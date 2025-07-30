@@ -3,15 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Edit3, 
   Eye, 
   RotateCcw,
-  ExternalLink,
-  Check,
-  X
+  ExternalLink
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -23,56 +19,11 @@ interface JournalEntryPanelProps {
 
 export function JournalEntryPanel({ transaction, onEdit, onSeeHow }: JournalEntryPanelProps) {
   const [showDetails, setShowDetails] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingEntries, setEditingEntries] = useState<any[]>([]);
 
   // Mock journal entry data with proper prepaid treatment for Vanta
   const journalEntry = getJournalEntryForTransaction(transaction);
 
   const confidence = transaction.confidence || 95;
-
-  // Chart of accounts options
-  const chartOfAccounts = [
-    "Professional Fees",
-    "Input CGST", 
-    "Input SGST",
-    "Input IGST",
-    "TDS on Professional Charges",
-    "TDS on Rent",
-    "Rates & Taxes",
-    "Freight and Postage", 
-    "Rent",
-    "Computers",
-    "General Expense",
-    "JCSS & Associates LLP",
-    "NSDL Database Management Ltd",
-    "Sogo Computers Pvt Ltd",
-    "Clayworks Spaces Technologies Pvt Ltd"
-  ];
-
-  const handleStartEdit = () => {
-    console.log("Starting edit mode");
-    setIsEditing(true);
-    setEditingEntries([...journalEntry.entries]);
-    console.log("Edit mode state:", true, "Editing entries:", journalEntry.entries);
-  };
-
-  const handleCancelEdit = () => {
-    setIsEditing(false);
-    setEditingEntries([]);
-  };
-
-  const handleSaveEdit = () => {
-    // Here you would save the changes
-    setIsEditing(false);
-    setEditingEntries([]);
-  };
-
-  const updateEntry = (index: number, field: string, value: any) => {
-    const updated = [...editingEntries];
-    updated[index] = { ...updated[index], [field]: value };
-    setEditingEntries(updated);
-  };
 
   return (
     <Card className="p-6">
@@ -80,32 +31,14 @@ export function JournalEntryPanel({ transaction, onEdit, onSeeHow }: JournalEntr
         <div className="flex items-center justify-between">
           <h3 className="font-semibold">Recommended Journal Entry</h3>
           <div className="flex space-x-2">
-            {!isEditing ? (
-              <>
-                <Button variant="outline" size="sm" onClick={() => {
-                  console.log("Edit button clicked in JournalEntryPanel");
-                  handleStartEdit();
-                }}>
-                  <Edit3 className="w-4 h-4 mr-1" />
-                  Edit
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => setShowDetails(!showDetails)}>
-                  <Eye className="w-4 h-4 mr-1" />
-                  {showDetails ? "Hide" : "Show"} Details
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button variant="outline" size="sm" onClick={handleCancelEdit}>
-                  <X className="w-4 h-4 mr-1" />
-                  Cancel
-                </Button>
-                <Button size="sm" onClick={handleSaveEdit}>
-                  <Check className="w-4 h-4 mr-1" />
-                  Save
-                </Button>
-              </>
-            )}
+            <Button variant="outline" size="sm" onClick={onEdit}>
+              <Edit3 className="w-4 h-4 mr-1" />
+              Edit
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setShowDetails(!showDetails)}>
+              <Eye className="w-4 h-4 mr-1" />
+              {showDetails ? "Hide" : "Show"} Details
+            </Button>
           </div>
         </div>
 
@@ -124,10 +57,10 @@ export function JournalEntryPanel({ transaction, onEdit, onSeeHow }: JournalEntr
             <div className="flex items-center space-x-2">
               <p className="font-medium">{journalEntry.invoiceNumber}</p>
               {journalEntry.isBillable && (
-                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+                <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
                   Billable ✓
                   <ExternalLink className="w-3 h-3 ml-1" />
-                </span>
+                </Badge>
               )}
             </div>
           </div>
@@ -158,66 +91,19 @@ export function JournalEntryPanel({ transaction, onEdit, onSeeHow }: JournalEntr
           </div>
           
           <div className="space-y-3">
-            {(isEditing ? editingEntries : journalEntry.entries).map((entry, index) => (
+            {journalEntry.entries.map((entry, index) => (
               <div key={index} className="grid grid-cols-4 gap-4 text-sm">
-                {/* Account Field */}
-                <div className="font-medium text-mobius-gray-900">
-                  {isEditing ? (
-                    <Select
-                      value={entry.account}
-                      onValueChange={(value) => updateEntry(index, 'account', value)}
-                    >
-                      <SelectTrigger className="h-8">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {chartOfAccounts.map((account) => (
-                          <SelectItem key={account} value={account}>
-                            {account}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    entry.account
-                  )}
-                </div>
-                
-                {/* Debit Field */}
+                <div className="font-medium text-mobius-gray-900">{entry.account}</div>
                 <div className="text-right font-variant-numeric: tabular-nums font-medium">
-                  {isEditing ? (
-                    <Input
-                      type="number"
-                      value={entry.debit || ''}
-                      onChange={(e) => updateEntry(index, 'debit', parseFloat(e.target.value) || 0)}
-                      className="h-8 text-right"
-                      placeholder="0.00"
-                    />
-                  ) : (
-                    entry.debit ? `₹${entry.debit.toFixed(2)}` : "—"
-                  )}
+                  {entry.debit ? `₹${entry.debit.toFixed(2)}` : "—"}
                 </div>
-                
-                {/* Credit Field */}
                 <div className="text-right font-variant-numeric: tabular-nums font-medium">
-                  {isEditing ? (
-                    <Input
-                      type="number"
-                      value={entry.credit || ''}
-                      onChange={(e) => updateEntry(index, 'credit', parseFloat(e.target.value) || 0)}
-                      className="h-8 text-right"
-                      placeholder="0.00"
-                    />
-                  ) : (
-                    entry.credit ? `₹${entry.credit.toFixed(2)}` : "—"
-                  )}
+                  {entry.credit ? `₹${entry.credit.toFixed(2)}` : "—"}
                 </div>
-                
-                {/* Confidence Field */}
                 <div className="text-right">
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-status-done/10 text-status-done border border-status-done/20">
+                  <Badge variant="outline" className="bg-status-done/10 text-status-done border-status-done/20 text-xs">
                     {entry.confidence || confidence}%
-                  </span>
+                  </Badge>
                 </div>
               </div>
             ))}
