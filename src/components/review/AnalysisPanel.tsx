@@ -99,10 +99,10 @@ export function AnalysisPanel({ transaction }: AnalysisPanelProps) {
       </h3>
       
       {analysisSteps.map((step) => (
-        <Card key={step.step} className="p-4">
-          <div className="flex items-start space-x-3">
+        <Card key={step.step} className="p-4 border border-mobius-gray-100 hover:border-mobius-gray-200 transition-colors">
+          <div className="flex items-start space-x-4">
             <div className={cn(
-              "w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium",
+              "w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0",
               step.status === "complete" 
                 ? "bg-status-done text-white"
                 : step.status === "skip"
@@ -112,25 +112,25 @@ export function AnalysisPanel({ transaction }: AnalysisPanelProps) {
               {step.status === "complete" ? "✓" : step.step}
             </div>
             
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium text-sm">
-                  Step {step.step}: {step.title}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-semibold text-base text-mobius-gray-900">
+                  {step.title}
                 </h4>
                 <div className="flex items-center space-x-2">
                   {step.status === "complete" && (
-                    <Badge variant="outline" className="bg-status-done/10 text-status-done border-status-done/20 text-xs">
-                      {step.confidence}%
+                    <Badge variant="outline" className="bg-status-done/10 text-status-done border-status-done/20 text-xs font-medium">
+                      {step.confidence}% confidence
                     </Badge>
                   )}
                 </div>
               </div>
 
-              <p className="text-sm text-mobius-gray-600 mb-2">
+              <p className="text-sm text-mobius-gray-600 mb-2 leading-relaxed">
                 {step.details}
               </p>
               {step.subDetails && (
-                <p className="text-xs text-mobius-gray-500 mb-3">
+                <p className="text-xs text-mobius-gray-500 mb-4 leading-relaxed">
                   {step.subDetails}
                 </p>
               )}
@@ -140,7 +140,7 @@ export function AnalysisPanel({ transaction }: AnalysisPanelProps) {
                 {step.hasOverride && (
                   <div className="flex items-center space-x-2">
                     <Select defaultValue={transaction.vendor.toLowerCase()}>
-                      <SelectTrigger className="w-32 h-7 text-xs">
+                      <SelectTrigger className="w-36 h-8 text-xs">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -152,7 +152,7 @@ export function AnalysisPanel({ transaction }: AnalysisPanelProps) {
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      className="h-7 text-xs"
+                      className="h-8 text-xs px-3"
                       onClick={() => handleRecompute(step.step)}
                     >
                       <RefreshCw className="w-3 h-3 mr-1" />
@@ -164,7 +164,7 @@ export function AnalysisPanel({ transaction }: AnalysisPanelProps) {
                 {step.hasAutoApproval && (
                   <Dialog open={autoApprovalOpen} onOpenChange={setAutoApprovalOpen}>
                     <DialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-7 text-xs">
+                      <Button variant="outline" size="sm" className="h-8 text-xs px-3">
                         <Settings className="w-3 h-3 mr-1" />
                         Set up auto-approval
                       </Button>
@@ -192,21 +192,21 @@ export function AnalysisPanel({ transaction }: AnalysisPanelProps) {
                 )}
 
                 {step.hasBreakdown && (
-                  <Button variant="outline" size="sm" className="h-7 text-xs">
+                  <Button variant="outline" size="sm" className="h-8 text-xs px-3">
                     <BarChart3 className="w-3 h-3 mr-1" />
                     View breakdown
                   </Button>
                 )}
 
                 {step.hasAllocation && (
-                  <Button variant="outline" size="sm" className="h-7 text-xs">
+                  <Button variant="outline" size="sm" className="h-8 text-xs px-3">
                     <Users className="w-3 h-3 mr-1" />
                     Change allocation
                   </Button>
                 )}
 
                 {step.hasEvidence && (
-                  <Button variant="outline" size="sm" className="h-7 text-xs">
+                  <Button variant="outline" size="sm" className="h-8 text-xs px-3">
                     <Eye className="w-3 h-3 mr-1" />
                     See evidence
                   </Button>
