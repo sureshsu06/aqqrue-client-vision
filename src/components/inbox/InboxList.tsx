@@ -99,7 +99,7 @@ export function InboxList({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <h3 className={cn(
-                      "font-medium truncate",
+                      "text-sm font-medium truncate",
                       transaction.status === "unread" ? "text-mobius-gray-900 font-semibold" : "text-mobius-gray-700"
                     )}>
                       {transaction.vendor}
