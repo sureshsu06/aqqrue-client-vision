@@ -185,10 +185,10 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
             <button
               key={filter.id}
               onClick={() => setSelectedFilter(filter.id)}
-              className={`quanta-tab flex items-center space-x-1.5 ${selectedFilter === filter.id ? 'active' : ''}`}
+              className={`quanta-tab ${selectedFilter === filter.id ? 'active' : ''}`}
             >
               <span>{filter.label}</span>
-              <span className="px-1.5 py-0.5 text-xs font-medium text-gray-500 bg-gray-100 rounded">
+              <span className="ml-1.5 text-xs font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
                 {filter.count}
               </span>
             </button>
@@ -200,10 +200,10 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
             <button
               key={filter.id}
               onClick={() => setSelectedStatus(filter.id)}
-              className={`quanta-tab flex items-center space-x-1.5 ${selectedStatus === filter.id ? 'active' : ''}`}
+              className={`quanta-tab ${selectedStatus === filter.id ? 'active' : ''}`}
             >
               <span>{filter.label}</span>
-              <span className="px-1.5 py-0.5 text-xs font-medium text-gray-500 bg-gray-100 rounded">
+              <span className="ml-1.5 text-xs font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
                 {filter.count}
               </span>
             </button>
