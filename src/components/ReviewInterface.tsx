@@ -110,7 +110,7 @@ export function ReviewInterface({ transaction, onClose }: ReviewInterfaceProps) 
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-mobius-lg max-w-7xl w-full max-h-[90vh] overflow-hidden">
+      <div className="bg-white rounded-lg shadow-mobius-lg max-w-7xl w-full h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-mobius-gray-100">
           <div className="flex items-center space-x-4">
@@ -151,9 +151,9 @@ export function ReviewInterface({ transaction, onClose }: ReviewInterfaceProps) 
         </div>
 
         {/* Content */}
-        <div className="flex h-[calc(90vh-8rem)]">
+        <div className="flex flex-1 min-h-0">
           {/* Left Panel - Document */}
-          <div className="w-1/2 p-6 border-r border-mobius-gray-100 overflow-y-auto">
+          <div className="w-1/2 p-6 border-r border-mobius-gray-100 overflow-y-auto flex-shrink-0">
             <div className="space-y-4">
               <div className="flex items-center space-x-2 text-sm text-mobius-gray-500">
                 <FileText className="w-4 h-4" />
@@ -216,7 +216,7 @@ export function ReviewInterface({ transaction, onClose }: ReviewInterfaceProps) 
           </div>
 
           {/* Right Panel - Analysis */}
-          <div className="w-1/2 p-6 overflow-y-auto">
+          <div className="w-1/2 p-6 overflow-y-auto flex-shrink-0">
             <Tabs defaultValue="entry" className="h-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="entry">Journal Entry</TabsTrigger>
@@ -395,8 +395,8 @@ export function ReviewInterface({ transaction, onClose }: ReviewInterfaceProps) 
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-mobius-gray-100">
+        {/* Footer - Fixed at bottom */}
+        <div className="flex items-center justify-between p-6 border-t border-mobius-gray-100 bg-white flex-shrink-0">
           <div className="flex items-center space-x-4">
             {transaction.isDuplicate && (
               <div className="flex items-center space-x-2 text-sm text-destructive">
