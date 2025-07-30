@@ -63,7 +63,7 @@ export function Layout({ children }: LayoutProps) {
                   )}
                   title={item.name}
                 >
-                  <item.icon className="w-7 h-7" />
+                  <item.icon className="w-10 h-10" />
                 </Button>
               </Link>
             ))}
