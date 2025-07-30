@@ -64,15 +64,10 @@ export function JournalEntryPanel({ transaction, onEdit, onSeeHow }: JournalEntr
               )}
             </div>
           </div>
-          {journalEntry.isRecurring && (
-            <div>
-              <p className="text-mobius-gray-500">Recurring:</p>
-              <p className="font-medium flex items-center">
-                <RotateCcw className="w-3 h-3 mr-1" />
-                Monthly on 1st
-              </p>
-            </div>
-          )}
+          <div>
+            <p className="text-mobius-gray-500">Vendor:</p>
+            <p className="font-medium">{journalEntry.vendor}</p>
+          </div>
         </div>
 
         <Separator />
