@@ -268,7 +268,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
       {/* Tabs */}
       <div className="flex-1 overflow-hidden">
         <Tabs defaultValue="summary" className="h-full flex flex-col">
-          <TabsList className="grid w-full grid-cols-2 mx-4 mt-4 mb-2">
+          <TabsList className="grid grid-cols-2 w-[calc(100%-2rem)] mx-4 mt-4 mb-2">
             <TabsTrigger value="summary">Summary</TabsTrigger>
             <TabsTrigger value="analysis">Analysis</TabsTrigger>
           </TabsList>
