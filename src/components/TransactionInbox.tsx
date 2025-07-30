@@ -4,7 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { InboxHeader } from "./inbox/InboxHeader";
 import { InboxList, Transaction } from "./inbox/InboxList";
-import { ReadingPane } from "./inbox/ReadingPane";
+import { DocumentPane } from "./inbox/DocumentPane";
+import { AnalysisPane } from "./inbox/AnalysisPane";
 import { useToast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
@@ -363,12 +364,15 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
         </div>
         
         {selectedTransaction && (
-          <ReadingPane
-            transaction={selectedTransaction}
-            onApprove={handleApprove}
-            onEdit={handleEdit}
-            onSeeHow={handleSeeHow}
-          />
+          <>
+            <DocumentPane transaction={selectedTransaction} />
+            <AnalysisPane 
+              transaction={selectedTransaction}
+              onApprove={handleApprove}
+              onEdit={handleEdit}
+              onSeeHow={handleSeeHow}
+            />
+          </>
         )}
       </div>
     </div>

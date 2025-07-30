@@ -1,0 +1,245 @@
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { 
+  CheckCircle2, 
+  Edit3, 
+  Eye, 
+  AlertTriangle,
+  RotateCcw
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Transaction } from "./InboxList";
+
+interface AnalysisPaneProps {
+  transaction: Transaction;
+  onApprove: () => void;
+  onEdit: () => void;
+  onSeeHow: () => void;
+}
+
+export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: AnalysisPaneProps) {
+  const confidence = transaction.confidence || 95;
+
+  // Mock journal entry data
+  const journalEntry = {
+    vendor: transaction.vendor,
+    amount: transaction.amount,
+    date: transaction.date,
+    invoiceNumber: transaction.vendor === "WeWork" ? "SEA-BVU-2024-07-1892" : "INV-2024-0789",
+    debitAccount: transaction.vendor === "WeWork" ? "6200 - Rent Expense" : 
+                  transaction.vendor === "Vanta Inc" ? "1410 - Prepaid Expenses" : "6100 - Software Expense",
+    creditAccount: transaction.source === "email" ? "2100 - Accounts Payable" : "2210 - Credit Card Payable",
+    client: transaction.client,
+    isRecurring: transaction.isRecurring,
+    isBillable: true,
+    costCenter: "US Operations"
+  };
+
+  const analysisSteps = [
+    {
+      step: 1,
+      title: "Vendor Identification",
+      status: "complete",
+      confidence: 100
+    },
+    {
+      step: 2,
+      title: "Recurring Pattern",
+      status: transaction.isRecurring ? "complete" : "skip",
+      confidence: transaction.isRecurring ? 100 : 0
+    },
+    {
+      step: 3,
+      title: "Amount Extraction",
+      status: "complete",
+      confidence: 100
+    },
+    {
+      step: 4,
+      title: "Client Attribution",
+      status: "complete",
+      confidence: 100
+    },
+    {
+      step: 5,
+      title: "Categorization",
+      status: "complete",
+      confidence: confidence
+    }
+  ];
+
+  return (
+    <div className="w-80 border-l border-mobius-gray-100 flex flex-col bg-white">
+      {/* Header */}
+      <div className="p-4 border-b border-mobius-gray-100">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="font-semibold text-lg">{transaction.vendor}</h3>
+          <Badge 
+            variant="outline" 
+            className={cn(
+              "text-xs",
+              confidence >= 95 
+                ? "bg-status-done/10 text-status-done border-status-done/20"
+                : confidence >= 85
+                ? "bg-blue-50 text-blue-700 border-blue-200"
+                : "bg-mobius-gray-50 text-mobius-gray-600 border-mobius-gray-200"
+            )}
+          >
+            {confidence}%
+          </Badge>
+        </div>
+
+        {transaction.isDuplicate && (
+          <div className="mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <div className="flex items-start space-x-2">
+              <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5" />
+              <div className="text-sm">
+                <p className="text-amber-800 font-medium">Duplicate detected</p>
+                <p className="text-amber-700">
+                  WeWork sent this to joy@ and accounting@. Keep one copy to avoid double entry.
+                </p>
+                <Button variant="outline" size="sm" className="mt-2 text-amber-700 border-amber-300">
+                  Remove this copy
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <p className="text-sm text-mobius-gray-500">
+          ${transaction.amount.toLocaleString()} • {new Date(transaction.date).toLocaleDateString()}
+        </p>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex-1 overflow-hidden">
+        <Tabs defaultValue="summary" className="h-full flex flex-col">
+          <TabsList className="grid w-full grid-cols-2 mx-4 mt-4">
+            <TabsTrigger value="summary">Summary</TabsTrigger>
+            <TabsTrigger value="analysis">Analysis</TabsTrigger>
+          </TabsList>
+
+          <div className="flex-1 overflow-y-auto p-4">
+            <TabsContent value="summary" className="mt-0">
+              <Card className="p-4">
+                <div className="space-y-4">
+                  <div className="space-y-3 text-sm">
+                    <div>
+                      <p className="text-mobius-gray-500">Client:</p>
+                      <p className="font-medium">{journalEntry.client}</p>
+                    </div>
+                    <div>
+                      <p className="text-mobius-gray-500">Invoice #:</p>
+                      <p className="font-medium">{journalEntry.invoiceNumber} 
+                        {journalEntry.isBillable && (
+                          <Badge variant="outline" className="ml-2 text-xs">Billable ✓</Badge>
+                        )}
+                      </p>
+                    </div>
+                    {journalEntry.isRecurring && (
+                      <div>
+                        <p className="text-mobius-gray-500">Recurring:</p>
+                        <p className="font-medium flex items-center">
+                          <RotateCcw className="w-3 h-3 mr-1" />
+                          Monthly on 1st
+                        </p>
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-mobius-gray-500">Cost Center:</p>
+                      <p className="font-medium">{journalEntry.costCenter}</p>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Journal Entry Table */}
+                  <div>
+                    <div className="grid grid-cols-3 gap-2 text-xs font-medium text-mobius-gray-500 uppercase tracking-wide mb-2">
+                      <div>ACCOUNT</div>
+                      <div className="text-right">DEBIT</div>
+                      <div className="text-right">CREDIT</div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="grid grid-cols-3 gap-2 text-sm">
+                        <div className="font-medium text-xs">{journalEntry.debitAccount}</div>
+                        <div className="text-right font-mono">${journalEntry.amount.toFixed(2)}</div>
+                        <div className="text-right">—</div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 text-sm">
+                        <div className="font-medium text-xs">{journalEntry.creditAccount}</div>
+                        <div className="text-right">—</div>
+                        <div className="text-right font-mono">${journalEntry.amount.toFixed(2)}</div>
+                      </div>
+                    </div>
+                    
+                    <Separator className="my-2" />
+                    
+                    <div className="grid grid-cols-3 gap-2 text-sm font-medium">
+                      <div>Balance</div>
+                      <div className="text-right">—</div>
+                      <div className="text-right text-status-done">$0.00 ✓</div>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="analysis" className="mt-0">
+              <div className="space-y-3">
+                {analysisSteps.map((step) => (
+                  <Card key={step.step} className="p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className={cn(
+                          "w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium",
+                          step.status === "complete" 
+                            ? "bg-status-done text-white"
+                            : step.status === "skip"
+                            ? "bg-mobius-gray-300 text-mobius-gray-600"
+                            : "bg-status-pending text-white"
+                        )}>
+                          {step.status === "complete" ? "✓" : step.step}
+                        </div>
+                        <h4 className="font-medium text-sm">{step.title}</h4>
+                      </div>
+                      {step.status === "complete" && (
+                        <Badge variant="outline" className="bg-status-done/10 text-status-done border-status-done/20 text-xs">
+                          {step.confidence}%
+                        </Badge>
+                      )}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+          </div>
+        </Tabs>
+      </div>
+
+      {/* Footer Actions */}
+      <div className="p-4 border-t border-mobius-gray-100 bg-white">
+        <div className="space-y-2">
+          <Button className="bg-status-done hover:bg-status-done/90 w-full" onClick={onApprove}>
+            <CheckCircle2 className="w-4 h-4 mr-2" />
+            Approve
+          </Button>
+          <div className="flex space-x-2">
+            <Button variant="outline" className="flex-1" onClick={onSeeHow}>
+              <Eye className="w-4 h-4 mr-2" />
+              See How
+            </Button>
+            <Button variant="outline" className="flex-1" onClick={onEdit}>
+              <Edit3 className="w-4 h-4 mr-2" />
+              Edit
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
