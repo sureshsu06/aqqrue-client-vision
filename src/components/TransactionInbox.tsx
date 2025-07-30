@@ -199,7 +199,7 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
       />
 
       {/* Gmail-style Toolbar */}
-      <div className="flex items-center justify-between py-2 pl-3 pr-4 bg-mobius-gray-50 rounded-lg mb-4">
+      <div className="flex items-center justify-between py-2 pl-1 pr-4 bg-mobius-gray-50 rounded-lg mb-4">
         <div className="flex items-center space-x-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
