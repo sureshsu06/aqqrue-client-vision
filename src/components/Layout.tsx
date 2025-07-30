@@ -7,7 +7,11 @@ import {
   Settings, 
   Bell,
   User,
-  Search
+  Search,
+  AlertTriangle,
+  BarChart3,
+  Building,
+  Calendar
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -18,6 +22,10 @@ interface LayoutProps {
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Exceptions", href: "/exceptions", icon: AlertTriangle },
+  { name: "Reporting", href: "/reporting", icon: BarChart3 },
+  { name: "Fixed Asset Register", href: "/fixed-assets", icon: Building },
+  { name: "Prepaid Schedules", href: "/prepaid-schedules", icon: Calendar },
 ];
 
 const bottomNavigation = [
