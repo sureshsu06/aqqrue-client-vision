@@ -51,8 +51,10 @@ export function JournalEntryPanel({ transaction, onEdit, onSeeHow }: JournalEntr
   ];
 
   const handleStartEdit = () => {
+    console.log("Starting edit mode");
     setIsEditing(true);
     setEditingEntries([...journalEntry.entries]);
+    console.log("Edit mode state:", true, "Editing entries:", journalEntry.entries);
   };
 
   const handleCancelEdit = () => {
