@@ -58,7 +58,7 @@ export function Layout({ children }: LayoutProps) {
                   className={cn(
                     "w-12 h-12 p-0 flex items-center justify-center",
                     location.pathname === item.href 
-                      ? "bg-white text-blue-600 shadow-sm hover:bg-blue-600 hover:text-white" 
+                      ? "bg-white text-blue-600 hover:bg-blue-600 hover:text-white" 
                       : "text-mobius-gray-500 hover:text-mobius-gray-900 hover:bg-mobius-gray-50"
                   )}
                   title={item.name}
