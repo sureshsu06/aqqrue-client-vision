@@ -37,15 +37,15 @@ const mockTransactions: Transaction[] = [
   },
   {
     id: "3",
-    vendor: "Figma",
-    amount: 1440,
+    vendor: "Farm Again",
+    amount: 2450,
     source: "drive",
     type: "bill",
     status: "review",
     date: "2024-07-30",
-    description: "Annual Renewal",
-    client: "DesignStudio",
-    confidence: 100,
+    description: "Hardware Purchase Invoice",
+    client: "TechStartup Inc",
+    confidence: 98,
     documentUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=1000&fit=crop"
   },
   {

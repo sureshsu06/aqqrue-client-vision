@@ -13,13 +13,14 @@ export function DocumentViewer({ transaction }: DocumentViewerProps) {
   const [pdfUrl, setPdfUrl] = useState<string>("");
 
   useEffect(() => {
-    // Map transaction to PDF file
+    // Map transaction to PDF URLs (converted Dropbox URLs to direct download)
     const pdfFiles: Record<string, string> = {
-      "WeWork": "/documents/sample-invoice-1.pdf",
-      "Starbucks Coffee": "/documents/sample-receipt-2.pdf"
+      "WeWork": "https://www.dropbox.com/scl/fi/gvhefbnqpur1zrp93vlsz/250101-1.pdf?rlkey=5cx24o1nhdf4owc76yi2kjefk&st=1pwbz48m&dl=1",
+      "Starbucks Coffee": "https://www.dropbox.com/scl/fi/r1ehtyims93rtc43dzea0/Bharath-Electronics-Invoice.pdf?rlkey=zzvf3u5ha0ueq7mlf0dry62em&st=5hmlav0k&dl=1",
+      "Farm Again": "https://www.dropbox.com/scl/fi/qq65zajhhn1afkms0mdjw/Farm-Again-Senseware.pdf?rlkey=sscc0wguljeabi3ybm2yhmec0&st=4vbal20e&dl=1"
     };
     
-    setPdfUrl(pdfFiles[transaction.vendor] || "/documents/sample-invoice-1.pdf");
+    setPdfUrl(pdfFiles[transaction.vendor] || pdfFiles["WeWork"]);
   }, [transaction.vendor]);
 
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 25, 200));
