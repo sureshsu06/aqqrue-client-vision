@@ -117,40 +117,47 @@ export function InboxList({
                   </div>
                   
                   <div className="flex items-center space-x-3">
-
                     {/* Quick Actions - show on hover */}
                     {hoveredRow === transaction.id && transaction.status === "unread" && (
                       <div className="flex space-x-1" onClick={(e) => e.stopPropagation()}>
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className="h-6 px-2 text-xs"
+                          className="h-6 w-6 p-0"
                           onClick={() => onQuickApprove(transaction.id)}
                         >
-                          <CheckCircle2 className="w-3 h-3 mr-1" />
-                          Approve
+                          <CheckCircle2 className="w-3 h-3" />
                         </Button>
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className="h-6 px-2 text-xs"
+                          className="h-6 w-6 p-0"
                           onClick={() => onQuickAssign(transaction.id)}
                         >
-                          <UserCheck className="w-3 h-3 mr-1" />
-                          Assign
+                          <UserCheck className="w-3 h-3" />
                         </Button>
                       </div>
                     )}
                   </div>
                 </div>
                 
-                {/* Second line: meta info */}
+                {/* Second line: Description */}
                 <div className="mt-1">
                   <p className={cn(
                     "text-sm truncate",
                     transaction.status === "unread" ? "text-mobius-gray-600" : "text-mobius-gray-500"
                   )}>
-                    {transaction.description} • {transaction.client} • {new Date(transaction.date).toLocaleDateString()}
+                    {transaction.description}
+                  </p>
+                </div>
+
+                {/* Third line: Client and Date */}
+                <div className="mt-1">
+                  <p className={cn(
+                    "text-xs truncate",
+                    transaction.status === "unread" ? "text-mobius-gray-500" : "text-mobius-gray-400"
+                  )}>
+                    {transaction.client} • {new Date(transaction.date).toLocaleDateString()}
                   </p>
                 </div>
               </div>
