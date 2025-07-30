@@ -55,22 +55,37 @@ export function DocumentViewer({ transaction }: DocumentViewerProps) {
         
         <Card className="p-2 bg-white border min-h-[600px] overflow-hidden">
           {pdfUrl ? (
-            <iframe
-              src={`${pdfUrl}#zoom=${zoom}`}
-              className="w-full h-[580px] border-0"
-              title="PDF Document"
-            />
+            <div className="w-full h-[580px] flex items-center justify-center bg-gray-50 rounded">
+              <div className="text-center">
+                <FileText className="w-16 h-16 mx-auto mb-4 text-blue-500" />
+                <p className="font-medium text-lg mb-2">PDF Document</p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Invoice: {transaction.vendor === "WeWork" ? "250101-1" : 
+                           transaction.vendor === "Farm Again" ? "Farm-Again-Senseware" : 
+                           "Bharath-Electronics-Invoice"}
+                </p>
+                <p className="text-sm mb-4">
+                  {transaction.vendor} - ${transaction.amount.toLocaleString()}
+                </p>
+                <a 
+                  href={pdfUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Open PDF in New Tab
+                </a>
+                <div className="mt-4 text-xs text-muted-foreground">
+                  Click to view the full document in a new tab
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="flex items-center justify-center h-[580px] text-center text-muted-foreground">
               <div>
                 <FileText className="w-16 h-16 mx-auto mb-4" />
-                <p className="font-medium text-lg mb-2">PDF Document Viewer</p>
-                <p className="text-sm">
-                  Invoice: {transaction.vendor === "WeWork" ? "SEA-BVU-2024-07-1892" : "INV-2024-0789"}
-                </p>
-                <p className="text-sm">
-                  {transaction.vendor} - ${transaction.amount.toLocaleString()}
-                </p>
+                <p className="font-medium text-lg mb-2">No Document</p>
                 <div className="mt-4 text-xs text-muted-foreground">
                   Add your PDF files to public/documents/ in Dev Mode
                 </div>
