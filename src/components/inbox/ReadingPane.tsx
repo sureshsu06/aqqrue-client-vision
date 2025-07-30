@@ -131,12 +131,37 @@ export function ReadingPane({ transaction, onApprove, onEdit, onSeeHow }: Readin
 
           <div className="flex-1 overflow-y-auto p-4">
             <TabsContent value="document" className="mt-0">
-              <Card className="p-6 bg-gradient-card min-h-96 flex items-center justify-center">
-                <div className="text-center text-mobius-gray-500">
-                  <FileText className="w-12 h-12 mx-auto mb-3" />
-                  <p className="font-medium">Document Viewer</p>
-                  <p className="text-sm">PDF/Image with zoom controls would appear here</p>
-                </div>
+              <Card className="p-4 bg-gradient-card min-h-96">
+                {transaction.documentUrl ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-sm">Original Document</h4>
+                      <div className="flex space-x-2">
+                        <Button variant="outline" size="sm">
+                          <Button variant="ghost" size="sm" className="w-8 h-8 p-0">-</Button>
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Button variant="ghost" size="sm" className="w-8 h-8 p-0">+</Button>
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="border border-mobius-gray-200 rounded-lg overflow-hidden">
+                      <img 
+                        src={transaction.documentUrl} 
+                        alt={`${transaction.vendor} invoice`}
+                        className="w-full h-auto max-h-96 object-contain bg-white"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center text-mobius-gray-500 flex items-center justify-center h-full">
+                    <div>
+                      <FileText className="w-12 h-12 mx-auto mb-3" />
+                      <p className="font-medium">No Document Available</p>
+                      <p className="text-sm">Upload a document to view it here</p>
+                    </div>
+                  </div>
+                )}
               </Card>
             </TabsContent>
 

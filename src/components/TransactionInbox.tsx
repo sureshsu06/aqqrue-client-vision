@@ -19,7 +19,8 @@ const mockTransactions: Transaction[] = [
     description: "Office Space - Monthly Rent",
     client: "TechStartup Inc",
     isDuplicate: true,
-    isRecurring: true
+    isRecurring: true,
+    documentUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=1000&fit=crop"
   },
   {
     id: "2",
@@ -31,7 +32,8 @@ const mockTransactions: Transaction[] = [
     date: "2024-07-28",
     description: "July Infrastructure",
     client: "StartupCo",
-    confidence: 95
+    confidence: 95,
+    documentUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&h=1000&fit=crop"
   },
   {
     id: "3",
@@ -43,7 +45,8 @@ const mockTransactions: Transaction[] = [
     date: "2024-07-30",
     description: "Annual Renewal",
     client: "DesignStudio",
-    confidence: 100
+    confidence: 100,
+    documentUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=1000&fit=crop"
   },
   {
     id: "4",
@@ -55,7 +58,8 @@ const mockTransactions: Transaction[] = [
     date: "2024-07-28",
     description: "Compliance Suite - Multi-period",
     client: "TechStartup Inc",
-    confidence: 88
+    confidence: 88,
+    documentUrl: "https://images.unsplash.com/photo-1483058712412-4245e9b90334?w=800&h=1000&fit=crop"
   },
   {
     id: "5",
@@ -68,7 +72,8 @@ const mockTransactions: Transaction[] = [
     description: "Monthly Subscription",
     client: "StartupCo",
     confidence: 100,
-    isRecurring: true
+    isRecurring: true,
+    documentUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=1000&fit=crop"
   }
 ];
 

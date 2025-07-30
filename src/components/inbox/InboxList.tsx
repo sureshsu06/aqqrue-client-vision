@@ -29,6 +29,7 @@ export interface Transaction {
   confidence?: number;
   isDuplicate?: boolean;
   isRecurring?: boolean;
+  documentUrl?: string;
 }
 
 interface InboxListProps {

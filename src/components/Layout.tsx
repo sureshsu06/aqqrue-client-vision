@@ -38,20 +38,17 @@ export function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-mobius-gray-50 flex">
-      {/* Left Sidebar */}
-      <div className="w-64 bg-white border-r border-mobius-gray-100 flex flex-col">
+      {/* Left Ribbon */}
+      <div className="w-16 bg-white border-r border-mobius-gray-100 flex flex-col items-center">
         {/* Logo */}
-        <div className="p-6 border-b border-mobius-gray-100">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">M</span>
-            </div>
-            <span className="text-xl font-bold text-mobius-gray-900">Mobius</span>
+        <div className="p-4 border-b border-mobius-gray-100">
+          <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">M</span>
           </div>
         </div>
 
         {/* Main Navigation */}
-        <nav className="flex-1 p-4">
+        <nav className="flex-1 p-2">
           <div className="space-y-2">
             {navigation.map((item) => (
               <Link key={item.name} to={item.href}>
@@ -59,14 +56,14 @@ export function Layout({ children }: LayoutProps) {
                   variant={location.pathname === item.href ? "default" : "ghost"}
                   size="sm"
                   className={cn(
-                    "w-full justify-start",
+                    "w-12 h-12 p-0 flex items-center justify-center",
                     location.pathname === item.href 
                       ? "bg-primary text-primary-foreground" 
                       : "text-mobius-gray-500 hover:text-mobius-gray-900 hover:bg-mobius-gray-50"
                   )}
+                  title={item.name}
                 >
-                  <item.icon className="w-4 h-4 mr-3" />
-                  <span>{item.name}</span>
+                  <item.icon className="w-5 h-5" />
                 </Button>
               </Link>
             ))}
@@ -74,7 +71,7 @@ export function Layout({ children }: LayoutProps) {
         </nav>
 
         {/* Bottom Navigation */}
-        <div className="p-4 border-t border-mobius-gray-100">
+        <div className="p-2 border-t border-mobius-gray-100">
           <div className="space-y-2">
             {bottomNavigation.map((item) => (
               <Link key={item.name} to={item.href}>
@@ -82,14 +79,14 @@ export function Layout({ children }: LayoutProps) {
                   variant={location.pathname === item.href ? "default" : "ghost"}
                   size="sm"
                   className={cn(
-                    "w-full justify-start",
+                    "w-12 h-12 p-0 flex items-center justify-center",
                     location.pathname === item.href 
                       ? "bg-primary text-primary-foreground" 
                       : "text-mobius-gray-500 hover:text-mobius-gray-900 hover:bg-mobius-gray-50"
                   )}
+                  title={item.name}
                 >
-                  <item.icon className="w-4 h-4 mr-3" />
-                  <span>{item.name}</span>
+                  <item.icon className="w-5 h-5" />
                 </Button>
               </Link>
             ))}
