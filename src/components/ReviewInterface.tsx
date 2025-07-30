@@ -65,7 +65,7 @@ export function ReviewInterface({ transaction, onClose }: ReviewInterfaceProps) 
                 Review Transaction
               </h2>
               <p className="text-sm text-mobius-gray-500">
-                {transaction.vendor} • ${transaction.amount.toLocaleString()}
+                {transaction.vendor} • ₹{transaction.amount.toLocaleString()}
               </p>
             </div>
           </div>

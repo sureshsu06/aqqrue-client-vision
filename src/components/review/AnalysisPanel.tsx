@@ -51,7 +51,7 @@ export function AnalysisPanel({ transaction }: AnalysisPanelProps) {
       step: 3,
       title: "Amount Extraction",
       status: "complete",
-      details: `Total: $${transaction.amount.toLocaleString()}`,
+      details: `Total: ₹${transaction.amount.toLocaleString()}`,
       subDetails: transaction.vendor === "Vanta Inc" ? "Multi-period expense detected" : "Single period expense",
       confidence: 100,
       hasBreakdown: transaction.vendor === "Vanta Inc"

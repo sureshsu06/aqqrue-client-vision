@@ -15,26 +15,14 @@ export function DocumentPane({ transaction }: DocumentPaneProps) {
   const [pdfUrl, setPdfUrl] = useState<string>("");
 
   useEffect(() => {
-    // Map transaction to PDF files in public/documents directory
-    const pdfFiles: Record<string, string> = {
-      "WeWork": "/documents/250101.pdf",
-      "AWS": "/documents/250102.pdf", 
-      "Farm Again": "/documents/Farm Again Senseware.pdf",
-      "Vanta Inc": "/documents/Sales_51 (1).pdf",
-      "Zoom": "/documents/PCD-143.pdf"
-    };
-    
-    // Try to find a matching document based on vendor name
-    const matchedDocument = pdfFiles[transaction.vendor];
-    
-    if (matchedDocument) {
-      setPdfUrl(matchedDocument);
+    // Use the pdfFile property from the transaction
+    if (transaction.pdfFile) {
+      const pdfUrl = `/documents/${transaction.pdfFile}`;
+      setPdfUrl(pdfUrl);
     } else {
-      // If no exact match, try to find a document that might be related
-      const fallbackDocument = Object.values(pdfFiles)[0]; // Use first document as fallback
-      setPdfUrl(fallbackDocument);
+      setPdfUrl("");
     }
-  }, [transaction.vendor]);
+  }, [transaction.pdfFile]);
 
   return (
     <div className="flex-1 bg-white border-l border-mobius-gray-100 flex flex-col">

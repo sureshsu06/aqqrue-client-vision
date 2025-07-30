@@ -16,33 +16,19 @@ export function DocumentViewer({ transaction }: DocumentViewerProps) {
   const embedRef = useRef<HTMLEmbedElement>(null);
 
   useEffect(() => {
-    // Map transaction to PDF files in public/documents directory
-    const pdfFiles: Record<string, string> = {
-      "WeWork": "/documents/250101.pdf",
-      "AWS": "/documents/250102.pdf", 
-      "Farm Again": "/documents/Farm Again Senseware.pdf",
-      "Vanta Inc": "/documents/Sales_51 (1).pdf",
-      "Zoom": "/documents/PCD-143.pdf"
-    };
-    
-    // Try to find a matching document based on vendor name
-    const matchedDocument = pdfFiles[transaction.vendor];
-    
-    console.log("Loading PDF:", matchedDocument, "for vendor:", transaction.vendor);
-    
-    if (matchedDocument) {
-      setPdfUrl(matchedDocument);
+    // Use the pdfFile property from the transaction
+    if (transaction.pdfFile) {
+      const pdfUrl = `/documents/${transaction.pdfFile}`;
+      console.log("Loading PDF:", pdfUrl, "for transaction:", transaction.id);
+      setPdfUrl(pdfUrl);
       setPdfError("");
       setPdfLoaded(false);
     } else {
-      // If no exact match, try to find a document that might be related
-      const fallbackDocument = Object.values(pdfFiles)[0]; // Use first document as fallback
-      console.log("No exact match found, using fallback:", fallbackDocument);
-      setPdfUrl(fallbackDocument);
-      setPdfError("");
+      console.log("No PDF file specified for transaction:", transaction.id);
+      setPdfError("No PDF document available for this transaction.");
       setPdfLoaded(false);
     }
-  }, [transaction.vendor]);
+  }, [transaction.pdfFile, transaction.id]);
 
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 25, 200));
   const handleZoomOut = () => setZoom(prev => Math.max(prev - 25, 50));
@@ -114,29 +100,28 @@ export function DocumentViewer({ transaction }: DocumentViewerProps) {
                 Loading: {pdfUrl}
               </div>
               
-              {!pdfError ? (
-                /* Direct PDF iframe */
-                <iframe
-                  src={pdfUrl}
-                  className="w-full h-[580px] border-0"
-                  title="PDF Document"
-                  style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top left' }}
-                  onLoad={handlePdfLoad}
-                  onError={handlePdfError}
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center bg-white" style={{ display: 'none' }} id="pdf-fallback">
-                  <div className="text-center">
-                    <p className="text-red-500 mb-2">PDF could not be displayed directly</p>
-                    <Button asChild>
-                      <a href={pdfUrl} download target="_blank" rel="noopener noreferrer">
-                        <Download className="w-4 h-4 mr-2" />
-                        Download PDF
-                      </a>
-                    </Button>
-                  </div>
+              {/* Direct PDF embed */}
+              <iframe
+                src={`https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(window.location.origin + pdfUrl)}`}
+                className="w-full h-[580px] border-0"
+                title="PDF Document"
+                style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top left' }}
+                onLoad={handlePdfLoad}
+                onError={handlePdfError}
+              />
+              
+              {/* Fallback if embed doesn't work */}
+              <div className="absolute inset-0 flex items-center justify-center bg-white" style={{ display: 'none' }} id="pdf-fallback">
+                <div className="text-center">
+                  <p className="text-red-500 mb-2">PDF could not be displayed directly</p>
+                  <Button asChild>
+                    <a href={pdfUrl} download target="_blank" rel="noopener noreferrer">
+                      <Download className="w-4 h-4 mr-2" />
+                      Download PDF
+                    </a>
+                  </Button>
                 </div>
-              )}
+              </div>
             </div>
           ) : (
             <div className="flex items-center justify-center h-[580px] text-center text-muted-foreground">
@@ -144,13 +129,13 @@ export function DocumentViewer({ transaction }: DocumentViewerProps) {
                 <FileText className="w-16 h-16 mx-auto mb-4" />
                 <p className="font-medium text-lg mb-2">PDF Document Viewer</p>
                 <p className="text-sm">
-                  Invoice: {transaction.vendor} - ${transaction.amount.toLocaleString()}
+                  Invoice: {transaction.vendor} - ₹{transaction.amount.toLocaleString()}
                 </p>
                 <div className="mt-4 text-xs text-muted-foreground">
                   Loading PDF document from public/documents...
                 </div>
                 <div className="mt-2 text-xs text-red-500">
-                  Debug: No PDF URL set for vendor: {transaction.vendor}
+                  Debug: No PDF URL set for transaction: {transaction.id}
                 </div>
               </div>
             </div>

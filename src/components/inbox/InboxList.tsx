@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { 
   Mail, 
@@ -30,6 +31,7 @@ export interface Transaction {
   isDuplicate?: boolean;
   isRecurring?: boolean;
   documentUrl?: string;
+  pdfFile?: string;
 }
 
 interface InboxListProps {
@@ -55,11 +57,137 @@ export function InboxList({
 
   const getSourceIcon = (source: string) => {
     switch (source) {
-      case "email": return <Mail className="w-4 h-4" />;
-      case "drive": return <FolderOpen className="w-4 h-4" />;
+      case "email": 
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white border border-gray-200">
+                  <img 
+                    src="/logos/Microsoft_Office_SharePoint_(2019–present).svg.png" 
+                    alt="Email"
+                    className="w-5 h-5 object-contain"
+                    onError={(e) => {
+                      // Fallback to icon if image fails to load
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                  <Mail className="w-4 h-4 text-blue-600 hidden" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Email</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      case "drive": 
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white border border-gray-200">
+                  <img 
+                    src="/logos/Microsoft_Office_SharePoint_(2019–present).svg.png" 
+                    alt="Google Drive"
+                    className="w-5 h-5 object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                  <FolderOpen className="w-4 h-4 text-green-600 hidden" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Google Drive</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
       case "brex":
-      case "ramp": return <CreditCard className="w-4 h-4" />;
-      default: return <FileText className="w-4 h-4" />;
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white border border-gray-200">
+                  <img 
+                    src="/logos/Microsoft_Office_SharePoint_(2019–present).svg.png" 
+                    alt="Brex"
+                    className="w-5 h-5 object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                  <CreditCard className="w-4 h-4 text-purple-600 hidden" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Brex Card</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      case "ramp":
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white border border-gray-200">
+                  <img 
+                    src="/logos/Microsoft_Office_SharePoint_(2019–present).svg.png" 
+                    alt="Ramp"
+                    className="w-5 h-5 object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                  <CreditCard className="w-4 h-4 text-orange-600 hidden" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Ramp Card</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      default: 
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white border border-gray-200">
+                  <img 
+                    src="/logos/Microsoft_Office_SharePoint_(2019–present).svg.png" 
+                    alt="File"
+                    className="w-5 h-5 object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                  <FileText className="w-4 h-4 text-gray-600 hidden" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>File</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+    }
+  };
+
+  const getSourceLabel = (source: string) => {
+    switch (source) {
+      case "email": return "Email";
+      case "drive": return "Google Drive";
+      case "brex": return "Brex Card";
+      case "ramp": return "Ramp Card";
+      default: return "File";
     }
   };
 
@@ -93,6 +221,9 @@ export function InboxList({
                 onCheckedChange={(checked) => onTransactionToggle(transaction.id, !!checked)}
                 onClick={(e) => e.stopPropagation()}
               />
+              
+              {/* Source Logo */}
+              {getSourceIcon(transaction.source)}
 
               <div className="flex-1 min-w-0">
                 {/* First line: Vendor + badges */}
@@ -107,11 +238,6 @@ export function InboxList({
                     {transaction.isDuplicate && (
                       <Badge className="text-xs bg-amber-100 text-amber-800 border-amber-200">
                         Duplicate
-                      </Badge>
-                    )}
-                    {transaction.isRecurring && (
-                      <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
-                        Recurring
                       </Badge>
                     )}
                   </div>
@@ -154,8 +280,8 @@ export function InboxList({
                 {/* Third line: Client and Date */}
                 <div className="mt-1">
                   <p className={cn(
-                    "text-xs truncate",
-                    transaction.status === "unread" ? "text-mobius-gray-500" : "text-mobius-gray-400"
+                    "text-sm truncate",
+                    transaction.status === "unread" ? "text-mobius-gray-600" : "text-mobius-gray-500"
                   )}>
                     {transaction.client} • {new Date(transaction.date).toLocaleDateString()}
                   </p>

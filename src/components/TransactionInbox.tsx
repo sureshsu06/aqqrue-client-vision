@@ -26,165 +26,176 @@ import {
 const mockTransactions: Transaction[] = [
   {
     id: "1",
-    vendor: "WeWork",
-    amount: 12750,
+    vendor: "JCSS & Associates LLP",
+    amount: 94400,
     source: "email",
     type: "bill",
     status: "unread",
-    date: "2024-07-31",
-    description: "Office Space - Monthly Rent",
-    client: "TechStartup Inc",
-    isDuplicate: true,
+    date: "2025-05-26",
+    description: "Professional Fees - May 2025",
+    client: "Elire",
     isRecurring: true,
+    pdfFile: "ASO-I_109_25-26Sign_Elire%20Global.pdf",
     documentUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=1000&fit=crop"
   },
   {
     id: "2",
-    vendor: "AWS",
-    amount: 4847,
+    vendor: "JCSS & Associates LLP",
+    amount: 70800,
     source: "email",
     type: "bill",
     status: "unread",
-    date: "2024-07-28",
-    description: "July Infrastructure",
-    client: "StartupCo",
+    date: "2025-05-26",
+    description: "Professional Fees - N-STP Condonation",
+    client: "Elire",
     confidence: 95,
+    pdfFile: "ASO-I_117_25-26_Elire Global.pdf",
     documentUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&h=1000&fit=crop"
   },
   {
     id: "3",
-    vendor: "Farm Again",
-    amount: 2450,
+    vendor: "NSDL Database Management Limited",
+    amount: 11800,
     source: "drive",
     type: "bill",
     status: "review",
-    date: "2024-07-30",
-    description: "Hardware Purchase Invoice",
-    client: "TechStartup Inc",
+    date: "2025-05-31",
+    description: "Equity AMC",
+    client: "Elire",
     confidence: 98,
+    pdfFile: "EGS001.pdf",
     documentUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=1000&fit=crop"
   },
   {
     id: "4",
-    vendor: "Vanta Inc",
-    amount: 5550,
+    vendor: "Sogo Computers",
+    amount: 5310,
     source: "brex",
-    type: "card",
+    type: "bill",
     status: "unread",
-    date: "2024-07-28",
-    description: "Compliance Suite - Multi-period",
-    client: "TechStartup Inc",
+    date: "2025-05-22",
+    description: "Freight Charges",
+    client: "Elire",
     confidence: 88,
+    pdfFile: "Hys-1117.pdf",
     documentUrl: "https://images.unsplash.com/photo-1483058712412-4245e9b90334?w=800&h=1000&fit=crop"
   },
   {
     id: "5",
-    vendor: "Zoom",
-    amount: 149,
+    vendor: "Sogo Computers",
+    amount: 5310,
     source: "ramp",
-    type: "card",
+    type: "bill",
     status: "done",
-    date: "2024-07-25",
-    description: "Monthly Subscription",
-    client: "StartupCo",
+    date: "2025-05-22",
+    description: "Freight Charges",
+    client: "Elire",
     confidence: 100,
     isRecurring: true,
+    pdfFile: "Hys-1121.pdf",
     documentUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=1000&fit=crop"
   },
   {
     id: "6",
-    vendor: "Slack",
-    amount: 79,
+    vendor: "Clayworks Spaces Pvt Ltd",
+    amount: 102660,
     source: "email",
     type: "bill",
     status: "unread",
-    date: "2024-07-30",
-    description: "Pro Plan - Monthly",
-    client: "TechStartup Inc",
+    date: "2025-05-22",
+    description: "Rent",
+    client: "Elire",
     confidence: 92,
     isRecurring: true,
+    pdfFile: "INV-25260258.pdf",
     documentUrl: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&h=1000&fit=crop"
   },
   {
     id: "7",
-    vendor: "Adobe",
-    amount: 239,
+    vendor: "Clayworks Spaces Pvt Ltd",
+    amount: 5251,
     source: "email",
     type: "bill",
     status: "unread",
-    date: "2024-07-29",
-    description: "Creative Cloud Team License",
-    client: "DesignCorp",
+    date: "2025-05-08",
+    description: "Parking Charges-April 2025",
+    client: "Elire",
     confidence: 87,
     isRecurring: true,
+    pdfFile: "INV-25260376.pdf",
     documentUrl: "https://images.unsplash.com/photo-1572044162444-ad60f128bdea?w=800&h=1000&fit=crop"
   },
   {
     id: "8",
-    vendor: "Microsoft",
-    amount: 450,
+    vendor: "Sogo Computers",
+    amount: 480850,
     source: "email",
     type: "bill",
     status: "unread",
-    date: "2024-07-28",
-    description: "Office 365 Enterprise",
-    client: "TechStartup Inc",
+    date: "2025-05-19",
+    description: "Laptop Purchase",
+    client: "Elire",
     confidence: 96,
     isRecurring: true,
+    pdfFile: "PCD-143.pdf",
     documentUrl: "https://images.unsplash.com/photo-1633114127408-af671c774b39?w=800&h=1000&fit=crop"
   },
   {
     id: "9",
-    vendor: "GitHub",
-    amount: 210,
+    vendor: "Sogo Computers",
+    amount: 96170,
     source: "email",
     type: "bill",
     status: "unread",
-    date: "2024-07-27",
-    description: "Enterprise Plan - 50 seats",
-    client: "StartupCo",
+    date: "2025-05-22",
+    description: "Laptop Purchase",
+    client: "Elire",
     confidence: 94,
     isRecurring: true,
+    pdfFile: "PCD-159.pdf",
     documentUrl: "https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=800&h=1000&fit=crop"
   },
   {
     id: "10",
-    vendor: "Figma",
-    amount: 144,
+    vendor: "Sogo Computers",
+    amount: 96170,
     source: "email",
     type: "bill",
     status: "unread",
-    date: "2024-07-26",
-    description: "Professional Team Plan",
-    client: "DesignCorp",
+    date: "2025-05-22",
+    description: "Laptop Purchase",
+    client: "Elire",
     confidence: 91,
     isRecurring: true,
+    pdfFile: "PCD-160.pdf",
     documentUrl: "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=800&h=1000&fit=crop"
   },
   {
     id: "11",
-    vendor: "Stripe",
-    amount: 890,
+    vendor: "Ozone Computer Services",
+    amount: 16900,
     source: "email",
     type: "bill",
     status: "review",
-    date: "2024-07-25",
-    description: "Payment Processing Fees",
-    client: "TechStartup Inc",
+    date: "2025-05-10",
+    description: "Monitor LG",
+    client: "Mahat",
     confidence: 99,
+    pdfFile: "725-MAHAT LABS (1).pdf",
     documentUrl: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=1000&fit=crop"
   },
   {
     id: "12",
-    vendor: "DigitalOcean",
-    amount: 320,
+    vendor: "MGEcoduties",
+    amount: 8174,
     source: "email",
     type: "bill",
     status: "done",
-    date: "2024-07-24",
-    description: "Cloud Infrastructure",
-    client: "StartupCo",
+    date: "2025-05-29",
+    description: "Office Supplies",
+    client: "Mahat",
     confidence: 97,
+    pdfFile: "Mahat Labs Pvt Ltd_Invoice_309_29.05.2025.pdf",
     documentUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=1000&fit=crop"
   }
 ];
@@ -306,22 +317,37 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="h-9 px-3 justify-between bg-white border border-mobius-gray-200 rounded-lg">
                   <div className="flex items-center space-x-2">
-                    <FileText className="w-4 h-4" />
-                    <span>Bills(8)</span>
+                    {selectedFilter === "bills" && <FileText className="w-4 h-4" />}
+                    {selectedFilter === "cards" && <CreditCard className="w-4 h-4" />}
+                    {selectedFilter === "all" && <Clock className="w-4 h-4" />}
+                    <span>
+                      {selectedFilter === "bills" && "Bills (8)"}
+                      {selectedFilter === "cards" && "Cards (4)"}
+                      {selectedFilter === "all" && "All (12)"}
+                    </span>
                   </div>
                   <ChevronDown className="w-4 h-4 ml-2" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-40 bg-white border border-mobius-gray-200">
-                <DropdownMenuItem className="flex items-center space-x-2">
+                <DropdownMenuItem 
+                  className="flex items-center space-x-2"
+                  onClick={() => setSelectedFilter("bills")}
+                >
                   <FileText className="w-4 h-4" />
                   <span>Bills (8)</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center space-x-2">
+                <DropdownMenuItem 
+                  className="flex items-center space-x-2"
+                  onClick={() => setSelectedFilter("cards")}
+                >
                   <CreditCard className="w-4 h-4" />
                   <span>Cards (4)</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center space-x-2">
+                <DropdownMenuItem 
+                  className="flex items-center space-x-2"
+                  onClick={() => setSelectedFilter("all")}
+                >
                   <Clock className="w-4 h-4" />
                   <span>All (12)</span>
                 </DropdownMenuItem>

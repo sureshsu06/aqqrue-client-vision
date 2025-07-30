@@ -80,11 +80,10 @@ export function PrepaidPanel({ transaction }: PrepaidPanelProps) {
             <div key={index} className="p-4 bg-mobius-gray-50 rounded-lg">
               <div className="flex justify-between items-start mb-2">
                 <h4 className="font-medium">{item.name}</h4>
-                <span className="font-semibold font-variant-numeric: tabular-nums">${item.amount.toLocaleString()}</span>
+                <span className="font-semibold font-variant-numeric: tabular-nums">₹{item.amount.toLocaleString()}</span>
               </div>
-              <div className="text-sm text-mobius-gray-600 space-y-1">
-                <p>Period: {item.period} ({item.months} months)</p>
-                <p>Monthly: ${item.amount.toLocaleString()} ÷ {item.months} = ${item.monthly.toFixed(2)}</p>
+              <div className="text-sm text-mobius-gray-600">
+                <p>Monthly: ₹{item.amount.toLocaleString()} ÷ {item.months} = ₹{item.monthly.toFixed(2)}</p>
               </div>
             </div>
           ))}
@@ -131,7 +130,7 @@ export function PrepaidPanel({ transaction }: PrepaidPanelProps) {
                         />
                         <YAxis fontSize={12} />
                         <Tooltip 
-                          formatter={(value) => [`$${Number(value).toFixed(2)}`, 'Balance']}
+                          formatter={(value) => [`₹${Number(value).toFixed(2)}`, 'Balance']}
                         />
                         <Line 
                           type="monotone" 
@@ -158,8 +157,8 @@ export function PrepaidPanel({ transaction }: PrepaidPanelProps) {
                   {prepaidBreakdown.schedule.map((item, index) => (
                     <div key={index} className="grid grid-cols-3 py-2 text-sm border-b border-mobius-gray-100 last:border-0">
                       <span>{item.month}</span>
-                      <span className="text-right font-variant-numeric: tabular-nums">${item.amount.toFixed(2)}</span>
-                      <span className="text-right font-variant-numeric: tabular-nums">${item.balance.toFixed(2)}</span>
+                      <span className="text-right font-variant-numeric: tabular-nums">₹{item.amount.toFixed(2)}</span>
+                      <span className="text-right font-variant-numeric: tabular-nums">₹{item.balance.toFixed(2)}</span>
                     </div>
                   ))}
                 </div>

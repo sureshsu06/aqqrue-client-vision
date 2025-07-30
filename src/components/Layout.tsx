@@ -34,11 +34,10 @@ const bottomNavigation = [
 
 const clients = [
   "All Clients",
-  "TechStartup Inc", 
-  "StartupCo",
-  "DesignStudio",
-  "DevCorp",
-  "CloudCo"
+  "Elire", 
+  "Mahat",
+  "HEPL",
+  "Wonderslate"
 ];
 
 export function Layout({ children }: LayoutProps) {
