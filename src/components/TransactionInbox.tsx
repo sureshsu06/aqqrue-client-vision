@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -6,6 +6,21 @@ import { InboxHeader } from "./inbox/InboxHeader";
 import { InboxList, Transaction } from "./inbox/InboxList";
 import { ReadingPane } from "./inbox/ReadingPane";
 import { useToast } from "@/hooks/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { 
+  Check, 
+  Mail, 
+  CreditCard, 
+  FileText,
+  Clock,
+  Calendar,
+  ChevronDown
+} from "lucide-react";
 
 const mockTransactions: Transaction[] = [
   {
@@ -78,16 +93,16 @@ const mockTransactions: Transaction[] = [
 ];
 
 const filters = [
-  { id: "all", label: "All", count: 12 },
-  { id: "bills", label: "Bills", count: 8 },
-  { id: "cards", label: "Credit Cards", count: 4 },
-  { id: "contracts", label: "Contracts", count: 0 }
+  { id: "all", label: "All", count: 12, icon: Check },
+  { id: "bills", label: "Bills", count: 8, icon: FileText },
+  { id: "cards", label: "Credit Cards", count: 4, icon: CreditCard },
+  { id: "contracts", label: "Contracts", count: 0, icon: FileText }
 ];
 
 const statusFilters = [
-  { id: "unread", label: "Unread", count: 7 },
-  { id: "today", label: "Today", count: 3 },
-  { id: "week", label: "This Week", count: 5 }
+  { id: "unread", label: "Unread", count: 7, icon: Mail },
+  { id: "today", label: "Today", count: 3, icon: Calendar },
+  { id: "week", label: "This Week", count: 5, icon: Clock }
 ];
 
 interface TransactionInboxProps {
@@ -186,37 +201,65 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
       {/* Gmail-style Toolbar */}
       <div className="flex items-center justify-between py-2 pl-3 pr-4 bg-mobius-gray-50 rounded-lg mb-4">
         <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <span className="text-sm font-medium text-mobius-gray-500">Filter:</span>
-            <select 
-              value={selectedFilter} 
-              onChange={(e) => setSelectedFilter(e.target.value)}
-              className="px-3 py-1 border border-mobius-gray-200 rounded-md text-sm bg-white"
-            >
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="min-w-[140px] justify-between bg-white">
+                <div className="flex items-center space-x-2">
+                  {React.createElement(filters.find(f => f.id === selectedFilter)?.icon || Check, { 
+                    className: "w-4 h-4" 
+                  })}
+                  <span>
+                    {filters.find(f => f.id === selectedFilter)?.label} 
+                    ({filters.find(f => f.id === selectedFilter)?.count})
+                  </span>
+                </div>
+                <ChevronDown className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="min-w-[140px]">
               {filters.map((filter) => (
-                <option key={filter.id} value={filter.id}>
-                  {filter.label} ({filter.count})
-                </option>
+                <DropdownMenuItem 
+                  key={filter.id} 
+                  onClick={() => setSelectedFilter(filter.id)}
+                  className="flex items-center space-x-2"
+                >
+                  <filter.icon className="w-4 h-4" />
+                  <span>{filter.label} ({filter.count})</span>
+                </DropdownMenuItem>
               ))}
-            </select>
-          </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         
         <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <span className="text-sm font-medium text-mobius-gray-500">Status:</span>
-            <select 
-              value={selectedStatus} 
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="px-3 py-1 border border-mobius-gray-200 rounded-md text-sm bg-white"
-            >
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="min-w-[140px] justify-between bg-white">
+                <div className="flex items-center space-x-2">
+                  {React.createElement(statusFilters.find(f => f.id === selectedStatus)?.icon || Mail, { 
+                    className: "w-4 h-4" 
+                  })}
+                  <span>
+                    {statusFilters.find(f => f.id === selectedStatus)?.label} 
+                    ({statusFilters.find(f => f.id === selectedStatus)?.count})
+                  </span>
+                </div>
+                <ChevronDown className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="min-w-[140px]">
               {statusFilters.map((filter) => (
-                <option key={filter.id} value={filter.id}>
-                  {filter.label} ({filter.count})
-                </option>
+                <DropdownMenuItem 
+                  key={filter.id} 
+                  onClick={() => setSelectedStatus(filter.id)}
+                  className="flex items-center space-x-2"
+                >
+                  <filter.icon className="w-4 h-4" />
+                  <span>{filter.label} ({filter.count})</span>
+                </DropdownMenuItem>
               ))}
-            </select>
-          </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
