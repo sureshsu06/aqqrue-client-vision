@@ -64,7 +64,7 @@ export function InboxList({
               <TooltipTrigger asChild>
                 <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white border border-gray-200">
                   <img 
-                    src="/logos/Microsoft_Office_SharePoint_(2019–present).svg.png" 
+                    src="/logos/sharepoint-logo.png" 
                     alt="Email"
                     className="w-5 h-5 object-contain"
                     onError={(e) => {
@@ -89,7 +89,7 @@ export function InboxList({
               <TooltipTrigger asChild>
                 <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white border border-gray-200">
                   <img 
-                    src="/logos/Microsoft_Office_SharePoint_(2019–present).svg.png" 
+                    src="/logos/sharepoint-logo.png" 
                     alt="Google Drive"
                     className="w-5 h-5 object-contain"
                     onError={(e) => {
@@ -113,7 +113,7 @@ export function InboxList({
               <TooltipTrigger asChild>
                 <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white border border-gray-200">
                   <img 
-                    src="/logos/Microsoft_Office_SharePoint_(2019–present).svg.png" 
+                    src="/logos/sharepoint-logo.png" 
                     alt="Brex"
                     className="w-5 h-5 object-contain"
                     onError={(e) => {
@@ -137,7 +137,7 @@ export function InboxList({
               <TooltipTrigger asChild>
                 <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white border border-gray-200">
                   <img 
-                    src="/logos/Microsoft_Office_SharePoint_(2019–present).svg.png" 
+                    src="/logos/sharepoint-logo.png" 
                     alt="Ramp"
                     className="w-5 h-5 object-contain"
                     onError={(e) => {
@@ -161,7 +161,7 @@ export function InboxList({
               <TooltipTrigger asChild>
                 <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white border border-gray-200">
                   <img 
-                    src="/logos/Microsoft_Office_SharePoint_(2019–present).svg.png" 
+                    src="/logos/sharepoint-logo.png" 
                     alt="File"
                     className="w-5 h-5 object-contain"
                     onError={(e) => {
