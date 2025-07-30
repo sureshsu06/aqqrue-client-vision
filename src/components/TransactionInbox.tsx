@@ -89,6 +89,102 @@ const mockTransactions: Transaction[] = [
     confidence: 100,
     isRecurring: true,
     documentUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=1000&fit=crop"
+  },
+  {
+    id: "6",
+    vendor: "Slack",
+    amount: 79,
+    source: "email",
+    type: "bill",
+    status: "unread",
+    date: "2024-07-30",
+    description: "Pro Plan - Monthly",
+    client: "TechStartup Inc",
+    confidence: 92,
+    isRecurring: true,
+    documentUrl: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&h=1000&fit=crop"
+  },
+  {
+    id: "7",
+    vendor: "Adobe",
+    amount: 239,
+    source: "email",
+    type: "bill",
+    status: "unread",
+    date: "2024-07-29",
+    description: "Creative Cloud Team License",
+    client: "DesignCorp",
+    confidence: 87,
+    isRecurring: true,
+    documentUrl: "https://images.unsplash.com/photo-1572044162444-ad60f128bdea?w=800&h=1000&fit=crop"
+  },
+  {
+    id: "8",
+    vendor: "Microsoft",
+    amount: 450,
+    source: "email",
+    type: "bill",
+    status: "unread",
+    date: "2024-07-28",
+    description: "Office 365 Enterprise",
+    client: "TechStartup Inc",
+    confidence: 96,
+    isRecurring: true,
+    documentUrl: "https://images.unsplash.com/photo-1633114127408-af671c774b39?w=800&h=1000&fit=crop"
+  },
+  {
+    id: "9",
+    vendor: "GitHub",
+    amount: 210,
+    source: "email",
+    type: "bill",
+    status: "unread",
+    date: "2024-07-27",
+    description: "Enterprise Plan - 50 seats",
+    client: "StartupCo",
+    confidence: 94,
+    isRecurring: true,
+    documentUrl: "https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=800&h=1000&fit=crop"
+  },
+  {
+    id: "10",
+    vendor: "Figma",
+    amount: 144,
+    source: "email",
+    type: "bill",
+    status: "unread",
+    date: "2024-07-26",
+    description: "Professional Team Plan",
+    client: "DesignCorp",
+    confidence: 91,
+    isRecurring: true,
+    documentUrl: "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=800&h=1000&fit=crop"
+  },
+  {
+    id: "11",
+    vendor: "Stripe",
+    amount: 890,
+    source: "email",
+    type: "bill",
+    status: "review",
+    date: "2024-07-25",
+    description: "Payment Processing Fees",
+    client: "TechStartup Inc",
+    confidence: 99,
+    documentUrl: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=1000&fit=crop"
+  },
+  {
+    id: "12",
+    vendor: "DigitalOcean",
+    amount: 320,
+    source: "email",
+    type: "bill",
+    status: "done",
+    date: "2024-07-24",
+    description: "Cloud Infrastructure",
+    client: "StartupCo",
+    confidence: 97,
+    documentUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=1000&fit=crop"
   }
 ];
 
@@ -186,17 +282,6 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
 
   return (
     <div className="h-full flex flex-col">
-      <InboxHeader
-        unreadCount={unreadCount}
-        totalCount={totalCount}
-        doneCount={doneCount}
-        role={role}
-        mode={mode}
-        confidenceThreshold={confidenceThreshold}
-        onRoleChange={setRole}
-        onModeChange={setMode}
-        onConfidenceChange={setConfidenceThreshold}
-      />
 
       {/* Gmail-style Toolbar */}
       <div className="flex items-center justify-between py-2 pl-0.5 pr-4 bg-mobius-gray-50 rounded-lg mb-4">
