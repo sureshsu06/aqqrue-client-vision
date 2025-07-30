@@ -1,12 +1,10 @@
 import { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { 
   LayoutDashboard, 
   Settings, 
-  Plug, 
-  Users, 
-  BarChart3,
   Bell,
   User,
   Search
@@ -20,71 +18,134 @@ interface LayoutProps {
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Integrations", href: "/integrations", icon: Plug },
+];
+
+const bottomNavigation = [
   { name: "Settings", href: "/settings", icon: Settings },
-  { name: "Clients", href: "/clients", icon: Users },
-  { name: "Reports", href: "/reports", icon: BarChart3 },
+];
+
+const clients = [
+  "All Clients",
+  "TechStartup Inc", 
+  "StartupCo",
+  "DesignStudio",
+  "DevCorp",
+  "CloudCo"
 ];
 
 export function Layout({ children }: LayoutProps) {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-mobius-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-mobius-gray-100 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-8">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">M</span>
-              </div>
-              <span className="text-xl font-bold text-mobius-gray-900">Mobius</span>
+    <div className="min-h-screen bg-mobius-gray-50 flex">
+      {/* Left Sidebar */}
+      <div className="w-64 bg-white border-r border-mobius-gray-100 flex flex-col">
+        {/* Logo */}
+        <div className="p-6 border-b border-mobius-gray-100">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">M</span>
             </div>
-            
-            <nav className="hidden md:flex space-x-1">
-              {navigation.map((item) => (
-                <Link key={item.name} to={item.href}>
-                  <Button
-                    variant={location.pathname === item.href ? "default" : "ghost"}
-                    size="sm"
-                    className={cn(
-                      "flex items-center space-x-2",
-                      location.pathname === item.href 
-                        ? "bg-primary text-primary-foreground" 
-                        : "text-mobius-gray-500 hover:text-mobius-gray-900"
-                    )}
-                  >
-                    <item.icon className="w-4 h-4" />
-                    <span>{item.name}</span>
-                  </Button>
-                </Link>
-              ))}
-            </nav>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-mobius-gray-500 w-4 h-4" />
-              <Input 
-                placeholder="Search transactions..." 
-                className="pl-10 w-64"
-              />
-            </div>
-            <Button variant="ghost" size="sm">
-              <Bell className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="sm">
-              <User className="w-4 h-4" />
-            </Button>
+            <span className="text-xl font-bold text-mobius-gray-900">Mobius</span>
           </div>
         </div>
-      </header>
+
+        {/* Main Navigation */}
+        <nav className="flex-1 p-4">
+          <div className="space-y-2">
+            {navigation.map((item) => (
+              <Link key={item.name} to={item.href}>
+                <Button
+                  variant={location.pathname === item.href ? "default" : "ghost"}
+                  size="sm"
+                  className={cn(
+                    "w-full justify-start",
+                    location.pathname === item.href 
+                      ? "bg-primary text-primary-foreground" 
+                      : "text-mobius-gray-500 hover:text-mobius-gray-900 hover:bg-mobius-gray-50"
+                  )}
+                >
+                  <item.icon className="w-4 h-4 mr-3" />
+                  <span>{item.name}</span>
+                </Button>
+              </Link>
+            ))}
+          </div>
+        </nav>
+
+        {/* Bottom Navigation */}
+        <div className="p-4 border-t border-mobius-gray-100">
+          <div className="space-y-2">
+            {bottomNavigation.map((item) => (
+              <Link key={item.name} to={item.href}>
+                <Button
+                  variant={location.pathname === item.href ? "default" : "ghost"}
+                  size="sm"
+                  className={cn(
+                    "w-full justify-start",
+                    location.pathname === item.href 
+                      ? "bg-primary text-primary-foreground" 
+                      : "text-mobius-gray-500 hover:text-mobius-gray-900 hover:bg-mobius-gray-50"
+                  )}
+                >
+                  <item.icon className="w-4 h-4 mr-3" />
+                  <span>{item.name}</span>
+                </Button>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* Main Content */}
-      <main className="p-6">
-        {children}
-      </main>
+      <div className="flex-1 flex flex-col">
+        {/* Top Header */}
+        <header className="bg-white border-b border-mobius-gray-100 px-6 py-4">
+          <div className="flex items-center justify-between">
+            {/* Client Pills */}
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-medium text-mobius-gray-500 mr-2">Clients:</span>
+              <div className="flex space-x-2">
+                {clients.map((client) => (
+                  <Badge 
+                    key={client}
+                    variant={client === "All Clients" ? "default" : "outline"}
+                    className={cn(
+                      "cursor-pointer",
+                      client === "All Clients" 
+                        ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                        : "hover:bg-mobius-gray-50"
+                    )}
+                  >
+                    {client}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-mobius-gray-500 w-4 h-4" />
+                <Input 
+                  placeholder="Search transactions..." 
+                  className="pl-10 w-64"
+                />
+              </div>
+              <Button variant="ghost" size="sm">
+                <Bell className="w-4 h-4" />
+              </Button>
+              <Button variant="ghost" size="sm">
+                <User className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <main className="flex-1 p-6">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

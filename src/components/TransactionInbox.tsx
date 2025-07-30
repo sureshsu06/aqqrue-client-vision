@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 import { 
   Mail, 
   FolderOpen, 
@@ -157,12 +158,14 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
   });
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-mobius-gray-900">Transaction Inbox</h1>
-          <p className="text-mobius-gray-500 mt-1">Review and approve your transactions</p>
+    <div className="h-full flex flex-col">
+      {/* Gmail-style Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center space-x-4">
+          <h1 className="text-xl font-semibold text-mobius-gray-900">Inbox</h1>
+          <Badge variant="outline" className="bg-status-pending/10 text-status-pending">
+            {filteredTransactions.filter(t => t.status === "unread").length} unread
+          </Badge>
         </div>
         
         <div className="flex items-center space-x-3">
@@ -170,42 +173,39 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
             <Filter className="w-4 h-4 mr-2" />
             Filters
           </Button>
-          <Badge variant="outline" className="bg-status-pending/10 text-status-pending">
-            {filteredTransactions.length} pending
-          </Badge>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex space-x-6">
-        <div className="flex space-x-1">
+      {/* Gmail-style Toolbar */}
+      <div className="flex items-center justify-between py-2 px-4 bg-mobius-gray-50 rounded-lg">
+        <div className="flex items-center space-x-1">
           {filters.map((filter) => (
             <Button
               key={filter.id}
               variant={selectedFilter === filter.id ? "default" : "ghost"}
               size="sm"
               onClick={() => setSelectedFilter(filter.id)}
-              className="flex items-center space-x-2"
+              className="h-8"
             >
               <span>{filter.label}</span>
-              <Badge variant="secondary" className="ml-1 text-xs">
+              <Badge variant="secondary" className="ml-1 text-xs h-5">
                 {filter.count}
               </Badge>
             </Button>
           ))}
         </div>
         
-        <div className="flex space-x-1">
+        <div className="flex items-center space-x-1">
           {statusFilters.map((filter) => (
             <Button
               key={filter.id}
               variant={selectedStatus === filter.id ? "default" : "ghost"}
               size="sm"
               onClick={() => setSelectedStatus(filter.id)}
-              className="flex items-center space-x-2"
+              className="h-8"
             >
               <span>{filter.label}</span>
-              <Badge variant="secondary" className="ml-1 text-xs">
+              <Badge variant="secondary" className="ml-1 text-xs h-5">
                 {filter.count}
               </Badge>
             </Button>
@@ -213,16 +213,19 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
         </div>
       </div>
 
-      {/* Transaction List */}
-      <Card className="bg-white shadow-mobius-md">
+      {/* Gmail-style Transaction List */}
+      <Card className="flex-1 bg-white shadow-mobius-md">
         <div className="divide-y divide-mobius-gray-100">
           {filteredTransactions.map((transaction) => (
             <div
               key={transaction.id}
-              className="p-4 hover:bg-mobius-gray-50 transition-colors cursor-pointer"
+              className={cn(
+                "p-3 hover:bg-mobius-gray-50 transition-colors cursor-pointer border-l-4",
+                transaction.status === "unread" ? "border-l-mobius-blue bg-blue-50/30" : "border-l-transparent"
+              )}
               onClick={() => onTransactionSelect(transaction)}
             >
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
                 <Checkbox 
                   checked={selectedTransactions.includes(transaction.id)}
                   onCheckedChange={(checked) => {
@@ -241,63 +244,68 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center space-x-3">
-                    <h3 className="font-medium text-mobius-gray-900 truncate">
-                      {transaction.vendor}
-                    </h3>
-                    {transaction.isDuplicate && (
-                      <Badge variant="destructive" className="text-xs">
-                        Duplicate
-                      </Badge>
-                    )}
-                    {transaction.isRecurring && (
-                      <Badge variant="outline" className="text-xs">
-                        Recurring
-                      </Badge>
-                    )}
-                    {transaction.confidence && (
-                      <Badge 
-                        variant="outline" 
-                        className={`text-xs ${
-                          transaction.confidence >= 95 
-                            ? 'bg-status-done/10 text-status-done border-status-done/20'
-                            : transaction.confidence >= 85
-                            ? 'bg-status-review/10 text-status-review border-status-review/20'
-                            : 'bg-status-pending/10 text-status-pending border-status-pending/20'
-                        }`}
-                      >
-                        {transaction.confidence}% confidence
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-sm text-mobius-gray-500 mt-1">
-                    {transaction.description}
-                  </p>
-                  <p className="text-xs text-mobius-gray-400 mt-1">
-                    Client: {transaction.client}
-                  </p>
-                </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <h3 className={cn(
+                        "font-medium truncate",
+                        transaction.status === "unread" ? "text-mobius-gray-900 font-semibold" : "text-mobius-gray-700"
+                      )}>
+                        {transaction.vendor}
+                      </h3>
+                      {transaction.isDuplicate && (
+                        <Badge variant="destructive" className="text-xs">
+                          Duplicate
+                        </Badge>
+                      )}
+                      {transaction.isRecurring && (
+                        <Badge variant="outline" className="text-xs">
+                          Recurring
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center space-x-3">
+                      <div className="text-right">
+                        <p className={cn(
+                          "font-medium",
+                          transaction.status === "unread" ? "text-mobius-gray-900" : "text-mobius-gray-700"
+                        )}>
+                          ${transaction.amount.toLocaleString()}
+                        </p>
+                        <p className="text-xs text-mobius-gray-500">
+                          {new Date(transaction.date).toLocaleDateString()}
+                        </p>
+                      </div>
+                      
+                      {transaction.confidence && (
+                        <Badge 
+                          variant="outline" 
+                          className={`text-xs ${
+                            transaction.confidence >= 95 
+                              ? 'bg-status-done/10 text-status-done border-status-done/20'
+                              : transaction.confidence >= 85
+                              ? 'bg-status-review/10 text-status-review border-status-review/20'
+                              : 'bg-status-pending/10 text-status-pending border-status-pending/20'
+                          }`}
+                        >
+                          {transaction.confidence}%
+                        </Badge>
+                      )}
 
-                <div className="flex items-center space-x-4">
-                  <div className="text-right">
-                    <p className="font-medium text-mobius-gray-900">
-                      ${transaction.amount.toLocaleString()}
-                    </p>
-                    <p className="text-xs text-mobius-gray-500">
-                      {new Date(transaction.date).toLocaleDateString()}
-                    </p>
+                      <Button variant="ghost" size="sm">
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                   
-                  <Badge 
-                    variant="outline" 
-                    className={getStatusBadge(transaction.status)}
-                  >
-                    {transaction.status}
-                  </Badge>
-
-                  <Button variant="ghost" size="sm">
-                    <Eye className="w-4 h-4" />
-                  </Button>
+                  <div className="mt-1">
+                    <p className={cn(
+                      "text-sm truncate",
+                      transaction.status === "unread" ? "text-mobius-gray-600" : "text-mobius-gray-500"
+                    )}>
+                      {transaction.description} • {transaction.client}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
