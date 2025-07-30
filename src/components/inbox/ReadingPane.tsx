@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -12,7 +12,8 @@ import {
   FileText,
   Building,
   Calendar,
-  RotateCcw
+  RotateCcw,
+  Download
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Transaction } from "./InboxList";
@@ -26,6 +27,29 @@ interface ReadingPaneProps {
 
 export function ReadingPane({ transaction, onApprove, onEdit, onSeeHow }: ReadingPaneProps) {
   const confidence = transaction.confidence || 95;
+  const [pdfUrl, setPdfUrl] = useState<string>("");
+
+  useEffect(() => {
+    // Map transaction to PDF files in public/documents directory
+    const pdfFiles: Record<string, string> = {
+      "WeWork": "/documents/250101.pdf",
+      "AWS": "/documents/250102.pdf", 
+      "Farm Again": "/documents/Farm Again Senseware.pdf",
+      "Vanta Inc": "/documents/Sales_51 (1).pdf",
+      "Zoom": "/documents/PCD-143.pdf"
+    };
+    
+    // Try to find a matching document based on vendor name
+    const matchedDocument = pdfFiles[transaction.vendor];
+    
+    if (matchedDocument) {
+      setPdfUrl(matchedDocument);
+    } else {
+      // If no exact match, try to find a document that might be related
+      const fallbackDocument = Object.values(pdfFiles)[0]; // Use first document as fallback
+      setPdfUrl(fallbackDocument);
+    }
+  }, [transaction.vendor]);
 
   // Mock journal entry data
   const journalEntry = {
@@ -132,24 +156,23 @@ export function ReadingPane({ transaction, onApprove, onEdit, onSeeHow }: Readin
           <div className="flex-1 overflow-y-auto p-4">
             <TabsContent value="document" className="mt-0">
               <Card className="p-4 bg-gradient-card min-h-96">
-                {transaction.documentUrl ? (
+                {pdfUrl ? (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <h4 className="font-medium text-sm">Original Document</h4>
                       <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">
-                          <Button variant="ghost" size="sm" className="w-8 h-8 p-0">-</Button>
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Button variant="ghost" size="sm" className="w-8 h-8 p-0">+</Button>
+                        <Button variant="outline" size="sm" asChild>
+                          <a href={pdfUrl} download target="_blank" rel="noopener noreferrer">
+                            <Download className="w-4 h-4" />
+                          </a>
                         </Button>
                       </div>
                     </div>
                     <div className="border border-mobius-gray-200 rounded-lg overflow-hidden">
-                      <img 
-                        src={transaction.documentUrl} 
-                        alt={`${transaction.vendor} invoice`}
-                        className="w-full h-auto max-h-96 object-contain bg-white"
+                      <embed
+                        src={pdfUrl}
+                        type="application/pdf"
+                        className="w-full h-96"
                       />
                     </div>
                   </div>
