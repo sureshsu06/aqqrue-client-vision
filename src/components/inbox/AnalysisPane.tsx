@@ -72,7 +72,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
   ];
 
   return (
-    <div className="w-96 border-l border-mobius-gray-100 flex flex-col bg-white">
+    <div className="w-80 border-l border-mobius-gray-100 flex flex-col bg-white">
       {/* Header */}
       <div className="p-4 border-b border-mobius-gray-100">
         <div className="flex items-center justify-between mb-2">
