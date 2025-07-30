@@ -297,68 +297,70 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
         onConfidenceChange={() => {}}
       />
 
-      {/* Gmail-style Toolbar */}
-      <div className="flex items-center justify-between py-2 pl-0.5 pr-4 bg-mobius-gray-50 rounded-lg mb-4">
-        <div className="flex items-center space-x-4">
+      {/* Integrated Bills Filter Bar */}
+      <div className="flex items-center justify-between py-3 px-4 bg-white border-b border-mobius-gray-200">
+        <div className="flex items-center space-x-6">
+          {/* Bills Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="min-w-[140px] justify-between bg-white">
+              <Button variant="ghost" className="h-9 px-3 justify-between bg-white border border-mobius-gray-200 rounded-lg">
                 <div className="flex items-center space-x-2">
-                  {React.createElement(filters.find(f => f.id === selectedFilter)?.icon || Check, { 
-                    className: "w-4 h-4" 
-                  })}
-                  <span>
-                    {filters.find(f => f.id === selectedFilter)?.label} 
-                    ({filters.find(f => f.id === selectedFilter)?.count})
-                  </span>
+                  <FileText className="w-4 h-4" />
+                  <span>Bills(8)</span>
                 </div>
-                <ChevronDown className="w-4 h-4" />
+                <ChevronDown className="w-4 h-4 ml-2" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="min-w-[140px]">
-              {filters.map((filter) => (
-                <DropdownMenuItem 
-                  key={filter.id} 
-                  onClick={() => setSelectedFilter(filter.id)}
-                  className="flex items-center space-x-2"
-                >
-                  <filter.icon className="w-4 h-4" />
-                  <span>{filter.label} ({filter.count})</span>
-                </DropdownMenuItem>
-              ))}
+            <DropdownMenuContent className="w-40 bg-white border border-mobius-gray-200">
+              <DropdownMenuItem className="flex items-center space-x-2">
+                <FileText className="w-4 h-4" />
+                <span>Bills (8)</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="flex items-center space-x-2">
+                <CreditCard className="w-4 h-4" />
+                <span>Cards (4)</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="flex items-center space-x-2">
+                <Clock className="w-4 h-4" />
+                <span>All (12)</span>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/* All/Unread Toggle */}
+          <div className="flex items-center">
+            <Button 
+              variant={selectedStatus === "all" ? "default" : "ghost"}
+              size="sm"
+              className={`px-4 py-2 rounded-none border-b-2 ${
+                selectedStatus === "all" 
+                  ? "border-mobius-blue bg-transparent text-mobius-blue hover:bg-mobius-blue/5" 
+                  : "border-transparent text-mobius-gray-600 hover:text-mobius-gray-900"
+              }`}
+              onClick={() => setSelectedStatus("all")}
+            >
+              All
+            </Button>
+            <Button 
+              variant={selectedStatus === "unread" ? "default" : "ghost"}
+              size="sm"
+              className={`px-4 py-2 rounded-none border-b-2 ${
+                selectedStatus === "unread" 
+                  ? "border-mobius-blue bg-transparent text-mobius-blue hover:bg-mobius-blue/5" 
+                  : "border-transparent text-mobius-gray-600 hover:text-mobius-gray-900"
+              }`}
+              onClick={() => setSelectedStatus("unread")}
+            >
+              Unread
+            </Button>
+          </div>
         </div>
-        
-        <div className="flex items-center space-x-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="min-w-[140px] justify-between bg-white">
-                <div className="flex items-center space-x-2">
-                  {React.createElement(statusFilters.find(f => f.id === selectedStatus)?.icon || Mail, { 
-                    className: "w-4 h-4" 
-                  })}
-                  <span>
-                    {statusFilters.find(f => f.id === selectedStatus)?.label} 
-                    ({statusFilters.find(f => f.id === selectedStatus)?.count})
-                  </span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="min-w-[140px]">
-              {statusFilters.map((filter) => (
-                <DropdownMenuItem 
-                  key={filter.id} 
-                  onClick={() => setSelectedStatus(filter.id)}
-                  className="flex items-center space-x-2"
-                >
-                  <filter.icon className="w-4 h-4" />
-                  <span>{filter.label} ({filter.count})</span>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+
+        {/* Right side - Sort icons */}
+        <div className="flex items-center space-x-2">
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+            <Calendar className="w-4 h-4 text-mobius-gray-600" />
+          </Button>
         </div>
       </div>
 
