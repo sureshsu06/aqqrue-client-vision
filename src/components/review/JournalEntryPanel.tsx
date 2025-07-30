@@ -119,10 +119,10 @@ export function JournalEntryPanel({ transaction, onEdit, onSeeHow }: JournalEntr
             <div className="flex items-center space-x-2">
               <p className="font-medium">{journalEntry.invoiceNumber}</p>
               {journalEntry.isBillable && (
-                <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200">
                   Billable ✓
                   <ExternalLink className="w-3 h-3 ml-1" />
-                </Badge>
+                </span>
               )}
             </div>
           </div>
@@ -210,9 +210,9 @@ export function JournalEntryPanel({ transaction, onEdit, onSeeHow }: JournalEntr
                 
                 {/* Confidence Field */}
                 <div className="text-right">
-                  <Badge variant="outline" className="bg-status-done/10 text-status-done border-status-done/20 text-xs">
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-status-done/10 text-status-done border border-status-done/20">
                     {entry.confidence || confidence}%
-                  </Badge>
+                  </span>
                 </div>
               </div>
             ))}
