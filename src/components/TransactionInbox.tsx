@@ -184,7 +184,7 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
       />
 
       {/* Gmail-style Toolbar */}
-      <div className="flex items-center justify-between py-2 pl-6 pr-4 bg-mobius-gray-50 rounded-lg mb-4">
+      <div className="flex items-center justify-between py-2 pl-3 pr-4 bg-mobius-gray-50 rounded-lg mb-4">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <span className="text-sm font-medium text-mobius-gray-500">Filter:</span>
