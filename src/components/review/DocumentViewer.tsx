@@ -13,11 +13,11 @@ export function DocumentViewer({ transaction }: DocumentViewerProps) {
   const [pdfUrl, setPdfUrl] = useState<string>("");
 
   useEffect(() => {
-    // Map transaction to PDF URLs - using Google Docs viewer for iframe compatibility
+    // Map transaction to PDF URLs - using Mozilla PDF.js viewer
     const pdfFiles: Record<string, string> = {
-      "WeWork": "https://docs.google.com/gview?url=https://www.dropbox.com/scl/fi/gvhefbnqpur1zrp93vlsz/250101-1.pdf?rlkey=5cx24o1nhdf4owc76yi2kjefk&st=1pwbz48m&dl=1&embedded=true",
-      "Starbucks Coffee": "https://docs.google.com/gview?url=https://www.dropbox.com/scl/fi/r1ehtyims93rtc43dzea0/Bharath-Electronics-Invoice.pdf?rlkey=zzvf3u5ha0ueq7mlf0dry62em&st=5hmlav0k&dl=1&embedded=true",
-      "Farm Again": "https://docs.google.com/gview?url=https://www.dropbox.com/scl/fi/qq65zajhhn1afkms0mdjw/Farm-Again-Senseware.pdf?rlkey=sscc0wguljeabi3ybm2yhmec0&st=4vbal20e&dl=1&embedded=true"
+      "WeWork": "https://mozilla.github.io/pdf.js/web/viewer.html?file=" + encodeURIComponent("https://www.dropbox.com/scl/fi/gvhefbnqpur1zrp93vlsz/250101-1.pdf?rlkey=5cx24o1nhdf4owc76yi2kjefk&st=1pwbz48m&dl=1"),
+      "Starbucks Coffee": "https://mozilla.github.io/pdf.js/web/viewer.html?file=" + encodeURIComponent("https://www.dropbox.com/scl/fi/r1ehtyims93rtc43dzea0/Bharath-Electronics-Invoice.pdf?rlkey=zzvf3u5ha0ueq7mlf0dry62em&st=5hmlav0k&dl=1"),
+      "Farm Again": "https://mozilla.github.io/pdf.js/web/viewer.html?file=" + encodeURIComponent("https://www.dropbox.com/scl/fi/qq65zajhhn1afkms0mdjw/Farm-Again-Senseware.pdf?rlkey=sscc0wguljeabi3ybm2yhmec0&st=4vbal20e&dl=1")
     };
     
     setPdfUrl(pdfFiles[transaction.vendor] || pdfFiles["WeWork"]);
