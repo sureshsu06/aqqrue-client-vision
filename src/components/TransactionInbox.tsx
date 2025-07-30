@@ -1,35 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { cn } from "@/lib/utils";
-import { 
-  Mail, 
-  FolderOpen, 
-  CreditCard, 
-  FileText, 
-  Filter,
-  Eye,
-  CheckCircle2,
-  AlertCircle,
-  Clock
-} from "lucide-react";
-
-interface Transaction {
-  id: string;
-  vendor: string;
-  amount: number;
-  source: "email" | "drive" | "brex" | "ramp";
-  type: "bill" | "card" | "contract";
-  status: "unread" | "review" | "approved" | "done";
-  date: string;
-  description: string;
-  client: string;
-  confidence?: number;
-  isDuplicate?: boolean;
-  isRecurring?: boolean;
-}
+import { InboxHeader } from "./inbox/InboxHeader";
+import { InboxList, Transaction } from "./inbox/InboxList";
+import { ReadingPane } from "./inbox/ReadingPane";
+import { useToast } from "@/hooks/use-toast";
 
 const mockTransactions: Transaction[] = [
   {
@@ -114,38 +89,14 @@ interface TransactionInboxProps {
 }
 
 export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps) {
-  const [selectedFilter, setSelectedFilter] = useState("all");
+  const [selectedFilter, setSelectedFilter] = useState("bills");
   const [selectedStatus, setSelectedStatus] = useState("unread");
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
-
-  const getSourceIcon = (source: string) => {
-    switch (source) {
-      case "email": return <Mail className="w-4 h-4" />;
-      case "drive": return <FolderOpen className="w-4 h-4" />;
-      case "brex":
-      case "ramp": return <CreditCard className="w-4 h-4" />;
-      default: return <FileText className="w-4 h-4" />;
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "done": return <CheckCircle2 className="w-4 h-4 text-status-done" />;
-      case "approved": return <CheckCircle2 className="w-4 h-4 text-status-approved" />;
-      case "review": return <AlertCircle className="w-4 h-4 text-status-review" />;
-      default: return <Clock className="w-4 h-4 text-status-pending" />;
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    const variants = {
-      unread: "bg-status-pending/10 text-status-pending border-status-pending/20",
-      review: "bg-status-review/10 text-status-review border-status-review/20",
-      approved: "bg-status-approved/10 text-status-approved border-status-approved/20",
-      done: "bg-status-done/10 text-status-done border-status-done/20"
-    };
-    return variants[status as keyof typeof variants] || variants.unread;
-  };
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [role, setRole] = useState("accountant");
+  const [mode, setMode] = useState("review-all");
+  const [confidenceThreshold, setConfidenceThreshold] = useState(95);
+  const { toast } = useToast();
 
   const filteredTransactions = mockTransactions.filter(transaction => {
     if (selectedFilter !== "all" && !transaction.type.includes(selectedFilter.slice(0, -1))) {
@@ -157,27 +108,77 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
     return true;
   });
 
+  const unreadCount = mockTransactions.filter(t => t.status === "unread").length;
+  const doneCount = mockTransactions.filter(t => t.status === "done").length;
+  const totalCount = mockTransactions.length;
+
+  const handleTransactionSelect = (transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+  };
+
+  const handleTransactionToggle = (transactionId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedTransactions([...selectedTransactions, transactionId]);
+    } else {
+      setSelectedTransactions(selectedTransactions.filter(id => id !== transactionId));
+    }
+  };
+
+  const handleQuickApprove = (transactionId: string) => {
+    toast({
+      title: "Transaction approved",
+      description: "Posted to QuickBooks • JE# QB-000192"
+    });
+  };
+
+  const handleQuickAssign = (transactionId: string) => {
+    toast({
+      title: "Transaction assigned",
+      description: "Assigned to Controller for review"
+    });
+  };
+
+  const handleApprove = () => {
+    if (selectedTransaction) {
+      toast({
+        title: "Transaction approved",
+        description: "Posted to QuickBooks • JE# QB-000192"
+      });
+      
+      // Auto-advance to next transaction
+      const currentIndex = filteredTransactions.findIndex(t => t.id === selectedTransaction.id);
+      if (currentIndex < filteredTransactions.length - 1) {
+        setSelectedTransaction(filteredTransactions[currentIndex + 1]);
+      } else {
+        setSelectedTransaction(null);
+      }
+    }
+  };
+
+  const handleEdit = () => {
+    onTransactionSelect(selectedTransaction!);
+  };
+
+  const handleSeeHow = () => {
+    onTransactionSelect(selectedTransaction!);
+  };
+
   return (
     <div className="h-full flex flex-col">
-      {/* Gmail-style Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-4">
-          <h1 className="text-xl font-semibold text-mobius-gray-900">Inbox</h1>
-          <Badge variant="outline" className="bg-status-pending/10 text-status-pending">
-            {filteredTransactions.filter(t => t.status === "unread").length} unread
-          </Badge>
-        </div>
-        
-        <div className="flex items-center space-x-3">
-          <Button variant="outline" size="sm">
-            <Filter className="w-4 h-4 mr-2" />
-            Filters
-          </Button>
-        </div>
-      </div>
+      <InboxHeader
+        unreadCount={unreadCount}
+        totalCount={totalCount}
+        doneCount={doneCount}
+        role={role}
+        mode={mode}
+        confidenceThreshold={confidenceThreshold}
+        onRoleChange={setRole}
+        onModeChange={setMode}
+        onConfidenceChange={setConfidenceThreshold}
+      />
 
       {/* Gmail-style Toolbar */}
-      <div className="flex items-center justify-between py-2 px-4 bg-mobius-gray-50 rounded-lg">
+      <div className="flex items-center justify-between py-2 px-4 bg-mobius-gray-50 rounded-lg mb-4">
         <div className="flex items-center space-x-1">
           {filters.map((filter) => (
             <Button
@@ -213,105 +214,29 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
         </div>
       </div>
 
-      {/* Gmail-style Transaction List */}
-      <Card className="flex-1 bg-white shadow-mobius-md">
-        <div className="divide-y divide-mobius-gray-100">
-          {filteredTransactions.map((transaction) => (
-            <div
-              key={transaction.id}
-              className={cn(
-                "p-3 hover:bg-mobius-gray-50 transition-colors cursor-pointer border-l-4",
-                transaction.status === "unread" ? "border-l-mobius-blue bg-blue-50/30" : "border-l-transparent"
-              )}
-              onClick={() => onTransactionSelect(transaction)}
-            >
-              <div className="flex items-center space-x-3">
-                <Checkbox 
-                  checked={selectedTransactions.includes(transaction.id)}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setSelectedTransactions([...selectedTransactions, transaction.id]);
-                    } else {
-                      setSelectedTransactions(selectedTransactions.filter(id => id !== transaction.id));
-                    }
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                />
-                
-                <div className="flex items-center space-x-2 text-mobius-gray-500">
-                  {getSourceIcon(transaction.source)}
-                  {getStatusIcon(transaction.status)}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <h3 className={cn(
-                        "font-medium truncate",
-                        transaction.status === "unread" ? "text-mobius-gray-900 font-semibold" : "text-mobius-gray-700"
-                      )}>
-                        {transaction.vendor}
-                      </h3>
-                      {transaction.isDuplicate && (
-                        <Badge variant="destructive" className="text-xs">
-                          Duplicate
-                        </Badge>
-                      )}
-                      {transaction.isRecurring && (
-                        <Badge variant="outline" className="text-xs">
-                          Recurring
-                        </Badge>
-                      )}
-                    </div>
-                    
-                    <div className="flex items-center space-x-3">
-                      <div className="text-right">
-                        <p className={cn(
-                          "font-medium",
-                          transaction.status === "unread" ? "text-mobius-gray-900" : "text-mobius-gray-700"
-                        )}>
-                          ${transaction.amount.toLocaleString()}
-                        </p>
-                        <p className="text-xs text-mobius-gray-500">
-                          {new Date(transaction.date).toLocaleDateString()}
-                        </p>
-                      </div>
-                      
-                      {transaction.confidence && (
-                        <Badge 
-                          variant="outline" 
-                          className={`text-xs ${
-                            transaction.confidence >= 95 
-                              ? 'bg-status-done/10 text-status-done border-status-done/20'
-                              : transaction.confidence >= 85
-                              ? 'bg-status-review/10 text-status-review border-status-review/20'
-                              : 'bg-status-pending/10 text-status-pending border-status-pending/20'
-                          }`}
-                        >
-                          {transaction.confidence}%
-                        </Badge>
-                      )}
-
-                      <Button variant="ghost" size="sm">
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-1">
-                    <p className={cn(
-                      "text-sm truncate",
-                      transaction.status === "unread" ? "text-mobius-gray-600" : "text-mobius-gray-500"
-                    )}>
-                      {transaction.description} • {transaction.client}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
+      {/* Inbox with Reading Pane */}
+      <div className="flex-1 flex min-h-0">
+        <div className="w-1/2">
+          <InboxList
+            transactions={filteredTransactions}
+            selectedTransaction={selectedTransaction}
+            selectedTransactions={selectedTransactions}
+            onTransactionSelect={handleTransactionSelect}
+            onTransactionToggle={handleTransactionToggle}
+            onQuickApprove={handleQuickApprove}
+            onQuickAssign={handleQuickAssign}
+          />
         </div>
-      </Card>
+        
+        {selectedTransaction && (
+          <ReadingPane
+            transaction={selectedTransaction}
+            onApprove={handleApprove}
+            onEdit={handleEdit}
+            onSeeHow={handleSeeHow}
+          />
+        )}
+      </div>
     </div>
   );
 }
