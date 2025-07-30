@@ -82,7 +82,10 @@ export function JournalEntryPanel({ transaction, onEdit, onSeeHow }: JournalEntr
           <div className="flex space-x-2">
             {!isEditing ? (
               <>
-                <Button variant="outline" size="sm" onClick={handleStartEdit}>
+                <Button variant="outline" size="sm" onClick={() => {
+                  console.log("Edit button clicked in JournalEntryPanel");
+                  handleStartEdit();
+                }}>
                   <Edit3 className="w-4 h-4 mr-1" />
                   Edit
                 </Button>
