@@ -167,13 +167,13 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                     <div className="space-y-2">
                       <div className="grid grid-cols-3 gap-2 text-sm">
                         <div className="font-medium text-xs">{journalEntry.debitAccount}</div>
-                        <div className="text-right font-mono">${journalEntry.amount.toFixed(2)}</div>
+                        <div className="text-right">${journalEntry.amount.toFixed(2)}</div>
                         <div className="text-right">—</div>
                       </div>
                       <div className="grid grid-cols-3 gap-2 text-sm">
                         <div className="font-medium text-xs">{journalEntry.creditAccount}</div>
                         <div className="text-right">—</div>
-                        <div className="text-right font-mono">${journalEntry.amount.toFixed(2)}</div>
+                        <div className="text-right">${journalEntry.amount.toFixed(2)}</div>
                       </div>
                     </div>
                     
