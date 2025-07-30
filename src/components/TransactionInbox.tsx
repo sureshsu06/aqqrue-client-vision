@@ -178,64 +178,64 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
         onConfidenceChange={setConfidenceThreshold}
       />
 
-      {/* Gmail-style Toolbar */}
-      <div className="flex items-center justify-between py-2 px-4 bg-mobius-gray-50 rounded-lg mb-4">
-        <div className="flex items-center space-x-1">
+      {/* Quanta-style Segmented Filters */}
+      <div className="flex items-center justify-between py-4 px-6 mb-6">
+        <div className="tabseg">
           {filters.map((filter) => (
-            <Button
+            <div
               key={filter.id}
-              variant={selectedFilter === filter.id ? "default" : "ghost"}
-              size="sm"
+              className={`item ${selectedFilter === filter.id ? 'active' : ''}`}
               onClick={() => setSelectedFilter(filter.id)}
-              className="h-8"
             >
               <span>{filter.label}</span>
-              <Badge variant="secondary" className="ml-1 text-xs h-5">
+              <span className="pill gray ml-2 text-xs px-2 py-0.5">
                 {filter.count}
-              </Badge>
-            </Button>
+              </span>
+            </div>
           ))}
         </div>
         
-        <div className="flex items-center space-x-1">
+        <div className="tabseg">
           {statusFilters.map((filter) => (
-            <Button
+            <div
               key={filter.id}
-              variant={selectedStatus === filter.id ? "default" : "ghost"}
-              size="sm"
+              className={`item ${selectedStatus === filter.id ? 'active' : ''}`}
               onClick={() => setSelectedStatus(filter.id)}
-              className="h-8"
             >
               <span>{filter.label}</span>
-              <Badge variant="secondary" className="ml-1 text-xs h-5">
+              <span className="pill gray ml-2 text-xs px-2 py-0.5">
                 {filter.count}
-              </Badge>
-            </Button>
+              </span>
+            </div>
           ))}
         </div>
       </div>
 
-      {/* Inbox with Reading Pane */}
-      <div className="flex-1 flex min-h-0">
+      {/* Glass Inbox with Reading Pane */}
+      <div className="flex-1 flex min-h-0 gap-6">
         <div className="w-1/2">
-          <InboxList
-            transactions={filteredTransactions}
-            selectedTransaction={selectedTransaction}
-            selectedTransactions={selectedTransactions}
-            onTransactionSelect={handleTransactionSelect}
-            onTransactionToggle={handleTransactionToggle}
-            onQuickApprove={handleQuickApprove}
-            onQuickAssign={handleQuickAssign}
-          />
+          <div className="glass-card pad h-full">
+            <InboxList
+              transactions={filteredTransactions}
+              selectedTransaction={selectedTransaction}
+              selectedTransactions={selectedTransactions}
+              onTransactionSelect={handleTransactionSelect}
+              onTransactionToggle={handleTransactionToggle}
+              onQuickApprove={handleQuickApprove}
+              onQuickAssign={handleQuickAssign}
+            />
+          </div>
         </div>
         
         {selectedTransaction && (
-          <ReadingPane
-            transaction={selectedTransaction}
-            onApprove={handleApprove}
-            onEdit={handleEdit}
-            onSeeHow={handleSeeHow}
-          />
+          <div className="w-1/2">
+            <ReadingPane
+              transaction={selectedTransaction}
+              onApprove={handleApprove}
+              onEdit={handleEdit}
+              onSeeHow={handleSeeHow}
+            />
+          </div>
         )}
       </div>
     </div>

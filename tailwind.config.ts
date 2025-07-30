@@ -62,34 +62,26 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				mobius: {
-					blue: 'hsl(var(--mobius-blue))',
-					'blue-light': 'hsl(var(--mobius-blue-light))',
-					'blue-dark': 'hsl(var(--mobius-blue-dark))',
-					green: 'hsl(var(--mobius-green))',
-					'green-light': 'hsl(var(--mobius-green-light))',
-					orange: 'hsl(var(--mobius-orange))',
-					'orange-light': 'hsl(var(--mobius-orange-light))',
-					'gray-50': 'hsl(var(--mobius-gray-50))',
-					'gray-100': 'hsl(var(--mobius-gray-100))',
-					'gray-500': 'hsl(var(--mobius-gray-500))',
-					'gray-900': 'hsl(var(--mobius-gray-900))'
+				glass: {
+					surface: 'var(--glass-surface)',
+					border: 'var(--glass-border)',
+					ring: 'var(--glass-ring)'
+				},
+				quanta: {
+					text: '#E7ECF7',
+					muted: '#A6B1C8',
+					label: '#93A0BE',
+					accent: '#8BB7FF',
+					'accent-2': '#5D8BFF',
+					success: '#54D885',
+					warning: '#FFCA69',
+					danger: '#FF7A84'
 				},
 				status: {
 					pending: 'hsl(var(--status-pending))',
 					approved: 'hsl(var(--status-approved))',
 					review: 'hsl(var(--status-review))',
 					done: 'hsl(var(--status-done))'
-				},
-				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background))',
-					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-					accent: 'hsl(var(--sidebar-accent))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
 				}
 			},
 			borderRadius: {
