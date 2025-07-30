@@ -283,6 +283,19 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
 
   return (
     <div className="h-full flex flex-col">
+      
+      {/* Add the InboxHeader component */}
+      <InboxHeader
+        unreadCount={unreadCount}
+        totalCount={filteredTransactions.length}
+        doneCount={doneCount}
+        role="accountant"
+        mode="review-all"
+        confidenceThreshold={95}
+        onRoleChange={() => {}}
+        onModeChange={() => {}}
+        onConfidenceChange={() => {}}
+      />
 
       {/* Gmail-style Toolbar */}
       <div className="flex items-center justify-between py-2 pl-0.5 pr-4 bg-mobius-gray-50 rounded-lg mb-4">
