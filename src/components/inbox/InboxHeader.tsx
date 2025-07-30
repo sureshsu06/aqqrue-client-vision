@@ -29,18 +29,15 @@ export function InboxHeader({
   const progressPercent = Math.round((doneCount / totalCount) * 100);
 
   return (
-    <div className="flex items-center justify-between mb-4">
-      <div className="flex items-center space-x-4">
-        <h1 className="text-xl font-semibold text-mobius-gray-900">Inbox</h1>
-        <div className="flex items-center space-x-2">
-          <Badge variant="outline" className="bg-status-pending/10 text-status-pending">
-            Unread: {unreadCount}
-          </Badge>
-          <span className="text-sm text-mobius-gray-500">•</span>
-          <span className="text-sm text-mobius-gray-600">
-            {doneCount} of {totalCount} done ({progressPercent}%)
-          </span>
-        </div>
+    <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center space-x-2">
+        <Badge variant="outline" className="bg-status-pending/10 text-status-pending">
+          Unread: {unreadCount}
+        </Badge>
+        <span className="text-sm text-mobius-gray-500">•</span>
+        <span className="text-sm text-mobius-gray-600">
+          {doneCount} of {totalCount} done ({progressPercent}%)
+        </span>
       </div>
       
       <div className="flex items-center space-x-3">
