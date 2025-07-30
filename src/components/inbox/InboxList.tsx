@@ -117,21 +117,6 @@ export function InboxList({
                   </div>
                   
                   <div className="flex items-center space-x-3">
-                    
-                    {transaction.confidence && (
-                      <Badge 
-                        variant="outline" 
-                        className={`text-xs ${
-                          transaction.confidence >= 95 
-                            ? 'bg-status-done/10 text-status-done border-status-done/20'
-                            : transaction.confidence >= 85
-                            ? 'bg-blue-50 text-blue-700 border-blue-200'
-                            : 'bg-mobius-gray-50 text-mobius-gray-600 border-mobius-gray-200'
-                        }`}
-                      >
-                        {transaction.confidence}%
-                      </Badge>
-                    )}
 
                     {/* Quick Actions - show on hover */}
                     {hoveredRow === transaction.id && transaction.status === "unread" && (

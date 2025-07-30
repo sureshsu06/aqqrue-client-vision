@@ -185,38 +185,38 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
 
       {/* Gmail-style Toolbar */}
       <div className="flex items-center justify-between py-2 px-4 bg-mobius-gray-50 rounded-lg mb-4">
-        <div className="flex items-center space-x-1">
-          {filters.map((filter) => (
-            <Button
-              key={filter.id}
-              variant={selectedFilter === filter.id ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setSelectedFilter(filter.id)}
-              className="h-8"
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm font-medium text-mobius-gray-500">Filter:</span>
+            <select 
+              value={selectedFilter} 
+              onChange={(e) => setSelectedFilter(e.target.value)}
+              className="px-3 py-1 border border-mobius-gray-200 rounded-md text-sm bg-white"
             >
-              <span>{filter.label}</span>
-              <Badge variant="secondary" className="ml-1 text-xs h-5">
-                {filter.count}
-              </Badge>
-            </Button>
-          ))}
+              {filters.map((filter) => (
+                <option key={filter.id} value={filter.id}>
+                  {filter.label} ({filter.count})
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
         
-        <div className="flex items-center space-x-1">
-          {statusFilters.map((filter) => (
-            <Button
-              key={filter.id}
-              variant={selectedStatus === filter.id ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setSelectedStatus(filter.id)}
-              className="h-8"
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm font-medium text-mobius-gray-500">Status:</span>
+            <select 
+              value={selectedStatus} 
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="px-3 py-1 border border-mobius-gray-200 rounded-md text-sm bg-white"
             >
-              <span>{filter.label}</span>
-              <Badge variant="secondary" className="ml-1 text-xs h-5">
-                {filter.count}
-              </Badge>
-            </Button>
-          ))}
+              {statusFilters.map((filter) => (
+                <option key={filter.id} value={filter.id}>
+                  {filter.label} ({filter.count})
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
