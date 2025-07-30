@@ -61,7 +61,7 @@ export function Layout({ children }: LayoutProps) {
             {navigation.map((item) => (
               <Link key={item.name} to={item.href}>
                 <Button
-                  variant={location.pathname === item.href ? "default" : "ghost"}
+                  variant="ghost"
                   size="sm"
                   className={cn(
                     "w-12 h-12 p-0 flex items-center justify-center",
