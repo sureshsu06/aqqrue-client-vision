@@ -31,14 +31,120 @@ export function InboxHeader({
 
   return (
     <div className="border-b border-mobius-gray-200 bg-white">
-      {/* Progress bar */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-mobius-gray-100">
-        <div className="flex items-center space-x-2">
-          <span className="text-sm text-mobius-gray-600">
-            {doneCount} of {totalCount} done ({progressPercent}%)
-          </span>
+      {/* Single toolbar with everything */}
+      <div className="flex items-center justify-between px-4 py-2">
+        <div className="flex items-center space-x-1">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
+                >
+                  <Archive className="w-4 h-4 text-mobius-gray-600" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Archive</p>
+              </TooltipContent>
+            </Tooltip>
+            
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
+                >
+                  <UserCheck className="w-4 h-4 text-mobius-gray-600" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Assign</p>
+              </TooltipContent>
+            </Tooltip>
+            
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
+                >
+                  <MailOpen className="w-4 h-4 text-mobius-gray-600" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Mark Unread</p>
+              </TooltipContent>
+            </Tooltip>
+            
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
+                >
+                  <Undo2 className="w-4 h-4 text-mobius-gray-600" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Undo</p>
+              </TooltipContent>
+            </Tooltip>
+            
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
+                >
+                  <Upload className="w-4 h-4 text-mobius-gray-600" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Upload</p>
+              </TooltipContent>
+            </Tooltip>
+            
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
+                >
+                  <Plus className="w-4 h-4 text-mobius-gray-600" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Add Task</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <div className="h-4 w-px bg-mobius-gray-300 mx-2" />
+            
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 px-3 hover:bg-mobius-gray-100 rounded"
+                >
+                  <Filter className="w-4 h-4 mr-2 text-mobius-gray-600" />
+                  <span className="text-sm text-mobius-gray-600">Filters</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Filter transactions</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
-        
+
         <div className="flex items-center space-x-3">
           {/* Role Switcher */}
           <Select value={role} onValueChange={onRoleChange}>
@@ -82,119 +188,6 @@ export function InboxHeader({
             </div>
           )}
         </div>
-      </div>
-
-      {/* Toolbar with action icons */}
-      <div className="flex items-center px-4 py-2 space-x-1">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
-              >
-                <Archive className="w-4 h-4 text-mobius-gray-600" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Archive</p>
-            </TooltipContent>
-          </Tooltip>
-          
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
-              >
-                <UserCheck className="w-4 h-4 text-mobius-gray-600" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Assign</p>
-            </TooltipContent>
-          </Tooltip>
-          
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
-              >
-                <MailOpen className="w-4 h-4 text-mobius-gray-600" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Mark Unread</p>
-            </TooltipContent>
-          </Tooltip>
-          
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
-              >
-                <Undo2 className="w-4 h-4 text-mobius-gray-600" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Undo</p>
-            </TooltipContent>
-          </Tooltip>
-          
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
-              >
-                <Upload className="w-4 h-4 text-mobius-gray-600" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Upload</p>
-            </TooltipContent>
-          </Tooltip>
-          
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
-              >
-                <Plus className="w-4 h-4 text-mobius-gray-600" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Add Task</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <div className="h-4 w-px bg-mobius-gray-300 mx-2" />
-          
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 px-3 hover:bg-mobius-gray-100 rounded"
-              >
-                <Filter className="w-4 h-4 mr-2 text-mobius-gray-600" />
-                <span className="text-sm text-mobius-gray-600">Filters</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Filter transactions</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
       </div>
     </div>
   );
