@@ -93,11 +93,6 @@ export function InboxList({
                 onCheckedChange={(checked) => onTransactionToggle(transaction.id, !!checked)}
                 onClick={(e) => e.stopPropagation()}
               />
-              
-              <div className="flex items-center space-x-2 text-mobius-gray-500">
-                {getSourceIcon(transaction.source)}
-                {getStatusIcon(transaction.status)}
-              </div>
 
               <div className="flex-1 min-w-0">
                 {/* First line: Vendor + badges */}
@@ -178,7 +173,7 @@ export function InboxList({
                     "text-sm truncate",
                     transaction.status === "unread" ? "text-mobius-gray-600" : "text-mobius-gray-500"
                   )}>
-                    {transaction.type} • {transaction.client} • {new Date(transaction.date).toLocaleDateString()} • {getSourceIcon(transaction.source)}
+                    {transaction.description} • {transaction.client} • {new Date(transaction.date).toLocaleDateString()}
                   </p>
                 </div>
               </div>

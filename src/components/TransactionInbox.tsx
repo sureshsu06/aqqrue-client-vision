@@ -222,7 +222,7 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
 
       {/* Inbox with Reading Pane */}
       <div className="flex-1 flex min-h-0">
-        <div className="w-1/2">
+        <div className="w-1/3">
           <InboxList
             transactions={filteredTransactions}
             selectedTransaction={selectedTransaction}
