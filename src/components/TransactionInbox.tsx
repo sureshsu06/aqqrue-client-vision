@@ -19,7 +19,7 @@ import {
   CreditCard, 
   FileText,
   Clock,
-  Calendar,
+  ArrowUpDown,
   ChevronDown
 } from "lucide-react";
 
@@ -198,7 +198,7 @@ const filters = [
 
 const statusFilters = [
   { id: "unread", label: "Unread", count: 7, icon: Mail },
-  { id: "today", label: "Today", count: 3, icon: Calendar },
+  { id: "today", label: "Today", count: 3, icon: Clock },
   { id: "week", label: "This Week", count: 5, icon: Clock }
 ];
 
@@ -300,32 +300,39 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
       {/* Integrated Bills Filter Bar */}
       <div className="flex items-center justify-between py-3 px-4 bg-white border-b border-mobius-gray-200">
         <div className="flex items-center space-x-6">
-          {/* Bills Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-9 px-3 justify-between bg-white border border-mobius-gray-200 rounded-lg">
-                <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2">
+            {/* Bills Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-9 px-3 justify-between bg-white border border-mobius-gray-200 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <FileText className="w-4 h-4" />
+                    <span>Bills(8)</span>
+                  </div>
+                  <ChevronDown className="w-4 h-4 ml-2" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-40 bg-white border border-mobius-gray-200">
+                <DropdownMenuItem className="flex items-center space-x-2">
                   <FileText className="w-4 h-4" />
-                  <span>Bills(8)</span>
-                </div>
-                <ChevronDown className="w-4 h-4 ml-2" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-40 bg-white border border-mobius-gray-200">
-              <DropdownMenuItem className="flex items-center space-x-2">
-                <FileText className="w-4 h-4" />
-                <span>Bills (8)</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="flex items-center space-x-2">
-                <CreditCard className="w-4 h-4" />
-                <span>Cards (4)</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="flex items-center space-x-2">
-                <Clock className="w-4 h-4" />
-                <span>All (12)</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                  <span>Bills (8)</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="flex items-center space-x-2">
+                  <CreditCard className="w-4 h-4" />
+                  <span>Cards (4)</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="flex items-center space-x-2">
+                  <Clock className="w-4 h-4" />
+                  <span>All (12)</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Date Sort Icon */}
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <ArrowUpDown className="w-4 h-4 text-mobius-gray-600" />
+            </Button>
+          </div>
 
           {/* All/Unread Toggle */}
           <div className="flex items-center">
@@ -354,13 +361,6 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
               Unread
             </Button>
           </div>
-        </div>
-
-        {/* Right side - Sort icons */}
-        <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-            <Calendar className="w-4 h-4 text-mobius-gray-600" />
-          </Button>
         </div>
       </div>
 
