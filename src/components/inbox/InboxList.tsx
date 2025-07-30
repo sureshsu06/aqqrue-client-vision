@@ -22,7 +22,7 @@ export interface Transaction {
   vendor: string;
   amount: number;
   source: "email" | "drive" | "brex" | "ramp";
-  type: "bill" | "card" | "contract";
+  type: "bill" | "card" | "contract" | "payment";
   status: "unread" | "review" | "approved" | "done";
   date: string;
   description: string;
