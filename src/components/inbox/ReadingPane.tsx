@@ -189,10 +189,6 @@ export function ReadingPane({ transaction, onApprove, onEdit, onSeeHow }: Readin
                         </p>
                       </div>
                     )}
-                    <div>
-                      <p className="text-mobius-gray-500">Cost Center:</p>
-                      <p className="font-medium">{journalEntry.costCenter}</p>
-                    </div>
                   </div>
 
                   <Separator />

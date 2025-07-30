@@ -73,10 +73,6 @@ export function JournalEntryPanel({ transaction, onEdit, onSeeHow }: JournalEntr
               </p>
             </div>
           )}
-          <div>
-            <p className="text-mobius-gray-500">Cost Center:</p>
-            <p className="font-medium">{journalEntry.costCenter}</p>
-          </div>
         </div>
 
         <Separator />
