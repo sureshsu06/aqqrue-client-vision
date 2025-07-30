@@ -202,155 +202,10 @@ const mockTransactions: Transaction[] = [
   }
 ];
 
-// Mock payment data for all the bills - these are the actual payments made for the bills
-const mockPayments: Transaction[] = [
-  {
-    id: "p1",
-    vendor: "JCSS & Associates LLP",
-    amount: 86400,
-    source: "email",
-    type: "payment",
-    status: "done",
-    date: "2025-05-28",
-    description: "Payment for Professional Fees - May 2025",
-    client: "Elire",
-    isRecurring: false,
-    pdfFile: "ASO-I_109_25-26Sign_Elire%20Global.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=1000&fit=crop"
-  },
-  {
-    id: "p2", 
-    vendor: "JCSS & Associates LLP",
-    amount: 64800,
-    source: "email",
-    type: "payment",
-    status: "done",
-    date: "2025-05-28",
-    description: "Payment for Professional Fees - N-STP Condonation",
-    client: "Elire",
-    confidence: 100,
-    pdfFile: "ASO-I_117_25-26_Elire Global.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&h=1000&fit=crop"
-  },
-  {
-    id: "p3",
-    vendor: "NSDL Database Management Limited",
-    amount: 11800,
-    source: "drive",
-    type: "payment",
-    status: "done",
-    date: "2025-06-02",
-    description: "Payment for Equity AMC",
-    client: "Elire",
-    confidence: 100,
-    pdfFile: "EGS001.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=1000&fit=crop"
-  },
-  {
-    id: "p4",
-    vendor: "Sogo Computers",
-    amount: 5310,
-    source: "brex",
-    type: "payment",
-    status: "done",
-    date: "2025-05-25",
-    description: "Payment for Freight Charges",
-    client: "Elire",
-    confidence: 100,
-    pdfFile: "Hys-1117.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1483058712412-4245e9b90334?w=800&h=1000&fit=crop"
-  },
-  {
-    id: "p5",
-    vendor: "Sogo Computers",
-    amount: 5310,
-    source: "ramp",
-    type: "payment",
-    status: "done",
-    date: "2025-05-25",
-    description: "Payment for Freight Charges",
-    client: "Elire",
-    confidence: 100,
-    pdfFile: "Hys-1121.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=1000&fit=crop"
-  },
-  {
-    id: "p6",
-    vendor: "Clayworks Spaces Pvt Ltd",
-    amount: 94960,
-    source: "email",
-    type: "payment",
-    status: "done",
-    date: "2025-05-25",
-    description: "Payment for Rent (Net of TDS)",
-    client: "Elire",
-    confidence: 100,
-    pdfFile: "INV-25260258.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&h=1000&fit=crop"
-  },
-  {
-    id: "p7",
-    vendor: "Clayworks Spaces Pvt Ltd",
-    amount: 4806,
-    source: "email",
-    type: "payment",
-    status: "done",
-    date: "2025-05-10",
-    description: "Payment for Parking Charges-April 2025 (Net of TDS)",
-    client: "Elire",
-    confidence: 100,
-    pdfFile: "INV-25260376.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1572044162444-ad60f128bdea?w=800&h=1000&fit=crop"
-  },
-  {
-    id: "p8",
-    vendor: "Sogo Computers",
-    amount: 480850,
-    source: "email",
-    type: "payment",
-    status: "done",
-    date: "2025-05-21",
-    description: "Payment for Laptop Purchase",
-    client: "Elire",
-    confidence: 100,
-    pdfFile: "PCD-143.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1633114127408-af671c774b39?w=800&h=1000&fit=crop"
-  },
-  {
-    id: "p9",
-    vendor: "Sogo Computers",
-    amount: 96170,
-    source: "email",
-    type: "payment",
-    status: "done",
-    date: "2025-05-24",
-    description: "Payment for Laptop Purchase",
-    client: "Elire",
-    confidence: 100,
-    pdfFile: "PCD-159.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=800&h=1000&fit=crop"
-  },
-  {
-    id: "p10",
-    vendor: "Sogo Computers",
-    amount: 96170,
-    source: "email",
-    type: "payment",
-    status: "done",
-    date: "2025-05-24",
-    description: "Payment for Laptop Purchase",
-    client: "Elire",
-    confidence: 100,
-    pdfFile: "PCD-160.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=800&h=1000&fit=crop"
-  }
-];
-
 const filters = [
-  { id: "all", label: "All", count: 22, icon: Check },
-  { id: "bills", label: "Bills", count: 12, icon: FileText },
-  { id: "payments", label: "Payments", count: 10, icon: CreditCard },
-  { id: "cards", label: "Credit Cards", count: 0, icon: CreditCard },
+  { id: "all", label: "All", count: 12, icon: Check },
+  { id: "bills", label: "Bills", count: 8, icon: FileText },
+  { id: "cards", label: "Credit Cards", count: 4, icon: CreditCard },
   { id: "contracts", label: "Contracts", count: 0, icon: FileText }
 ];
 
@@ -374,11 +229,8 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
   const [confidenceThreshold, setConfidenceThreshold] = useState(95);
   const { toast } = useToast();
 
-  // Combine all transactions
-  const allTransactions = [...mockTransactions, ...mockPayments];
-
-  const filteredTransactions = allTransactions.filter(transaction => {
-    if (selectedFilter !== "all" && selectedFilter !== transaction.type) {
+  const filteredTransactions = mockTransactions.filter(transaction => {
+    if (selectedFilter !== "all" && !transaction.type.includes(selectedFilter.slice(0, -1))) {
       return false;
     }
     if (selectedStatus === "unread" && transaction.status !== "unread") {
@@ -387,9 +239,9 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
     return true;
   });
 
-  const unreadCount = allTransactions.filter(t => t.status === "unread").length;
-  const doneCount = allTransactions.filter(t => t.status === "done").length;
-  const totalCount = allTransactions.length;
+  const unreadCount = mockTransactions.filter(t => t.status === "unread").length;
+  const doneCount = mockTransactions.filter(t => t.status === "done").length;
+  const totalCount = mockTransactions.length;
 
   const handleTransactionSelect = (transaction: Transaction) => {
     setSelectedTransaction(transaction);
@@ -468,14 +320,12 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
                 <Button variant="ghost" className="h-9 px-3 justify-between bg-white border border-mobius-gray-200 rounded-lg">
                   <div className="flex items-center space-x-2">
                     {selectedFilter === "bills" && <FileText className="w-4 h-4" />}
-                    {selectedFilter === "payments" && <CreditCard className="w-4 h-4" />}
                     {selectedFilter === "cards" && <CreditCard className="w-4 h-4" />}
                     {selectedFilter === "all" && <Clock className="w-4 h-4" />}
                     <span>
-                      {selectedFilter === "bills" && "Bills (12)"}
-                      {selectedFilter === "payments" && "Payments (10)"}
-                      {selectedFilter === "cards" && "Cards (0)"}
-                      {selectedFilter === "all" && "All (22)"}
+                      {selectedFilter === "bills" && "Bills (8)"}
+                      {selectedFilter === "cards" && "Cards (4)"}
+                      {selectedFilter === "all" && "All (12)"}
                     </span>
                   </div>
                   <ChevronDown className="w-4 h-4 ml-2" />
@@ -487,28 +337,21 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
                   onClick={() => setSelectedFilter("bills")}
                 >
                   <FileText className="w-4 h-4" />
-                  <span>Bills (12)</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="flex items-center space-x-2"
-                  onClick={() => setSelectedFilter("payments")}
-                >
-                  <CreditCard className="w-4 h-4" />
-                  <span>Payments (10)</span>
+                  <span>Bills (8)</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="flex items-center space-x-2"
                   onClick={() => setSelectedFilter("cards")}
                 >
                   <CreditCard className="w-4 h-4" />
-                  <span>Cards (0)</span>
+                  <span>Cards (4)</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="flex items-center space-x-2"
                   onClick={() => setSelectedFilter("all")}
                 >
                   <Clock className="w-4 h-4" />
-                  <span>All (22)</span>
+                  <span>All (12)</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
