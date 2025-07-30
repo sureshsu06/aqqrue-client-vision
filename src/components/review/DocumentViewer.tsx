@@ -13,11 +13,11 @@ export function DocumentViewer({ transaction }: DocumentViewerProps) {
   const [pdfUrl, setPdfUrl] = useState<string>("");
 
   useEffect(() => {
-    // Map transaction to PDF URLs (converted Dropbox URLs to direct download)
+    // Map transaction to PDF URLs - using Google Docs viewer for iframe compatibility
     const pdfFiles: Record<string, string> = {
-      "WeWork": "https://www.dropbox.com/scl/fi/gvhefbnqpur1zrp93vlsz/250101-1.pdf?rlkey=5cx24o1nhdf4owc76yi2kjefk&st=1pwbz48m&dl=1",
-      "Starbucks Coffee": "https://www.dropbox.com/scl/fi/r1ehtyims93rtc43dzea0/Bharath-Electronics-Invoice.pdf?rlkey=zzvf3u5ha0ueq7mlf0dry62em&st=5hmlav0k&dl=1",
-      "Farm Again": "https://www.dropbox.com/scl/fi/qq65zajhhn1afkms0mdjw/Farm-Again-Senseware.pdf?rlkey=sscc0wguljeabi3ybm2yhmec0&st=4vbal20e&dl=1"
+      "WeWork": "https://docs.google.com/gview?url=https://www.dropbox.com/scl/fi/gvhefbnqpur1zrp93vlsz/250101-1.pdf?rlkey=5cx24o1nhdf4owc76yi2kjefk&st=1pwbz48m&dl=1&embedded=true",
+      "Starbucks Coffee": "https://docs.google.com/gview?url=https://www.dropbox.com/scl/fi/r1ehtyims93rtc43dzea0/Bharath-Electronics-Invoice.pdf?rlkey=zzvf3u5ha0ueq7mlf0dry62em&st=5hmlav0k&dl=1&embedded=true",
+      "Farm Again": "https://docs.google.com/gview?url=https://www.dropbox.com/scl/fi/qq65zajhhn1afkms0mdjw/Farm-Again-Senseware.pdf?rlkey=sscc0wguljeabi3ybm2yhmec0&st=4vbal20e&dl=1&embedded=true"
     };
     
     setPdfUrl(pdfFiles[transaction.vendor] || pdfFiles["WeWork"]);
@@ -55,39 +55,27 @@ export function DocumentViewer({ transaction }: DocumentViewerProps) {
         
         <Card className="p-2 bg-white border min-h-[600px] overflow-hidden">
           {pdfUrl ? (
-            <div className="w-full h-[580px] flex items-center justify-center bg-gray-50 rounded">
-              <div className="text-center">
-                <FileText className="w-16 h-16 mx-auto mb-4 text-blue-500" />
-                <p className="font-medium text-lg mb-2">PDF Document</p>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Invoice: {transaction.vendor === "WeWork" ? "250101-1" : 
-                           transaction.vendor === "Farm Again" ? "Farm-Again-Senseware" : 
-                           "Bharath-Electronics-Invoice"}
-                </p>
-                <p className="text-sm mb-4">
-                  {transaction.vendor} - ${transaction.amount.toLocaleString()}
-                </p>
-                <a 
-                  href={pdfUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <FileText className="w-4 h-4 mr-2" />
-                  Open PDF in New Tab
-                </a>
-                <div className="mt-4 text-xs text-muted-foreground">
-                  Click to view the full document in a new tab
-                </div>
-              </div>
-            </div>
+            <iframe
+              src={pdfUrl}
+              className="w-full h-[580px] border-0"
+              title="PDF Document"
+              style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top left' }}
+            />
           ) : (
             <div className="flex items-center justify-center h-[580px] text-center text-muted-foreground">
               <div>
                 <FileText className="w-16 h-16 mx-auto mb-4" />
-                <p className="font-medium text-lg mb-2">No Document</p>
+                <p className="font-medium text-lg mb-2">PDF Document Viewer</p>
+                <p className="text-sm">
+                  Invoice: {transaction.vendor === "WeWork" ? "250101-1" : 
+                           transaction.vendor === "Farm Again" ? "Farm-Again-Senseware" : 
+                           "Bharath-Electronics-Invoice"}
+                </p>
+                <p className="text-sm">
+                  {transaction.vendor} - ${transaction.amount.toLocaleString()}
+                </p>
                 <div className="mt-4 text-xs text-muted-foreground">
-                  Add your PDF files to public/documents/ in Dev Mode
+                  Loading PDF document...
                 </div>
               </div>
             </div>
