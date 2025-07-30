@@ -117,14 +117,6 @@ export function InboxList({
                   </div>
                   
                   <div className="flex items-center space-x-3">
-                    <div className="text-right">
-                      <p className={cn(
-                        "font-medium font-variant-numeric: tabular-nums",
-                        transaction.status === "unread" ? "text-mobius-gray-900" : "text-mobius-gray-700"
-                      )}>
-                        ${transaction.amount.toLocaleString()}
-                      </p>
-                    </div>
                     
                     {transaction.confidence && (
                       <Badge 
