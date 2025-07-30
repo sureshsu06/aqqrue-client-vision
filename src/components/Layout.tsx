@@ -11,7 +11,7 @@ import {
   AlertTriangle,
   BarChart3,
   Building,
-  Calendar
+  ClipboardList
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -25,7 +25,7 @@ const navigation = [
   { name: "Exceptions", href: "/exceptions", icon: AlertTriangle },
   { name: "Reporting", href: "/reporting", icon: BarChart3 },
   { name: "Fixed Asset Register", href: "/fixed-assets", icon: Building },
-  { name: "Prepaid Schedules", href: "/prepaid-schedules", icon: Calendar },
+  { name: "Prepaid Schedules", href: "/prepaid-schedules", icon: ClipboardList },
 ];
 
 const bottomNavigation = [
@@ -66,7 +66,7 @@ export function Layout({ children }: LayoutProps) {
                   className={cn(
                     "w-12 h-12 p-0 flex items-center justify-center",
                     location.pathname === item.href 
-                      ? "bg-white text-blue-600 hover:bg-blue-600 hover:text-white" 
+                      ? "bg-primary text-primary-foreground" 
                       : "text-mobius-gray-500 hover:text-mobius-gray-900 hover:bg-mobius-gray-50"
                   )}
                   title={item.name}
