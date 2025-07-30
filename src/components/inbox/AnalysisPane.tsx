@@ -3,15 +3,21 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   CheckCircle2, 
   Edit3, 
   Eye, 
   AlertTriangle,
-  RotateCcw
+  RotateCcw,
+  Save,
+  X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Transaction } from "./InboxList";
+import { useState } from "react";
 
 interface AnalysisPaneProps {
   transaction: Transaction;
@@ -22,42 +28,199 @@ interface AnalysisPaneProps {
 
 export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: AnalysisPaneProps) {
   const confidence = transaction.confidence || 95;
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editedJournalEntry, setEditedJournalEntry] = useState<any>(null);
 
   // Mock journal entry data
   const journalEntry = getJournalEntryForTransaction(transaction);
 
-  const analysisSteps = [
+  // Initialize edited journal entry when entering edit mode
+  const handleEditClick = () => {
+    setEditedJournalEntry(JSON.parse(JSON.stringify(journalEntry))); // Deep copy
+    setIsEditMode(true);
+  };
+
+  const handleSaveEdit = () => {
+    // Here you would typically save the changes to your backend
+    console.log("Saving edited journal entry:", editedJournalEntry);
+    setIsEditMode(false);
+    setEditedJournalEntry(null);
+    // You could also call a callback to update the parent component
+    if (onEdit) onEdit();
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditMode(false);
+    setEditedJournalEntry(null);
+  };
+
+  const updateJournalEntry = (index: number, field: string, value: any) => {
+    if (!editedJournalEntry) return;
+    
+    const updatedEntries = [...editedJournalEntry.entries];
+    updatedEntries[index] = { ...updatedEntries[index], [field]: value };
+    
+    setEditedJournalEntry({
+      ...editedJournalEntry,
+      entries: updatedEntries
+    });
+  };
+
+  // Dynamic analysis steps based on transaction
+  const getAnalysisSteps = (transaction: any) => {
+    const baseSteps = [
     {
       step: 1,
-      title: "Vendor Identification",
-      status: "complete",
-      confidence: 100
+        title: "Extraction",
+        status: "complete" as const,
+        confidence: 100,
+        result: `Extracted ₹${transaction.amount.toLocaleString()} from ${transaction.vendor} invoice with 100% accuracy`
     },
     {
       step: 2,
-      title: "Recurring Pattern",
-      status: transaction.isRecurring ? "complete" : "skip",
-      confidence: transaction.isRecurring ? 100 : 0
+        title: "Capex/Opex",
+        status: "complete" as const,
+        confidence: 95,
+        result: getCapexOpexResult(transaction)
     },
     {
       step: 3,
-      title: "Amount Extraction",
-      status: "complete",
-      confidence: 100
+        title: "GST Applicability",
+        status: "complete" as const,
+        confidence: 100,
+        result: getGSTResult(transaction)
     },
     {
       step: 4,
-      title: "Client Attribution",
-      status: "complete",
-      confidence: 100
+        title: "TDS",
+        status: "complete" as const,
+        confidence: 100,
+        result: getTDSResult(transaction)
     },
     {
       step: 5,
-      title: "Categorization",
-      status: "complete",
-      confidence: confidence
+        title: "COA Mapping",
+        status: "complete" as const,
+        confidence: 95,
+        result: getCOAResult(transaction)
+      }
+    ];
+
+    return baseSteps;
+  };
+
+  const getCapexOpexResult = (transaction: any) => {
+    switch (transaction.id) {
+      case "1":
+      case "2":
+        return "Classified as Opex - Professional fees for monthly services";
+      case "3":
+        return "Classified as Opex - Regulatory compliance charges";
+      case "4":
+      case "5":
+        return "Classified as Opex - Freight and logistics expenses";
+      case "6":
+      case "7":
+        return "Classified as Opex - Office rent and parking charges";
+      case "8":
+      case "9":
+      case "10":
+        return "Classified as Capex - Computer hardware purchases";
+      case "11":
+        return "Classified as Capex - Monitor equipment purchase";
+      case "12":
+        return "Classified as Opex - Office supplies and consumables";
+      default:
+        return "Classified as Opex - General business expenses";
     }
-  ];
+  };
+
+  const getGSTResult = (transaction: any) => {
+    switch (transaction.id) {
+      case "1":
+      case "2":
+        return "CGST 9% + SGST 9% = ₹16,992 total GST. Input credit fully available under Section 16";
+      case "3":
+        return "IGST 18% = ₹1,800 total GST. Input credit available for business use under Section 16";
+      case "4":
+      case "5":
+        return "CGST 9% + SGST 9% = ₹810 total GST. Input credit available for business expenses";
+      case "6":
+        return "CGST 9% + SGST 9% = ₹15,660 total GST. Input credit available for office rent";
+      case "7":
+        return "CGST 9% + SGST 9% = ₹801 total GST. Input credit available for parking charges";
+      case "8":
+        return "CGST 9% + SGST 9% = ₹73,350 total GST. Input credit available for capital goods";
+      case "9":
+      case "10":
+        return "CGST 9% + SGST 9% = ₹14,670 total GST. Input credit available for capital goods";
+      case "11":
+        return "CGST 9% + SGST 9% = ₹3,042 total GST. Input credit available for capital goods";
+      case "12":
+        return "CGST 9% + SGST 9% = ₹1,471 total GST. Input credit available for office supplies";
+      default:
+        return "GST applicable as per standard rates. Input credit available for business use";
+    }
+  };
+
+  const getTDSResult = (transaction: any) => {
+    switch (transaction.id) {
+      case "1":
+        return "TDS 10% under Section 194J - Professional fees. Section threshold: ₹30,000 per annum. Invoice amount: ₹94,400 (above threshold)";
+      case "2":
+        return "TDS 10% under Section 194J - Professional fees. Section threshold: ₹30,000 per annum. Invoice amount: ₹70,800 (above threshold)";
+      case "3":
+        return "No TDS applicable - Regulatory charges. Section 194J threshold: ₹30,000 per annum. Invoice amount: ₹11,800 (below threshold)";
+      case "4":
+        return "No TDS applicable - Freight charges. Section 194C threshold: ₹30,000 per annum. Invoice amount: ₹5,310 (below threshold)";
+      case "5":
+        return "No TDS applicable - Freight charges. Section 194C threshold: ₹30,000 per annum. Invoice amount: ₹5,310 (below threshold)";
+      case "6":
+        return "TDS 10% under Section 194I - Rent. Section threshold: ₹2,40,000 per annum. Invoice amount: ₹1,02,660 (above threshold)";
+      case "7":
+        return "TDS 10% under Section 194I - Rent. Section threshold: ₹2,40,000 per annum. Invoice amount: ₹5,251 (below threshold)";
+      case "8":
+        return "No TDS applicable - Purchase of goods. Section 194Q threshold: ₹50,00,000 per annum. Invoice amount: ₹4,80,850 (below threshold)";
+      case "9":
+        return "No TDS applicable - Purchase of goods. Section 194Q threshold: ₹50,00,000 per annum. Invoice amount: ₹96,170 (below threshold)";
+      case "10":
+        return "No TDS applicable - Purchase of goods. Section 194Q threshold: ₹50,00,000 per annum. Invoice amount: ₹96,170 (below threshold)";
+      case "11":
+        return "No TDS applicable - Purchase of goods. Section 194Q threshold: ₹50,00,000 per annum. Invoice amount: ₹16,900 (below threshold)";
+      case "12":
+        return "No TDS applicable - Purchase of goods. Section 194Q threshold: ₹50,00,000 per annum. Invoice amount: ₹8,174 (below threshold)";
+      default:
+        return "TDS applicable as per relevant sections based on transaction type and thresholds";
+    }
+  };
+
+  const getCOAResult = (transaction: any) => {
+    switch (transaction.id) {
+      case "1":
+      case "2":
+        return "Mapped to 'Professional Fees' account with 95% confidence";
+      case "3":
+        return "Mapped to 'Rates & Taxes' account with 95% confidence";
+      case "4":
+      case "5":
+        return "Mapped to 'Freight and Postage' account with 95% confidence";
+      case "6":
+      case "7":
+        return "Mapped to 'Rent' account with 95% confidence";
+      case "8":
+      case "9":
+      case "10":
+        return "Mapped to 'Computers' account with 95% confidence";
+      case "11":
+        return "Mapped to 'Computers' account with 95% confidence";
+      case "12":
+        return "Mapped to 'Office Supplies' account with 95% confidence";
+      default:
+        return "Mapped to appropriate expense account with 95% confidence";
+    }
+  };
+
+  const analysisSteps = getAnalysisSteps(transaction);
 
   return (
     <div className="w-[422px] border-l border-mobius-gray-100 flex flex-col bg-white">
@@ -105,12 +268,12 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
       {/* Tabs */}
       <div className="flex-1 overflow-hidden">
         <Tabs defaultValue="summary" className="h-full flex flex-col">
-          <TabsList className="grid w-full grid-cols-2 mx-4 mt-4">
+          <TabsList className="grid w-full grid-cols-2 mx-2 mt-4 mb-2">
             <TabsTrigger value="summary">Summary</TabsTrigger>
             <TabsTrigger value="analysis">Analysis</TabsTrigger>
           </TabsList>
 
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto px-4 pb-4">
             <TabsContent value="summary" className="mt-0">
               <Card className="p-4">
                 <div className="space-y-4">
@@ -147,22 +310,71 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                   {/* Journal Entry Table */}
                   <div>
                     <div className="grid grid-cols-3 gap-2 text-xs font-medium text-mobius-gray-500 uppercase tracking-wide mb-2">
-                      <div>ACCOUNT</div>
+                      <div className="pl-0">ACCOUNT</div>
                       <div className="text-right">DEBIT</div>
                       <div className="text-right">CREDIT</div>
                     </div>
                     
                     <div className="space-y-2">
-                      {journalEntry.entries.map((entry, index) => (
+                      {(isEditMode ? editedJournalEntry : journalEntry).entries.map((entry: any, index: number) => (
                         <div key={index} className="grid grid-cols-3 gap-2 text-sm">
-                          <div className="font-medium text-sm">{entry.account}</div>
-                          <div className="text-right">
-                            {entry.debit ? `₹${entry.debit.toFixed(2)}` : "—"}
+                          <div className="font-medium text-sm">
+                            {isEditMode ? (
+                              <Select 
+                                value={entry.account} 
+                                onValueChange={(value) => updateJournalEntry(index, 'account', value)}
+                              >
+                                <SelectTrigger className="h-8 text-sm border-mobius-gray-200 text-left justify-start">
+                                  <SelectValue className="text-sm text-left" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Professional Fees">Professional Fees</SelectItem>
+                                  <SelectItem value="Rent">Rent</SelectItem>
+                                  <SelectItem value="Computers">Computers</SelectItem>
+                                  <SelectItem value="Freight and Postage">Freight and Postage</SelectItem>
+                                  <SelectItem value="Rates & Taxes">Rates & Taxes</SelectItem>
+                                  <SelectItem value="Input CGST">Input CGST</SelectItem>
+                                  <SelectItem value="Input SGST">Input SGST</SelectItem>
+                                  <SelectItem value="Input IGST">Input IGST</SelectItem>
+                                  <SelectItem value="TDS on Professional Charges">TDS on Professional Charges</SelectItem>
+                                  <SelectItem value="TDS on Rent">TDS on Rent</SelectItem>
+                                  <SelectItem value="JCSS & Associates LLP">JCSS & Associates LLP</SelectItem>
+                                  <SelectItem value="Sogo Computers Pvt Ltd">Sogo Computers Pvt Ltd</SelectItem>
+                                  <SelectItem value="Clayworks Spaces Technologies Pvt Ltd">Clayworks Spaces Technologies Pvt Ltd</SelectItem>
+                                  <SelectItem value="NSDL Database Management Ltd">NSDL Database Management Ltd</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              entry.account
+                            )}
                           </div>
                           <div className="text-right">
-                            {entry.credit ? `₹${entry.credit.toFixed(2)}` : "—"}
+                            {isEditMode ? (
+                              <Input
+                                type="number"
+                                value={entry.debit || ''}
+                                onChange={(e) => updateJournalEntry(index, 'debit', parseFloat(e.target.value) || 0)}
+                                className="h-8 text-sm text-right border-mobius-gray-200 font-variant-numeric tabular-nums"
+                                placeholder="0.00"
+                              />
+                            ) : (
+                              entry.debit ? `₹${entry.debit.toFixed(2)}` : "—"
+                            )}
                           </div>
-                        </div>
+                          <div className="text-right">
+                            {isEditMode ? (
+                              <Input
+                                type="number"
+                                value={entry.credit || ''}
+                                onChange={(e) => updateJournalEntry(index, 'credit', parseFloat(e.target.value) || 0)}
+                                className="h-8 text-sm text-right border-mobius-gray-200 font-variant-numeric tabular-nums"
+                                placeholder="0.00"
+                              />
+                            ) : (
+                              entry.credit ? `₹${entry.credit.toFixed(2)}` : "—"
+                            )}
+                      </div>
+                      </div>
                       ))}
                     </div>
                     
@@ -182,10 +394,11 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
               <div className="space-y-3">
                 {analysisSteps.map((step) => (
                   <Card key={step.step} className="p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start space-x-3 flex-1">
                         <div className={cn(
-                          "w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium",
+                            "w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium mt-0.5",
                           step.status === "complete" 
                             ? "bg-status-done text-white"
                             : step.status === "skip"
@@ -194,13 +407,35 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                         )}>
                           {step.status === "complete" ? "✓" : step.step}
                         </div>
-                        <h4 className="font-medium text-sm">{step.title}</h4>
+                          <div className="flex-1">
+                            <h4 className="font-medium text-sm mb-1">{step.title}</h4>
+                            <p className="text-xs text-mobius-gray-600 leading-relaxed">{step.result}</p>
+                          </div>
                       </div>
                       {step.status === "complete" && (
-                        <Badge variant="outline" className="bg-status-done/10 text-status-done border-status-done/20 text-xs">
+                          <Badge variant="outline" className="bg-status-done/10 text-status-done border-status-done/20 text-xs ml-2">
                           {step.confidence}%
                         </Badge>
                       )}
+                      </div>
+                      
+                      {/* Comment and Retry Section */}
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Input
+                            placeholder="Add a comment or correction for this analysis step..."
+                            className="h-8 text-xs border-mobius-gray-200 flex-1"
+                          />
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="h-8 w-8 p-0"
+                            onClick={() => console.log(`Retry ${step.title} for transaction ${transaction.id}`)}
+                          >
+                            <RotateCcw className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   </Card>
                 ))}
@@ -212,6 +447,20 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
 
       {/* Footer Actions */}
       <div className="p-4 border-t border-mobius-gray-100 bg-white">
+        {isEditMode ? (
+          <div className="space-y-2">
+            <div className="flex space-x-2">
+              <Button className="bg-status-done hover:bg-status-done/90 flex-1" onClick={handleSaveEdit}>
+                <Save className="w-4 h-4 mr-2" />
+                Save Changes
+              </Button>
+              <Button variant="outline" className="flex-1" onClick={handleCancelEdit}>
+                <X className="w-4 h-4 mr-2" />
+                Cancel
+              </Button>
+            </div>
+          </div>
+        ) : (
         <div className="space-y-2">
           <Button className="bg-status-done hover:bg-status-done/90 w-full" onClick={onApprove}>
             <CheckCircle2 className="w-4 h-4 mr-2" />
@@ -222,12 +471,13 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
               <Eye className="w-4 h-4 mr-2" />
               See How
             </Button>
-            <Button variant="outline" className="flex-1" onClick={onEdit}>
+              <Button variant="outline" className="flex-1" onClick={handleEditClick}>
               <Edit3 className="w-4 h-4 mr-2" />
               Edit
             </Button>
           </div>
         </div>
+        )}
       </div>
     </div>
   );

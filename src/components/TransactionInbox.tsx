@@ -20,8 +20,10 @@ import {
   FileText,
   Clock,
   ArrowUpDown,
-  ChevronDown
+  ChevronDown,
+  Undo2
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const mockTransactions: Transaction[] = [
   {
@@ -387,6 +389,26 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
               Unread
             </Button>
           </div>
+        </div>
+
+        {/* Undo Button - positioned to the right */}
+        <div className="flex items-center">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
+                >
+                  <Undo2 className="w-4 h-4 text-mobius-gray-600" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Undo</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
 

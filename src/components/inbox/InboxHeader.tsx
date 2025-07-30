@@ -87,21 +87,6 @@ export function InboxHeader({
                   size="sm" 
                   className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
                 >
-                  <Undo2 className="w-4 h-4 text-mobius-gray-600" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Undo</p>
-              </TooltipContent>
-            </Tooltip>
-            
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
-                >
                   <Upload className="w-4 h-4 text-mobius-gray-600" />
                 </Button>
               </TooltipTrigger>
