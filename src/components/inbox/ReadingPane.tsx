@@ -179,7 +179,7 @@ export function ReadingPane({ transaction, onApprove, onEdit, onSeeHow }: Readin
                 ) : (
                   <div className="text-center text-mobius-gray-500 flex items-center justify-center h-full">
                     <div>
-                      <FileText className="w-12 h-12 mx-auto mb-3" />
+                      <FileText className="w-8 h-8 mx-auto mb-3" />
                       <p className="font-medium">No Document Available</p>
                       <p className="text-sm">Upload a document to view it here</p>
                     </div>
