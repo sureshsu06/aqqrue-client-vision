@@ -72,7 +72,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
   ];
 
   return (
-    <div className="w-96 border-l border-mobius-gray-100 flex flex-col bg-white">
+    <div className="w-[422px] border-l border-mobius-gray-100 flex flex-col bg-white">
       {/* Header */}
       <div className="p-4 border-b border-mobius-gray-100">
         <div className="flex items-center justify-between mb-2">
@@ -166,12 +166,12 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                     
                     <div className="space-y-2">
                       <div className="grid grid-cols-3 gap-2 text-sm">
-                        <div className="font-medium text-xs">{journalEntry.debitAccount}</div>
+                        <div className="font-medium text-sm">{journalEntry.debitAccount}</div>
                         <div className="text-right">${journalEntry.amount.toFixed(2)}</div>
                         <div className="text-right">—</div>
                       </div>
                       <div className="grid grid-cols-3 gap-2 text-sm">
-                        <div className="font-medium text-xs">{journalEntry.creditAccount}</div>
+                        <div className="font-medium text-sm">{journalEntry.creditAccount}</div>
                         <div className="text-right">—</div>
                         <div className="text-right">${journalEntry.amount.toFixed(2)}</div>
                       </div>
