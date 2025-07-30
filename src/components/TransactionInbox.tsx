@@ -178,64 +178,64 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
         onConfidenceChange={setConfidenceThreshold}
       />
 
-      {/* Quanta-style Toolbar */}
-      <div className="flex items-center justify-between py-3 px-4 bg-white border border-gray-200 rounded-lg mb-4 shadow-sm">
-        <div className="quanta-tabseg">
+      {/* Gmail-style Toolbar */}
+      <div className="flex items-center justify-between py-2 px-4 bg-mobius-gray-50 rounded-lg mb-4">
+        <div className="flex items-center space-x-1">
           {filters.map((filter) => (
-            <button
+            <Button
               key={filter.id}
+              variant={selectedFilter === filter.id ? "default" : "ghost"}
+              size="sm"
               onClick={() => setSelectedFilter(filter.id)}
-              className={`quanta-tab ${selectedFilter === filter.id ? 'active' : ''}`}
+              className="h-8"
             >
               <span>{filter.label}</span>
-              <span className="ml-1.5 text-xs font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+              <Badge variant="secondary" className="ml-1 text-xs h-5">
                 {filter.count}
-              </span>
-            </button>
+              </Badge>
+            </Button>
           ))}
         </div>
         
-        <div className="quanta-tabseg">
+        <div className="flex items-center space-x-1">
           {statusFilters.map((filter) => (
-            <button
+            <Button
               key={filter.id}
+              variant={selectedStatus === filter.id ? "default" : "ghost"}
+              size="sm"
               onClick={() => setSelectedStatus(filter.id)}
-              className={`quanta-tab ${selectedStatus === filter.id ? 'active' : ''}`}
+              className="h-8"
             >
               <span>{filter.label}</span>
-              <span className="ml-1.5 text-xs font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+              <Badge variant="secondary" className="ml-1 text-xs h-5">
                 {filter.count}
-              </span>
-            </button>
+              </Badge>
+            </Button>
           ))}
         </div>
       </div>
 
       {/* Inbox with Reading Pane */}
-      <div className="flex-1 flex min-h-0 gap-4">
+      <div className="flex-1 flex min-h-0">
         <div className="w-1/2">
-          <Card className="h-full quanta-card">
-            <InboxList
-              transactions={filteredTransactions}
-              selectedTransaction={selectedTransaction}
-              selectedTransactions={selectedTransactions}
-              onTransactionSelect={handleTransactionSelect}
-              onTransactionToggle={handleTransactionToggle}
-              onQuickApprove={handleQuickApprove}
-              onQuickAssign={handleQuickAssign}
-            />
-          </Card>
+          <InboxList
+            transactions={filteredTransactions}
+            selectedTransaction={selectedTransaction}
+            selectedTransactions={selectedTransactions}
+            onTransactionSelect={handleTransactionSelect}
+            onTransactionToggle={handleTransactionToggle}
+            onQuickApprove={handleQuickApprove}
+            onQuickAssign={handleQuickAssign}
+          />
         </div>
         
         {selectedTransaction && (
-          <div className="w-1/2">
-            <ReadingPane
-              transaction={selectedTransaction}
-              onApprove={handleApprove}
-              onEdit={handleEdit}
-              onSeeHow={handleSeeHow}
-            />
-          </div>
+          <ReadingPane
+            transaction={selectedTransaction}
+            onApprove={handleApprove}
+            onEdit={handleEdit}
+            onSeeHow={handleSeeHow}
+          />
         )}
       </div>
     </div>

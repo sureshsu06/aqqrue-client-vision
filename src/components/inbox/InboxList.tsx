@@ -72,107 +72,119 @@ export function InboxList({
   };
 
   return (
-    <div className="h-full">
-      <div className="divide-y divide-border">
+    <Card className="flex-1 bg-white shadow-mobius-md">
+      <div className="divide-y divide-mobius-gray-100">
         {transactions.map((transaction) => (
           <div
             key={transaction.id}
             className={cn(
-              "px-4 py-3 transition-all cursor-pointer border-l-2 relative h-14 flex items-center",
-              transaction.status === "unread" ? "border-l-blue-500 bg-blue-50/30" : "border-l-transparent",
-              selectedTransaction?.id === transaction.id ? "bg-blue-50" : "hover:bg-gray-50"
+              "p-3 transition-colors cursor-pointer border-l-4 relative",
+              transaction.status === "unread" ? "border-l-mobius-blue bg-blue-50/30" : "border-l-transparent",
+              selectedTransaction?.id === transaction.id ? "bg-mobius-blue/10" : "hover:bg-mobius-gray-50"
             )}
             onClick={() => onTransactionSelect(transaction)}
             onMouseEnter={() => setHoveredRow(transaction.id)}
             onMouseLeave={() => setHoveredRow(null)}
           >
-            <div className="flex items-center w-full space-x-3">
+            <div className="flex items-center space-x-3">
               <Checkbox 
                 checked={selectedTransactions.includes(transaction.id)}
                 onCheckedChange={(checked) => onTransactionToggle(transaction.id, !!checked)}
                 onClick={(e) => e.stopPropagation()}
-                className="shrink-0"
               />
               
-              <div className="flex items-center space-x-2 text-gray-400 shrink-0">
+              <div className="flex items-center space-x-2 text-mobius-gray-500">
                 {getSourceIcon(transaction.source)}
                 {getStatusIcon(transaction.status)}
               </div>
 
               <div className="flex-1 min-w-0">
-                {/* Two-line layout */}
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    {/* Line 1: Vendor + badges */}
-                    <div className="flex items-center space-x-2 mb-0.5">
-                      <h3 className={cn(
-                        "font-semibold truncate text-sm",
-                        transaction.status === "unread" ? "text-gray-900" : "text-gray-700"
-                      )}>
-                        {transaction.vendor}
-                      </h3>
-                      {transaction.isDuplicate && (
-                        <span className="quanta-pill amber text-xs">Duplicate</span>
-                      )}
-                      {transaction.isRecurring && (
-                        <span className="quanta-pill blue text-xs">Recurring</span>
-                      )}
-                    </div>
-                    
-                    {/* Line 2: meta info */}
-                    <p className="text-xs quanta-muted truncate">
-                      {transaction.description} • {transaction.client}
-                    </p>
+                {/* First line: Vendor + badges */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <h3 className={cn(
+                      "font-medium truncate",
+                      transaction.status === "unread" ? "text-mobius-gray-900 font-semibold" : "text-mobius-gray-700"
+                    )}>
+                      {transaction.vendor}
+                    </h3>
+                    {transaction.isDuplicate && (
+                      <Badge className="text-xs bg-amber-100 text-amber-800 border-amber-200">
+                        Duplicate
+                      </Badge>
+                    )}
+                    {transaction.isRecurring && (
+                      <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
+                        Recurring
+                      </Badge>
+                    )}
                   </div>
                   
-                  <div className="flex flex-col items-end space-y-1 ml-4 shrink-0">
-                    {/* Amount */}
+                  <div className="flex items-center space-x-3">
                     <div className="text-right">
-                      <p className="quanta-value text-sm">
+                      <p className={cn(
+                        "font-medium font-variant-numeric: tabular-nums",
+                        transaction.status === "unread" ? "text-mobius-gray-900" : "text-mobius-gray-700"
+                      )}>
                         ${transaction.amount.toLocaleString()}
                       </p>
-                      {transaction.confidence && (
-                        <span className={cn(
-                          "quanta-pill text-xs mt-0.5 inline-block",
-                          transaction.confidence >= 95 ? "green" : 
-                          transaction.confidence >= 85 ? "blue" : "gray"
-                        )}>
-                          {transaction.confidence}%
-                        </span>
-                      )}
                     </div>
                     
-                    {/* Date */}
-                    <p className="text-xs text-gray-500">
-                      {new Date(transaction.date).toLocaleDateString()}
-                    </p>
+                    {transaction.confidence && (
+                      <Badge 
+                        variant="outline" 
+                        className={`text-xs ${
+                          transaction.confidence >= 95 
+                            ? 'bg-status-done/10 text-status-done border-status-done/20'
+                            : transaction.confidence >= 85
+                            ? 'bg-blue-50 text-blue-700 border-blue-200'
+                            : 'bg-mobius-gray-50 text-mobius-gray-600 border-mobius-gray-200'
+                        }`}
+                      >
+                        {transaction.confidence}%
+                      </Badge>
+                    )}
+
+                    {/* Quick Actions - show on hover */}
+                    {hoveredRow === transaction.id && transaction.status === "unread" && (
+                      <div className="flex space-x-1" onClick={(e) => e.stopPropagation()}>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-6 px-2 text-xs"
+                          onClick={() => onQuickApprove(transaction.id)}
+                        >
+                          <CheckCircle2 className="w-3 h-3 mr-1" />
+                          Approve
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-6 px-2 text-xs"
+                          onClick={() => onQuickAssign(transaction.id)}
+                        >
+                          <UserCheck className="w-3 h-3 mr-1" />
+                          Assign
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
-
-              {/* Quick Actions - show on hover */}
-              {hoveredRow === transaction.id && transaction.status === "unread" && (
-                <div className="flex space-x-1 absolute right-4 bg-white rounded shadow-md p-1" onClick={(e) => e.stopPropagation()}>
-                  <button 
-                    className="quanta-btn ghost text-xs px-2 py-1 h-6"
-                    onClick={() => onQuickApprove(transaction.id)}
-                  >
-                    <CheckCircle2 className="w-3 h-3 mr-1" />
-                    Approve
-                  </button>
-                  <button 
-                    className="quanta-btn ghost text-xs px-2 py-1 h-6"
-                    onClick={() => onQuickAssign(transaction.id)}
-                  >
-                    <UserCheck className="w-3 h-3 mr-1" />
-                    Assign
-                  </button>
+                
+                {/* Second line: meta info */}
+                <div className="mt-1">
+                  <p className={cn(
+                    "text-sm truncate",
+                    transaction.status === "unread" ? "text-mobius-gray-600" : "text-mobius-gray-500"
+                  )}>
+                    {transaction.type} • {transaction.client} • {new Date(transaction.date).toLocaleDateString()} • {getSourceIcon(transaction.source)}
+                  </p>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         ))}
       </div>
-    </div>
+    </Card>
   );
 }
