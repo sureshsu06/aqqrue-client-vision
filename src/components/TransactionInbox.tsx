@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { InboxHeader } from "./inbox/InboxHeader";
 import { InboxList, Transaction } from "./inbox/InboxList";
 import { DocumentPane } from "./inbox/DocumentPane";
@@ -416,27 +417,33 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
       <div className="flex-1 flex min-h-0">
         {!isInboxCollapsed && (
           <div className="w-1/5">
-            <InboxList
-              transactions={filteredTransactions}
-              selectedTransaction={selectedTransaction}
-              selectedTransactions={selectedTransactions}
-              onTransactionSelect={handleTransactionSelect}
-              onTransactionToggle={handleTransactionToggle}
-              onQuickApprove={handleQuickApprove}
-              onQuickAssign={handleQuickAssign}
-            />
+            <ScrollArea className="h-full">
+              <InboxList
+                transactions={filteredTransactions}
+                selectedTransaction={selectedTransaction}
+                selectedTransactions={selectedTransactions}
+                onTransactionSelect={handleTransactionSelect}
+                onTransactionToggle={handleTransactionToggle}
+                onQuickApprove={handleQuickApprove}
+                onQuickAssign={handleQuickAssign}
+              />
+            </ScrollArea>
           </div>
         )}
         
         {selectedTransaction && (
           <>
-            <DocumentPane transaction={selectedTransaction} />
-            <AnalysisPane 
-              transaction={selectedTransaction}
-              onApprove={handleApprove}
-              onEdit={handleEdit}
-              onSeeHow={handleSeeHow}
-            />
+            <ScrollArea className="flex-1">
+              <DocumentPane transaction={selectedTransaction} />
+            </ScrollArea>
+            <ScrollArea className="flex-1">
+              <AnalysisPane 
+                transaction={selectedTransaction}
+                onApprove={handleApprove}
+                onEdit={handleEdit}
+                onSeeHow={handleSeeHow}
+              />
+            </ScrollArea>
           </>
         )}
       </div>
