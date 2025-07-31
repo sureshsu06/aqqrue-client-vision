@@ -265,7 +265,7 @@ export function InboxList({
   };
 
   return (
-    <Card className="bg-white shadow-mobius-md h-full flex flex-col">
+    <Card className="bg-white shadow-mobius-md max-h-[calc(100vh-12rem)] flex flex-col">
       <ScrollArea className="flex-1">
         <div className="divide-y divide-mobius-gray-100">
           {transactions.map((transaction) => (
