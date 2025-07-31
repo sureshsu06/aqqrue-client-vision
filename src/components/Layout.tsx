@@ -46,7 +46,7 @@ export function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen bg-mobius-gray-50 flex">
       {/* Left Ribbon */}
-      <div className="w-16 bg-white border-r border-mobius-gray-100 flex flex-col items-center">
+      <div className="w-16 h-screen bg-white border-r border-mobius-gray-100 flex flex-col items-center sticky top-0">
         {/* Logo */}
         <div className="p-4 border-b border-mobius-gray-100">
           <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
