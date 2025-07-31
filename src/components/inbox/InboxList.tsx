@@ -208,10 +208,81 @@ export function InboxList({
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "done": return <CheckCircle2 className="w-4 h-4 text-status-done" />;
-      case "approved": return <CheckCircle2 className="w-4 h-4 text-status-approved" />;
-      case "review": return <AlertCircle className="w-4 h-4 text-status-review" />;
-      default: return <Clock className="w-4 h-4 text-status-pending" />;
+      case "done": 
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center justify-center w-4 h-4 rounded-full bg-green-100 border border-green-200">
+                  <CheckCircle2 className="w-2.5 h-2.5 text-green-600" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Posted to QuickBooks</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      case "approved": 
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center justify-center w-4 h-4 rounded-full bg-blue-100 border border-blue-200">
+                  <CheckCircle2 className="w-2.5 h-2.5 text-blue-600" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Approved - Ready to post</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      case "review": 
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center justify-center w-4 h-4 rounded-full bg-yellow-100 border border-yellow-200">
+                  <Clock className="w-2.5 h-2.5 text-yellow-600" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Pending review</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      case "unread": 
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center justify-center w-4 h-4 rounded-full bg-gray-100 border border-gray-200">
+                  <div className="w-1 h-1 rounded-full bg-gray-400"></div>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>New transaction</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      default: 
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center justify-center w-4 h-4 rounded-full bg-gray-100 border border-gray-200">
+                  <Clock className="w-2.5 h-2.5 text-gray-600" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Pending</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
     }
   };
 
@@ -237,8 +308,14 @@ export function InboxList({
                 onClick={(e) => e.stopPropagation()}
               />
               
-              {/* Source Logo */}
-              {getSourceIcon(transaction.source)}
+              {/* Source Logo with Status Icon Above */}
+              <div className="relative">
+                {/* Status Icon - Positioned above the source logo */}
+                <div className="absolute -top-1 -right-1 z-10">
+                  {getStatusIcon(transaction.status)}
+                </div>
+                {getSourceIcon(transaction.source)}
+              </div>
 
               <div className="flex-1 min-w-0">
                 {/* First line: Amount + badges */}

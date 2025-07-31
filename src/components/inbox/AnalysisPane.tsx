@@ -14,11 +14,12 @@ import {
   RotateCcw,
   Save,
   X,
-  Plus
+  Plus,
+  UserCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Transaction } from "./InboxList";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface AnalysisPaneProps {
   transaction: Transaction;
@@ -29,18 +30,44 @@ interface AnalysisPaneProps {
 
 export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: AnalysisPaneProps) {
   const confidence = transaction.confidence || 95;
-  const [isEditMode, setIsEditMode] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false); // Default to view mode
   const [editedJournalEntry, setEditedJournalEntry] = useState<any>(null);
-  const [formulaMode, setFormulaMode] = useState<{[key: string]: boolean}>({});
+  const [journalEntry, setJournalEntry] = useState<any>(null);
+  const [isFormulaMode, setIsFormulaMode] = useState(false); // Formula mode toggle
 
-  // Mock journal entry data
-  const journalEntry = getJournalEntryForTransaction(transaction);
+  // Initialize journal entry data safely
+  useEffect(() => {
+    try {
+      const entry = getJournalEntryForTransaction(transaction);
+      setJournalEntry(entry);
+      
+      // Initialize edited journal entry when in edit mode
+      if (isEditMode && !editedJournalEntry) {
+        setEditedJournalEntry(JSON.parse(JSON.stringify(entry)));
+      }
+    } catch (error) {
+      console.error('Error initializing journal entry:', error);
+      // Set a fallback journal entry
+      setJournalEntry({
+        client: "Elire",
+        invoiceNumber: "INV-2025-001",
+        totalAmount: transaction.amount,
+        entryType: "General Expense",
+        narration: `Being the expense payable to ${transaction.vendor}`,
+        entries: [
+          { account: "General Expense", debit: transaction.amount * 0.85, credit: 0, confidence: 95 },
+          { account: transaction.vendor, debit: 0, credit: transaction.amount, confidence: 100 }
+        ]
+      });
+    }
+  }, [transaction, isEditMode, editedJournalEntry]);
 
   // Initialize edited journal entry when entering edit mode
   const handleEditClick = () => {
-    setEditedJournalEntry(JSON.parse(JSON.stringify(journalEntry))); // Deep copy
-    setIsEditMode(true);
-    setFormulaMode({});
+    if (journalEntry) {
+      setEditedJournalEntry(JSON.parse(JSON.stringify(journalEntry))); // Deep copy
+      setIsEditMode(true);
+    }
   };
 
   const handleSaveEdit = () => {
@@ -48,15 +75,13 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
     console.log("Saving edited journal entry:", editedJournalEntry);
     setIsEditMode(false);
     setEditedJournalEntry(null);
-    setFormulaMode({});
-    // You could also call a callback to update the parent component
-    if (onEdit) onEdit();
+    // Removed the onEdit callback to prevent modal from opening
+    // if (onEdit) onEdit();
   };
 
   const handleCancelEdit = () => {
     setIsEditMode(false);
     setEditedJournalEntry(null);
-    setFormulaMode({});
   };
 
   const updateJournalEntry = (index: number, field: string, value: any) => {
@@ -64,21 +89,27 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
     
     const updatedEntries = [...editedJournalEntry.entries];
     
-    // Handle formula evaluation
+    // Handle formula evaluation for debit/credit fields
     if (field === 'debit' || field === 'credit') {
-      if (typeof value === 'string' && value.startsWith('=')) {
-        // Formula mode
-        const formula = value.substring(1);
-        try {
-          const result = evaluateFormula(formula, updatedEntries, index);
-          updatedEntries[index] = { ...updatedEntries[index], [field]: result };
-        } catch (error) {
-          // Keep the formula as string if evaluation fails
+      if (typeof value === 'string' && value.trim() !== '') {
+        console.log('Processing value:', value, 'for field:', field, 'formula mode:', isFormulaMode);
+        
+        // In formula mode, treat everything as a potential formula
+        // Otherwise, check if it's a formula (starts with = or contains cell references or %)
+        const isFormula = isFormulaMode || value.startsWith('=') || /[A-Z]\d+/.test(value) || /%/.test(value);
+        console.log('Is formula?', isFormula);
+        
+        if (isFormula) {
+          // Store the formula as-is for now, don't evaluate immediately
           updatedEntries[index] = { ...updatedEntries[index], [field]: value };
+        } else {
+          // Regular number input
+          const numValue = parseFloat(value);
+          updatedEntries[index] = { ...updatedEntries[index], [field]: isNaN(numValue) ? 0 : numValue };
         }
       } else {
-        // Regular number input
-        updatedEntries[index] = { ...updatedEntries[index], [field]: parseFloat(value) || 0 };
+        // Empty value
+        updatedEntries[index] = { ...updatedEntries[index], [field]: 0 };
       }
     } else {
       updatedEntries[index] = { ...updatedEntries[index], [field]: value };
@@ -90,26 +121,141 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
     });
   };
 
+  // New function to evaluate formulas when user finishes typing
+  const evaluateFormulaOnBlur = (index: number, field: string) => {
+    if (!editedJournalEntry) return;
+    
+    const entry = editedJournalEntry.entries[index];
+    const value = entry[field];
+    
+    if (typeof value === 'string' && value.trim() !== '') {
+      const isFormula = isFormulaMode || value.startsWith('=') || /[A-Z]\d+/.test(value) || /%/.test(value);
+      
+      if (isFormula) {
+        try {
+          // If in formula mode and doesn't start with =, add it
+          let formula = value;
+          if (isFormulaMode && !value.startsWith('=')) {
+            formula = '=' + value;
+          } else if (value.startsWith('=')) {
+            formula = value.substring(1);
+          }
+          
+          console.log('Evaluating formula on blur:', formula);
+          const result = evaluateFormula(formula, editedJournalEntry.entries, index);
+          console.log('Formula result:', result);
+          
+          const updatedEntries = [...editedJournalEntry.entries];
+          updatedEntries[index] = { ...updatedEntries[index], [field]: result };
+          
+          setEditedJournalEntry({
+            ...editedJournalEntry,
+            entries: updatedEntries
+          });
+        } catch (error) {
+          console.log('Formula evaluation failed:', error);
+        }
+      }
+    }
+  };
+
   const evaluateFormula = (formula: string, entries: any[], currentIndex: number) => {
-    // Simple formula evaluation with cell references like A1, B2, etc.
-    const cellRefs = formula.match(/[A-Z]\d+/g) || [];
-    let evaluatedFormula = formula;
+    console.log('Evaluating formula:', formula, 'for entries:', entries);
+    
+    // Clean the formula and handle basic operations
+    let processedFormula = formula.trim();
+    
+    // Handle percentage calculations (e.g., 10%*B1, 15%*C2)
+    processedFormula = processedFormula.replace(/(\d+)%/g, (match, num) => {
+      console.log('Converting percentage:', match, 'to', `(${num}/100)`);
+      return `(${num}/100)`;
+    });
+    
+    console.log('After percentage processing:', processedFormula);
+    
+    // Handle cell references like A1, B2, C3, etc.
+    // A = Account column (not used for calculations)
+    // B = Debit column (index 1)
+    // C = Credit column (index 2)
+    const cellRefs = processedFormula.match(/[A-Z]\d+/g) || [];
+    console.log('Found cell references:', cellRefs);
     
     cellRefs.forEach(ref => {
       const col = ref.charCodeAt(0) - 65; // A=0, B=1, C=2
       const row = parseInt(ref.substring(1)) - 1;
       
+      console.log('Processing cell ref:', ref, 'col:', col, 'row:', row);
+      
       if (row >= 0 && row < entries.length) {
         let cellValue = 0;
-        if (col === 1) cellValue = entries[row].debit || 0; // B column = debit
-        if (col === 2) cellValue = entries[row].credit || 0; // C column = credit
         
-        evaluatedFormula = evaluatedFormula.replace(ref, cellValue.toString());
+        // Map columns to actual data
+        if (col === 1) { // B column = debit
+          cellValue = entries[row].debit || 0;
+        } else if (col === 2) { // C column = credit
+          cellValue = entries[row].credit || 0;
+        } else if (col === 0) { // A column = account (not numeric)
+          cellValue = 0; // Account names are not numeric
+        }
+        
+        console.log('Cell value for', ref, ':', cellValue);
+        // Replace all occurrences of this cell reference
+        processedFormula = processedFormula.replace(new RegExp(ref, 'g'), cellValue.toString());
+      } else {
+        console.log('Invalid cell reference:', ref);
+        // Replace invalid references with 0
+        processedFormula = processedFormula.replace(new RegExp(ref, 'g'), '0');
       }
     });
     
-    // Basic math evaluation
-    return eval(evaluatedFormula);
+    // Basic math evaluation with safety
+    console.log('Final formula to evaluate:', processedFormula);
+    
+    try {
+      // Replace common Excel functions with JavaScript equivalents
+      processedFormula = processedFormula
+        .replace(/\bSUM\s*\(/gi, '(') // SUM(A1:A3) -> (A1+A2+A3)
+        .replace(/\bAVERAGE\s*\(/gi, '(') // AVERAGE(A1:A3) -> (A1+A2+A3)/3
+        .replace(/\bMAX\s*\(/gi, 'Math.max(')
+        .replace(/\bMIN\s*\(/gi, 'Math.min(')
+        .replace(/\bABS\s*\(/gi, 'Math.abs(')
+        .replace(/\bROUND\s*\(/gi, 'Math.round(');
+      
+      // Handle range references like A1:A3 or B1:B3
+      const rangeRefs = processedFormula.match(/[A-Z]\d+:[A-Z]\d+/g) || [];
+      rangeRefs.forEach(range => {
+        const [start, end] = range.split(':');
+        const startCol = start.charCodeAt(0) - 65;
+        const startRow = parseInt(start.substring(1)) - 1;
+        const endCol = end.charCodeAt(0) - 65;
+        const endRow = parseInt(end.substring(1)) - 1;
+        
+        let rangeSum = 0;
+        for (let row = startRow; row <= endRow && row < entries.length; row++) {
+          if (startCol === 1) { // B column = debit
+            rangeSum += entries[row].debit || 0;
+          } else if (startCol === 2) { // C column = credit
+            rangeSum += entries[row].credit || 0;
+          }
+        }
+        
+        processedFormula = processedFormula.replace(range, rangeSum.toString());
+      });
+      
+      // At this point, processedFormula should only contain numbers and mathematical operators
+      // No need for aggressive sanitization since cell references are already replaced
+      console.log('Processed formula for evaluation:', processedFormula);
+      
+      // Use Function constructor for safer evaluation
+      const result = new Function('return ' + processedFormula)();
+      console.log('Formula result:', result);
+      
+      // Return 0 if result is NaN or infinite
+      return isNaN(result) || !isFinite(result) ? 0 : result;
+    } catch (error) {
+      console.error('Formula evaluation error:', error);
+      return 0;
+    }
   };
 
   const addRow = () => {
@@ -136,14 +282,6 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
       ...editedJournalEntry,
       entries: updatedEntries
     });
-  };
-
-  const toggleFormulaMode = (index: number, field: string) => {
-    const key = `${index}-${field}`;
-    setFormulaMode(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
   };
 
   // Dynamic analysis steps based on transaction
@@ -258,7 +396,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
       case "6":
         return "TDS 10% under Section 194I - Rent. Section threshold: ₹2,40,000 per annum. Invoice amount: ₹1,02,660 (above threshold)";
       case "7":
-        return "TDS 10% under Section 194I - Rent. Section threshold: ₹2,40,000 per annum. Invoice amount: ₹5,251 (below threshold)";
+        return "TDS 10% under Section 194I - Rent. Since rent to vendor is above annual threshold of ₹2,40,000 per annum, TDS must be charged. Invoice amount: ₹5,251";
       case "8":
         return "No TDS applicable - Purchase of goods. Section 194Q threshold: ₹50,00,000 per annum. Invoice amount: ₹4,80,850 (below threshold)";
       case "9":
@@ -345,15 +483,28 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
         </p>
       </div>
 
+      {/* Loading state */}
+      {!journalEntry && (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center text-mobius-gray-500">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-mobius-blue mx-auto mb-2"></div>
+            <p>Loading journal entry...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Content - only render if journalEntry exists */}
+      {journalEntry && (
+        <>
       {/* Tabs */}
       <div className="flex-1 overflow-hidden">
         <Tabs defaultValue="summary" className="h-full flex flex-col">
-          <TabsList className="grid grid-cols-2 w-[calc(100%-2rem)] mx-4 mt-4 mb-2">
+              <TabsList className="grid grid-cols-2 w-[calc(100%-2rem)] mx-4 mt-4 mb-2">
             <TabsTrigger value="summary">Summary</TabsTrigger>
             <TabsTrigger value="analysis">Analysis</TabsTrigger>
           </TabsList>
 
-          <div className="flex-1 overflow-y-auto px-4 pb-4">
+              <div className="flex-1 overflow-y-auto px-4 pb-4">
             <TabsContent value="summary" className="mt-0">
               <Card className="p-4">
                 <div className="space-y-4">
@@ -370,149 +521,218 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                         )}
                       </p>
                     </div>
-                    <div>
-                      <p className="text-mobius-gray-500">Vendor:</p>
-                      <p className="font-medium">{journalEntry.vendor}</p>
+                        <div>
+                          <p className="text-mobius-gray-500">Currency:</p>
+                          <p className="font-medium">Indian Rupee (₹)</p>
+                        </div>
+                    {journalEntry.isRecurring && (
+                      <div>
+                        <p className="text-mobius-gray-500">Recurring:</p>
+                        <p className="font-medium flex items-center">
+                          <RotateCcw className="w-3 h-3 mr-1" />
+                          Monthly on 1st
+                        </p>
+                      </div>
+                    )}
                     </div>
-                  </div>
+
+                      {/* Undo Button */}
+                      <div className="flex justify-end mb-1 gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className={cn("h-6 w-6 p-0", isFormulaMode ? "bg-blue-100 text-blue-600" : "")}
+                          onClick={() => setIsFormulaMode(!isFormulaMode)}
+                          title={isFormulaMode ? "Disable Formula Mode" : "Enable Formula Mode"}
+                        >
+                          <span className="text-xs font-bold">fx</span>
+                        </Button>
+                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                          <RotateCcw className="w-3 h-3" />
+                        </Button>
+                      </div>
+
+                      {/* Formula Mode Instructions */}
+                      {isFormulaMode && (
+                        <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
+                          <p className="font-medium mb-1">Formula Mode Active</p>
+                          <p>Use Excel-like formulas: <code className="bg-blue-100 px-1 rounded">=B1*0.1</code>, <code className="bg-blue-100 px-1 rounded">=SUM(B1:B3)</code>, <code className="bg-blue-100 px-1 rounded">10%*C2</code></p>
+                          <p className="text-blue-600 mt-1">B = Debit column, C = Credit column, numbers = row index (1-based)</p>
+                        </div>
+                      )}
 
                   <Separator />
 
                   {/* Journal Entry Table */}
                   <div>
-                    <div className="grid grid-cols-4 gap-2 text-xs font-medium text-mobius-gray-500 uppercase tracking-wide mb-2">
-                      <div className="pl-0">ACCOUNT</div>
-                      <div className="text-right">DEBIT</div>
-                      <div className="text-right">CREDIT</div>
-                      <div className="text-center">ACTIONS</div>
-                    </div>
-                    
-                    <div className="space-y-1">
-                      {(isEditMode ? editedJournalEntry : journalEntry).entries.map((entry: any, index: number) => (
-                        <div key={index} className="grid grid-cols-4 gap-2 text-sm items-center">
-                          <div className="font-medium text-sm">
-                            {isEditMode ? (
-                              <Select 
-                                value={entry.account} 
-                                onValueChange={(value) => updateJournalEntry(index, 'account', value)}
-                              >
-                                <SelectTrigger className="h-8 text-sm border-mobius-gray-200 text-left justify-start">
-                                  <SelectValue className="text-sm text-left" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="Professional Fees">Professional Fees</SelectItem>
-                                  <SelectItem value="Rent">Rent</SelectItem>
-                                  <SelectItem value="Computers">Computers</SelectItem>
-                                  <SelectItem value="Freight and Postage">Freight and Postage</SelectItem>
-                                  <SelectItem value="Rates & Taxes">Rates & Taxes</SelectItem>
-                                  <SelectItem value="Input CGST">Input CGST</SelectItem>
-                                  <SelectItem value="Input SGST">Input SGST</SelectItem>
-                                  <SelectItem value="Input IGST">Input IGST</SelectItem>
-                                  <SelectItem value="TDS on Professional Charges">TDS on Professional Charges</SelectItem>
-                                  <SelectItem value="TDS on Rent">TDS on Rent</SelectItem>
-                                  <SelectItem value="JCSS & Associates LLP">JCSS & Associates LLP</SelectItem>
-                                  <SelectItem value="Sogo Computers Pvt Ltd">Sogo Computers Pvt Ltd</SelectItem>
-                                  <SelectItem value="Clayworks Spaces Technologies Pvt Ltd">Clayworks Spaces Technologies Pvt Ltd</SelectItem>
-                                  <SelectItem value="NSDL Database Management Ltd">NSDL Database Management Ltd</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            ) : (
-                              entry.account
-                            )}
+                        <div className="grid grid-cols-12 gap-2 text-xs font-medium text-mobius-gray-500 uppercase tracking-wide mb-2">
+                          <div className="col-span-5 pl-0">ACCOUNT</div>
+                          <div className="col-span-3 text-right">DEBIT</div>
+                          <div className="col-span-3 text-right">CREDIT</div>
+                          <div className="col-span-1"></div>
+                        </div>
+                        
+                        {/* Column Headers for Formula Reference */}
+                        {isFormulaMode && (
+                          <div className="grid grid-cols-12 gap-2 text-xs font-medium text-blue-600 mb-1">
+                            <div className="col-span-5 pl-0">A</div>
+                            <div className="col-span-3 text-right">B</div>
+                            <div className="col-span-3 text-right">C</div>
+                            <div className="col-span-1"></div>
                           </div>
-                          <div className="text-right">
-                            {isEditMode ? (
-                              <div className="flex items-center space-x-1">
-                                <Input
-                                  type="text"
-                                  value={formulaMode[`${index}-debit`] ? (entry.debit?.toString().startsWith('=') ? entry.debit : `=${entry.debit || 0}`) : (entry.debit || '')}
-                                  onChange={(e) => updateJournalEntry(index, 'debit', e.target.value)}
-                                  className="h-8 text-sm text-right border-mobius-gray-200 font-variant-numeric tabular-nums flex-1"
-                                  placeholder="0.00"
-                                />
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-8 w-6 p-0"
-                                  onClick={() => toggleFormulaMode(index, 'debit')}
-                                  title="Toggle formula mode"
-                                >
-                                  <span className="text-xs">fx</span>
-                                </Button>
+                        )}
+                        
+                        <div className="space-y-1">
+                          {(isEditMode ? editedJournalEntry : journalEntry).entries.map((entry: any, index: number) => (
+                            <div key={index} className="grid grid-cols-12 gap-2 text-sm items-center group">
+                              <div className="col-span-5 font-medium text-sm">
+                                {isEditMode ? (
+                                  <Select 
+                                    value={entry.account} 
+                                    onValueChange={(value) => updateJournalEntry(index, 'account', value)}
+                                  >
+                                    <SelectTrigger className="h-8 text-sm border-mobius-gray-200 text-left justify-start">
+                                      <SelectValue className="text-sm text-left" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="Professional Fees">Professional Fees</SelectItem>
+                                      <SelectItem value="Rent">Rent</SelectItem>
+                                      <SelectItem value="Computers">Computers</SelectItem>
+                                      <SelectItem value="Freight and Postage">Freight and Postage</SelectItem>
+                                      <SelectItem value="Rates & Taxes">Rates & Taxes</SelectItem>
+                                      <SelectItem value="Input CGST">Input CGST</SelectItem>
+                                      <SelectItem value="Input SGST">Input SGST</SelectItem>
+                                      <SelectItem value="Input IGST">Input IGST</SelectItem>
+                                      <SelectItem value="TDS on Professional Charges">TDS on Professional Charges</SelectItem>
+                                      <SelectItem value="TDS on Rent">TDS on Rent</SelectItem>
+                                      <SelectItem value="JCSS & Associates LLP">JCSS & Associates LLP</SelectItem>
+                                      <SelectItem value="Sogo Computers Pvt Ltd">Sogo Computers Pvt Ltd</SelectItem>
+                                      <SelectItem value="Clayworks Spaces Technologies Pvt Ltd">Clayworks Spaces Technologies Pvt Ltd</SelectItem>
+                                      <SelectItem value="NSDL Database Management Ltd">NSDL Database Management Ltd</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                ) : (
+                                  <div>
+                                    <div className="font-medium">{entry.account} <span className="text-xs text-mobius-gray-500 font-normal">({getGLAccountCode(entry.account)})</span></div>
+                                  </div>
+                                )}
                               </div>
-                            ) : (
-                              entry.debit ? `₹${entry.debit.toFixed(2)}` : "—"
-                            )}
-                          </div>
-                          <div className="text-right">
-                            {isEditMode ? (
-                              <div className="flex items-center space-x-1">
-                                <Input
-                                  type="text"
-                                  value={formulaMode[`${index}-credit`] ? (entry.credit?.toString().startsWith('=') ? entry.credit : `=${entry.credit || 0}`) : (entry.credit || '')}
-                                  onChange={(e) => updateJournalEntry(index, 'credit', e.target.value)}
-                                  className="h-8 text-sm text-right border-mobius-gray-200 font-variant-numeric tabular-nums flex-1"
-                                  placeholder="0.00"
-                                />
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-8 w-6 p-0"
-                                  onClick={() => toggleFormulaMode(index, 'credit')}
-                                  title="Toggle formula mode"
-                                >
-                                  <span className="text-xs">fx</span>
-                                </Button>
+                              <div className="col-span-3 text-right">
+                                {isEditMode ? (
+                                  <Input
+                                    type="text"
+                                    value={entry.debit?.toString() || ''}
+                                    onChange={(e) => updateJournalEntry(index, 'debit', e.target.value)}
+                                    onBlur={() => evaluateFormulaOnBlur(index, 'debit')}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        evaluateFormulaOnBlur(index, 'debit');
+                                        e.currentTarget.blur();
+                                      }
+                                    }}
+                                    className={cn(
+                                      "h-8 text-sm text-right border-mobius-gray-200",
+                                      isFormulaMode ? "bg-blue-50 border-blue-300 font-mono" : "font-variant-numeric tabular-nums"
+                                    )}
+                                    placeholder={isFormulaMode ? "=B1*0.1" : "0.00"}
+                                    inputMode="text"
+                                    autoComplete="off"
+                                    spellCheck="false"
+                                    style={isFormulaMode ? { fontVariantNumeric: 'normal' } : {}}
+                                  />
+                                ) : (
+                                  entry.debit ? `₹${entry.debit.toFixed(2)}` : "—"
+                                )}
                               </div>
-                            ) : (
-                              entry.credit ? `₹${entry.credit.toFixed(2)}` : "—"
-                            )}
-                          </div>
-                          <div className="flex items-center justify-center space-x-1">
-                            {isEditMode && (
-                              <>
-                                <span className="text-xs text-mobius-gray-400">
-                                  B{index + 1}, C{index + 1}
-                                </span>
-                                {editedJournalEntry.entries.length > 1 && (
+                              <div className="col-span-3 text-right">
+                                {isEditMode ? (
+                                  <Input
+                                    type="text"
+                                    value={entry.credit?.toString() || ''}
+                                    onChange={(e) => updateJournalEntry(index, 'credit', e.target.value)}
+                                    onBlur={() => evaluateFormulaOnBlur(index, 'credit')}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        evaluateFormulaOnBlur(index, 'credit');
+                                        e.currentTarget.blur();
+                                      }
+                                    }}
+                                    className={cn(
+                                      "h-8 text-sm text-right border-mobius-gray-200",
+                                      isFormulaMode ? "bg-blue-50 border-blue-300 font-mono" : "font-variant-numeric tabular-nums"
+                                    )}
+                                    placeholder={isFormulaMode ? "=C1*0.1" : "0.00"}
+                                    inputMode="text"
+                                    autoComplete="off"
+                                    spellCheck="false"
+                                    style={isFormulaMode ? { fontVariantNumeric: 'normal' } : {}}
+                                  />
+                                ) : (
+                                  entry.credit ? `₹${entry.credit.toFixed(2)}` : "—"
+                                )}
+                              </div>
+                              {/* Delete button - positioned in the last column */}
+                              <div className="col-span-1 flex justify-center">
+                                {isEditMode && editedJournalEntry?.entries.length > 1 && (
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="h-6 w-6 p-0 text-red-500 hover:text-red-700 ml-1"
+                                    className="h-6 w-6 p-0 text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
                                     onClick={() => deleteRow(index)}
                                     title="Delete row"
                                   >
                                     <X className="w-3 h-3" />
                                   </Button>
                                 )}
-                              </>
-                            )}
-                      </div>
-                      </div>
-                      ))}
+                              </div>
+                            </div>
+                          ))}
                     </div>
                     
-                    {/* Add Row on Hover */}
-                    {isEditMode && (
-                      <div 
-                        className="group relative mt-2 p-1 border-2 border-dashed border-mobius-gray-200 rounded-lg hover:border-mobius-gray-300 transition-colors cursor-pointer"
-                        onClick={addRow}
-                      >
-                        <div className="flex items-center justify-center">
-                          <Plus className="w-4 h-4 text-mobius-gray-400 group-hover:text-mobius-gray-600 transition-colors" />
-                        </div>
+                        {/* Add Row on Hover */}
+                        {isEditMode && (
+                          <div 
+                            className="group relative mt-2 p-1 border-2 border-dashed border-mobius-gray-200 rounded-lg hover:border-mobius-gray-300 transition-colors cursor-pointer"
+                            onClick={addRow}
+                          >
+                            <div className="flex items-center justify-center">
+                              <Plus className="w-4 h-4 text-mobius-gray-400 group-hover:text-mobius-gray-600 transition-colors" />
                       </div>
-                    )}
+                            {/* Tooltip */}
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-mobius-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                              Drag to add or remove rows
+                              <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-mobius-gray-800"></div>
+                      </div>
+                    </div>
+                        )}
                     
                     <Separator className="my-2" />
                     
-                    <div className="grid grid-cols-4 gap-2 text-sm font-medium">
-                      <div>Balance</div>
-                      <div className="text-right">—</div>
-                      <div className="text-right text-status-done">₹0.00 ✓</div>
-                      <div></div>
-                    </div>
-                  </div>
+                        {/* Totals Row */}
+                        <div className="grid grid-cols-12 gap-2 text-sm font-medium">
+                          <div className="col-span-5">Totals</div>
+                          <div className="col-span-3 text-right">{getTotalDebit(journalEntry)}</div>
+                          <div className="col-span-3 text-right">{getTotalCredit(journalEntry)}</div>
+                          <div className="col-span-1"></div>
+                        </div>
+                        
+                        {/* Balance Status */}
+                        <div className={cn(
+                          "text-center text-xs mt-1 p-1 rounded",
+                          isBalanced(isEditMode ? editedJournalEntry : journalEntry) ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50"
+                        )}>
+                          {isBalanced(isEditMode ? editedJournalEntry : journalEntry) ? "✓ Balanced" : "✗ Unbalanced"}
+                        </div>
+                      </div>
+
+                      {/* Comment Box */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-mobius-gray-700">Comments</label>
+                        <textarea
+                          className="w-full h-20 p-2 text-sm border border-mobius-gray-200 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-mobius-blue focus:border-transparent"
+                          placeholder="Add context or notes for this transaction..."
+                        />
+                      </div>
                 </div>
               </Card>
             </TabsContent>
@@ -521,11 +741,11 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
               <div className="space-y-3">
                 {analysisSteps.map((step) => (
                   <Card key={step.step} className="p-3">
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start space-x-3 flex-1">
+                        <div className="space-y-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-start space-x-3 flex-1">
                         <div className={cn(
-                            "w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium mt-0.5",
+                                "w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium mt-0.5",
                           step.status === "complete" 
                             ? "bg-status-done text-white"
                             : step.status === "skip"
@@ -534,35 +754,35 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                         )}>
                           {step.status === "complete" ? "✓" : step.step}
                         </div>
-                          <div className="flex-1">
-                            <h4 className="font-medium text-sm mb-1">{step.title}</h4>
-                            <p className="text-xs text-mobius-gray-600 leading-relaxed">{step.result}</p>
-                          </div>
+                              <div className="flex-1">
+                                <h4 className="font-medium text-sm mb-1">{step.title}</h4>
+                                <p className="text-xs text-mobius-gray-600 leading-relaxed">{step.result}</p>
+                              </div>
                       </div>
                       {step.status === "complete" && (
-                          <Badge variant="outline" className="bg-status-done/10 text-status-done border-status-done/20 text-xs ml-2">
+                              <Badge variant="outline" className="bg-status-done/10 text-status-done border-status-done/20 text-xs ml-2">
                           {step.confidence}%
                         </Badge>
                       )}
-                      </div>
-                      
-                      {/* Comment and Retry Section */}
-                      <div className="space-y-2">
-                        <div className="flex items-center space-x-2">
-                          <Input
-                            placeholder="Add a comment or correction for this analysis step..."
-                            className="h-8 text-xs border-mobius-gray-200 flex-1"
-                          />
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="h-8 w-8 p-0"
-                            onClick={() => console.log(`Retry ${step.title} for transaction ${transaction.id}`)}
-                          >
-                            <RotateCcw className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      </div>
+                          </div>
+                          
+                          {/* Comment and Retry Section */}
+                          <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <Input
+                                placeholder="Add a comment or correction for this analysis step..."
+                                className="h-8 text-xs border-mobius-gray-200 flex-1"
+                              />
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="h-8 w-8 p-0"
+                                onClick={() => console.log(`Retry ${step.title} for transaction ${transaction.id}`)}
+                              >
+                                <RotateCcw className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </div>
                     </div>
                   </Card>
                 ))}
@@ -574,38 +794,42 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
 
       {/* Footer Actions */}
       <div className="p-4 border-t border-mobius-gray-100 bg-white">
-        {isEditMode ? (
-          <div className="space-y-2">
-            <div className="flex space-x-2">
-              <Button className="bg-status-done hover:bg-status-done/90 flex-1" onClick={handleSaveEdit}>
-                <Save className="w-4 h-4 mr-2" />
-                Save Changes
-              </Button>
-              <Button variant="outline" className="flex-1" onClick={handleCancelEdit}>
-                <X className="w-4 h-4 mr-2" />
-                Cancel
-              </Button>
-            </div>
-          </div>
-        ) : (
+            {isEditMode ? (
+              <div className="space-y-2">
+                <div className="flex space-x-2">
+                  <Button className="bg-status-done hover:bg-status-done/90 flex-1" onClick={handleSaveEdit}>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Changes
+                  </Button>
+                  <Button variant="outline" className="flex-1" onClick={handleCancelEdit}>
+                    <X className="w-4 h-4 mr-2" />
+                    Cancel
+                  </Button>
+                </div>
+                <Button variant="outline" className="w-full" onClick={() => setIsEditMode(false)}>
+                  <Eye className="w-4 h-4 mr-2" />
+                  View Mode
+                </Button>
+              </div>
+            ) : (
         <div className="space-y-2">
           <Button className="bg-status-done hover:bg-status-done/90 w-full" onClick={onApprove}>
             <CheckCircle2 className="w-4 h-4 mr-2" />
             Approve
           </Button>
-          <div className="flex space-x-2">
-            <Button variant="outline" className="flex-1" onClick={onSeeHow}>
-              <Eye className="w-4 h-4 mr-2" />
-              See How
+                <Button variant="outline" className="w-full" onClick={() => console.log("Assign to Controller")}>
+                  <UserCheck className="w-4 h-4 mr-2" />
+                  Assign to Controller
             </Button>
-              <Button variant="outline" className="flex-1" onClick={handleEditClick}>
+                <Button variant="outline" className="w-full" onClick={handleEditClick}>
               <Edit3 className="w-4 h-4 mr-2" />
               Edit
             </Button>
           </div>
+            )}
         </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 }
@@ -794,4 +1018,57 @@ function getJournalEntryForTransaction(transaction: any) {
         ]
       };
   }
+}
+
+// Helper function to get GL account code
+function getGLAccountCode(accountName: string) {
+  switch (accountName) {
+    case "Professional Fees":
+      return "1010";
+    case "Rent":
+      return "1011";
+    case "Computers":
+      return "1012";
+    case "Freight and Postage":
+      return "1013";
+    case "Rates & Taxes":
+      return "1014";
+    case "Input CGST":
+      return "1015";
+    case "Input SGST":
+      return "1016";
+    case "Input IGST":
+      return "1017";
+    case "TDS on Professional Charges":
+      return "1018";
+    case "TDS on Rent":
+      return "1019";
+    case "JCSS & Associates LLP":
+      return "1020";
+    case "Sogo Computers Pvt Ltd":
+      return "1021";
+    case "Clayworks Spaces Technologies Pvt Ltd":
+      return "1022";
+    case "NSDL Database Management Ltd":
+      return "1023";
+    default:
+      return "";
+  }
+}
+
+// Helper function to get total debit
+function getTotalDebit(journalEntry: any) {
+  return `₹${journalEntry.entries.reduce((sum: number, entry: any) => sum + (entry.debit || 0), 0).toFixed(2)}`;
+}
+
+// Helper function to get total credit
+function getTotalCredit(journalEntry: any) {
+  return `₹${journalEntry.entries.reduce((sum: number, entry: any) => sum + (entry.credit || 0), 0).toFixed(2)}`;
+}
+
+// Helper function to check if journal entry is balanced
+function isBalanced(journalEntry: any) {
+  const totalDebit = journalEntry.entries.reduce((sum: number, entry: any) => sum + (entry.debit || 0), 0);
+  const totalCredit = journalEntry.entries.reduce((sum: number, entry: any) => sum + (entry.credit || 0), 0);
+  return Math.abs(totalDebit - totalCredit) < 0.01; // Allow for floating point inaccuracies
 }

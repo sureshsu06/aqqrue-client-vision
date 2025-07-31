@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { 
   FileText,
-  Download
+  Download,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { Transaction } from "./InboxList";
 
@@ -13,23 +15,92 @@ interface DocumentPaneProps {
 
 export function DocumentPane({ transaction }: DocumentPaneProps) {
   const [pdfUrl, setPdfUrl] = useState<string>("");
+  const [currentDocIndex, setCurrentDocIndex] = useState<number>(0);
+
+  // Mock multiple documents for demonstration
+  const getDocumentsForTransaction = (transaction: Transaction) => {
+    // In a real implementation, this would come from the transaction data
+    const baseDoc = transaction.pdfFile;
+    if (!baseDoc) return [];
+    
+    // For demonstration, create multiple document variations
+    const documents = [
+      { name: "Original Invoice", file: baseDoc },
+      { name: "Supporting Receipt", file: baseDoc.replace('.pdf', '_receipt.pdf') },
+      { name: "Approval Document", file: baseDoc.replace('.pdf', '_approval.pdf') },
+      { name: "Additional Notes", file: baseDoc.replace('.pdf', '_notes.pdf') }
+    ];
+    
+    return documents;
+  };
+
+  const documents = getDocumentsForTransaction(transaction);
+  const currentDocument = documents[currentDocIndex];
 
   useEffect(() => {
-    // Use the pdfFile property from the transaction
-    if (transaction.pdfFile) {
-      const pdfUrl = `/documents/${transaction.pdfFile}`;
+    // Use the current document's file
+    if (currentDocument?.file) {
+      const pdfUrl = `/documents/${currentDocument.file}`;
       setPdfUrl(pdfUrl);
     } else {
       setPdfUrl("");
     }
-  }, [transaction.pdfFile]);
+  }, [currentDocument]);
+
+  const goToPreviousDoc = () => {
+    if (currentDocIndex > 0) {
+      setCurrentDocIndex(currentDocIndex - 1);
+    }
+  };
+
+  const goToNextDoc = () => {
+    if (currentDocIndex < documents.length - 1) {
+      setCurrentDocIndex(currentDocIndex + 1);
+    }
+  };
 
   return (
     <div className="flex-1 bg-white border-l border-mobius-gray-100 flex flex-col">
       {/* Header */}
       <div className="p-4 border-b border-mobius-gray-100">
         <div className="flex items-center justify-between">
-          <h4 className="font-medium text-sm">Original Document</h4>
+          <div className="flex items-center space-x-3">
+            <h4 className="font-medium text-sm">Original Document</h4>
+            
+            {/* Document Navigation */}
+            {documents.length > 1 && (
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={goToPreviousDoc}
+                  disabled={currentDocIndex === 0}
+                  className="h-7 w-7 p-0"
+                >
+                  <ChevronLeft className="w-3 h-3" />
+                </Button>
+                
+                <div className="text-xs text-mobius-gray-600">
+                  {currentDocIndex + 1} of {documents.length}
+                </div>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={goToNextDoc}
+                  disabled={currentDocIndex === documents.length - 1}
+                  className="h-7 w-7 p-0"
+                >
+                  <ChevronRight className="w-3 h-3" />
+                </Button>
+                
+                <div className="text-xs text-mobius-gray-500 ml-2">
+                  {currentDocument?.name}
+                </div>
+              </div>
+            )}
+          </div>
+          
           {pdfUrl && (
             <Button variant="outline" size="sm" asChild>
               <a href={pdfUrl} download target="_blank" rel="noopener noreferrer">
