@@ -55,6 +55,21 @@ export function InboxList({
 }: InboxListProps) {
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
 
+  const getAbbreviatedVendor = (vendor: string) => {
+    // Create abbreviated versions of vendor names
+    const abbreviations: { [key: string]: string } = {
+      "JCSS & Associates LLP": "JCSS...",
+      "NSDL Database Management Limited": "NSDL...",
+      "Sogo Computers": "Sogo...",
+      "Clayworks Spaces Pvt Ltd": "Clayworks...",
+      "Ozone Computer Services": "Ozone...",
+      "MGEcoduties": "MGE...",
+      "Clayworks Spaces Technologies Pvt Ltd": "Clayworks..."
+    };
+    
+    return abbreviations[vendor] || vendor.substring(0, 8) + "...";
+  };
+
   const getSourceIcon = (source: string) => {
     switch (source) {
       case "email": 
@@ -226,14 +241,14 @@ export function InboxList({
               {getSourceIcon(transaction.source)}
 
               <div className="flex-1 min-w-0">
-                {/* First line: Vendor + badges */}
+                {/* First line: Amount + badges */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <h3 className={cn(
                       "text-sm font-medium truncate",
                       transaction.status === "unread" ? "text-mobius-gray-900 font-semibold" : "text-mobius-gray-700"
                     )}>
-                      {transaction.vendor}
+                      ₹{transaction.amount.toLocaleString()}
                     </h3>
                     {transaction.isDuplicate && (
                       <Badge className="text-xs bg-amber-100 text-amber-800 border-amber-200">
@@ -267,13 +282,13 @@ export function InboxList({
                   </div>
                 </div>
                 
-                {/* Second line: Description */}
+                {/* Second line: Vendor + Description */}
                 <div className="mt-1">
                   <p className={cn(
                     "text-sm truncate",
                     transaction.status === "unread" ? "text-mobius-gray-600" : "text-mobius-gray-500"
                   )}>
-                    {transaction.description}
+                    {getAbbreviatedVendor(transaction.vendor)} • {transaction.description}
                   </p>
                 </div>
 

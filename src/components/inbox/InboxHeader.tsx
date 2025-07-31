@@ -117,10 +117,9 @@ export function InboxHeader({
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="h-8 px-3 hover:bg-mobius-gray-100 rounded"
+                  className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
                 >
-                  <Filter className="w-4 h-4 mr-2 text-mobius-gray-600" />
-                  <span className="text-sm text-mobius-gray-600">Filters</span>
+                  <Filter className="w-4 h-4 text-mobius-gray-600" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>

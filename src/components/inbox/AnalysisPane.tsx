@@ -13,7 +13,8 @@ import {
   AlertTriangle,
   RotateCcw,
   Save,
-  X
+  X,
+  Plus
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Transaction } from "./InboxList";
@@ -30,6 +31,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
   const confidence = transaction.confidence || 95;
   const [isEditMode, setIsEditMode] = useState(false);
   const [editedJournalEntry, setEditedJournalEntry] = useState<any>(null);
+  const [formulaMode, setFormulaMode] = useState<{[key: string]: boolean}>({});
 
   // Mock journal entry data
   const journalEntry = getJournalEntryForTransaction(transaction);
@@ -38,6 +40,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
   const handleEditClick = () => {
     setEditedJournalEntry(JSON.parse(JSON.stringify(journalEntry))); // Deep copy
     setIsEditMode(true);
+    setFormulaMode({});
   };
 
   const handleSaveEdit = () => {
@@ -45,6 +48,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
     console.log("Saving edited journal entry:", editedJournalEntry);
     setIsEditMode(false);
     setEditedJournalEntry(null);
+    setFormulaMode({});
     // You could also call a callback to update the parent component
     if (onEdit) onEdit();
   };
@@ -52,18 +56,94 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
   const handleCancelEdit = () => {
     setIsEditMode(false);
     setEditedJournalEntry(null);
+    setFormulaMode({});
   };
 
   const updateJournalEntry = (index: number, field: string, value: any) => {
     if (!editedJournalEntry) return;
     
     const updatedEntries = [...editedJournalEntry.entries];
-    updatedEntries[index] = { ...updatedEntries[index], [field]: value };
+    
+    // Handle formula evaluation
+    if (field === 'debit' || field === 'credit') {
+      if (typeof value === 'string' && value.startsWith('=')) {
+        // Formula mode
+        const formula = value.substring(1);
+        try {
+          const result = evaluateFormula(formula, updatedEntries, index);
+          updatedEntries[index] = { ...updatedEntries[index], [field]: result };
+        } catch (error) {
+          // Keep the formula as string if evaluation fails
+          updatedEntries[index] = { ...updatedEntries[index], [field]: value };
+        }
+      } else {
+        // Regular number input
+        updatedEntries[index] = { ...updatedEntries[index], [field]: parseFloat(value) || 0 };
+      }
+    } else {
+      updatedEntries[index] = { ...updatedEntries[index], [field]: value };
+    }
     
     setEditedJournalEntry({
       ...editedJournalEntry,
       entries: updatedEntries
     });
+  };
+
+  const evaluateFormula = (formula: string, entries: any[], currentIndex: number) => {
+    // Simple formula evaluation with cell references like A1, B2, etc.
+    const cellRefs = formula.match(/[A-Z]\d+/g) || [];
+    let evaluatedFormula = formula;
+    
+    cellRefs.forEach(ref => {
+      const col = ref.charCodeAt(0) - 65; // A=0, B=1, C=2
+      const row = parseInt(ref.substring(1)) - 1;
+      
+      if (row >= 0 && row < entries.length) {
+        let cellValue = 0;
+        if (col === 1) cellValue = entries[row].debit || 0; // B column = debit
+        if (col === 2) cellValue = entries[row].credit || 0; // C column = credit
+        
+        evaluatedFormula = evaluatedFormula.replace(ref, cellValue.toString());
+      }
+    });
+    
+    // Basic math evaluation
+    return eval(evaluatedFormula);
+  };
+
+  const addRow = () => {
+    if (!editedJournalEntry) return;
+    
+    const newRow = {
+      account: '',
+      debit: 0,
+      credit: 0,
+      confidence: 95
+    };
+    
+    setEditedJournalEntry({
+      ...editedJournalEntry,
+      entries: [...editedJournalEntry.entries, newRow]
+    });
+  };
+
+  const deleteRow = (index: number) => {
+    if (!editedJournalEntry || editedJournalEntry.entries.length <= 1) return;
+    
+    const updatedEntries = editedJournalEntry.entries.filter((_: any, i: number) => i !== index);
+    setEditedJournalEntry({
+      ...editedJournalEntry,
+      entries: updatedEntries
+    });
+  };
+
+  const toggleFormulaMode = (index: number, field: string) => {
+    const key = `${index}-${field}`;
+    setFormulaMode(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
   };
 
   // Dynamic analysis steps based on transaction
@@ -223,7 +303,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
   const analysisSteps = getAnalysisSteps(transaction);
 
   return (
-    <div className="w-[422px] border-l border-mobius-gray-100 flex flex-col bg-white">
+    <div className="w-[500px] border-l border-mobius-gray-100 flex flex-col bg-white">
       {/* Header */}
       <div className="p-4 border-b border-mobius-gray-100">
         <div className="flex items-center justify-between mb-2">
@@ -300,15 +380,16 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
 
                   {/* Journal Entry Table */}
                   <div>
-                    <div className="grid grid-cols-3 gap-2 text-xs font-medium text-mobius-gray-500 uppercase tracking-wide mb-2">
+                    <div className="grid grid-cols-4 gap-2 text-xs font-medium text-mobius-gray-500 uppercase tracking-wide mb-2">
                       <div className="pl-0">ACCOUNT</div>
                       <div className="text-right">DEBIT</div>
                       <div className="text-right">CREDIT</div>
+                      <div className="text-center">ACTIONS</div>
                     </div>
                     
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       {(isEditMode ? editedJournalEntry : journalEntry).entries.map((entry: any, index: number) => (
-                        <div key={index} className="grid grid-cols-3 gap-2 text-sm">
+                        <div key={index} className="grid grid-cols-4 gap-2 text-sm items-center">
                           <div className="font-medium text-sm">
                             {isEditMode ? (
                               <Select 
@@ -341,40 +422,95 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                           </div>
                           <div className="text-right">
                             {isEditMode ? (
-                              <Input
-                                type="number"
-                                value={entry.debit || ''}
-                                onChange={(e) => updateJournalEntry(index, 'debit', parseFloat(e.target.value) || 0)}
-                                className="h-8 text-sm text-right border-mobius-gray-200 font-variant-numeric tabular-nums"
-                                placeholder="0.00"
-                              />
+                              <div className="flex items-center space-x-1">
+                                <Input
+                                  type="text"
+                                  value={formulaMode[`${index}-debit`] ? (entry.debit?.toString().startsWith('=') ? entry.debit : `=${entry.debit || 0}`) : (entry.debit || '')}
+                                  onChange={(e) => updateJournalEntry(index, 'debit', e.target.value)}
+                                  className="h-8 text-sm text-right border-mobius-gray-200 font-variant-numeric tabular-nums flex-1"
+                                  placeholder="0.00"
+                                />
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-6 p-0"
+                                  onClick={() => toggleFormulaMode(index, 'debit')}
+                                  title="Toggle formula mode"
+                                >
+                                  <span className="text-xs">fx</span>
+                                </Button>
+                              </div>
                             ) : (
                               entry.debit ? `₹${entry.debit.toFixed(2)}` : "—"
                             )}
                           </div>
                           <div className="text-right">
                             {isEditMode ? (
-                              <Input
-                                type="number"
-                                value={entry.credit || ''}
-                                onChange={(e) => updateJournalEntry(index, 'credit', parseFloat(e.target.value) || 0)}
-                                className="h-8 text-sm text-right border-mobius-gray-200 font-variant-numeric tabular-nums"
-                                placeholder="0.00"
-                              />
+                              <div className="flex items-center space-x-1">
+                                <Input
+                                  type="text"
+                                  value={formulaMode[`${index}-credit`] ? (entry.credit?.toString().startsWith('=') ? entry.credit : `=${entry.credit || 0}`) : (entry.credit || '')}
+                                  onChange={(e) => updateJournalEntry(index, 'credit', e.target.value)}
+                                  className="h-8 text-sm text-right border-mobius-gray-200 font-variant-numeric tabular-nums flex-1"
+                                  placeholder="0.00"
+                                />
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-6 p-0"
+                                  onClick={() => toggleFormulaMode(index, 'credit')}
+                                  title="Toggle formula mode"
+                                >
+                                  <span className="text-xs">fx</span>
+                                </Button>
+                              </div>
                             ) : (
                               entry.credit ? `₹${entry.credit.toFixed(2)}` : "—"
+                            )}
+                          </div>
+                          <div className="flex items-center justify-center space-x-1">
+                            {isEditMode && (
+                              <>
+                                <span className="text-xs text-mobius-gray-400">
+                                  B{index + 1}, C{index + 1}
+                                </span>
+                                {editedJournalEntry.entries.length > 1 && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 w-6 p-0 text-red-500 hover:text-red-700 ml-1"
+                                    onClick={() => deleteRow(index)}
+                                    title="Delete row"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </Button>
+                                )}
+                              </>
                             )}
                       </div>
                       </div>
                       ))}
                     </div>
                     
+                    {/* Add Row on Hover */}
+                    {isEditMode && (
+                      <div 
+                        className="group relative mt-2 p-1 border-2 border-dashed border-mobius-gray-200 rounded-lg hover:border-mobius-gray-300 transition-colors cursor-pointer"
+                        onClick={addRow}
+                      >
+                        <div className="flex items-center justify-center">
+                          <Plus className="w-4 h-4 text-mobius-gray-400 group-hover:text-mobius-gray-600 transition-colors" />
+                        </div>
+                      </div>
+                    )}
+                    
                     <Separator className="my-2" />
                     
-                    <div className="grid grid-cols-3 gap-2 text-sm font-medium">
+                    <div className="grid grid-cols-4 gap-2 text-sm font-medium">
                       <div>Balance</div>
                       <div className="text-right">—</div>
                       <div className="text-right text-status-done">₹0.00 ✓</div>
+                      <div></div>
                     </div>
                   </div>
                 </div>
