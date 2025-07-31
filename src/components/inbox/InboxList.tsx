@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { 
@@ -208,104 +209,157 @@ export function InboxList({
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "done": return <CheckCircle2 className="w-4 h-4 text-status-done" />;
-      case "approved": return <CheckCircle2 className="w-4 h-4 text-status-approved" />;
-      case "review": return <AlertCircle className="w-4 h-4 text-status-review" />;
-      default: return <Clock className="w-4 h-4 text-status-pending" />;
+      case "done": 
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <CheckCircle2 className="w-4 h-4 text-green-600" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Posted</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      case "approved": 
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <CheckCircle2 className="w-4 h-4 text-blue-600" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Approved</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      case "review": 
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <Clock className="w-4 h-4 text-yellow-600" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Pending Review</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      default: 
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <AlertCircle className="w-4 h-4 text-gray-500" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Unread</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
     }
   };
 
   return (
-    <Card className="flex-1 bg-white shadow-mobius-md">
-      <div className="divide-y divide-mobius-gray-100">
-        {transactions.map((transaction) => (
-          <div
-            key={transaction.id}
-            className={cn(
-              "p-3 transition-colors cursor-pointer border-l-4 relative",
-              transaction.status === "unread" ? "border-l-mobius-blue bg-blue-50/30" : "border-l-transparent",
-              selectedTransaction?.id === transaction.id ? "bg-mobius-blue/10" : "hover:bg-mobius-gray-50"
-            )}
-            onClick={() => onTransactionSelect(transaction)}
-            onMouseEnter={() => setHoveredRow(transaction.id)}
-            onMouseLeave={() => setHoveredRow(null)}
-          >
-            <div className="flex items-center space-x-3">
-              <Checkbox 
-                checked={selectedTransactions.includes(transaction.id)}
-                onCheckedChange={(checked) => onTransactionToggle(transaction.id, !!checked)}
-                onClick={(e) => e.stopPropagation()}
-              />
-              
-              {/* Source Logo */}
-              {getSourceIcon(transaction.source)}
+    <Card className="bg-white shadow-mobius-md max-h-[calc(100vh-12rem)] flex flex-col">
+      <ScrollArea className="flex-1">
+        <div className="divide-y divide-mobius-gray-100">
+          {transactions.map((transaction) => (
+            <div
+              key={transaction.id}
+              className={cn(
+                "p-3 transition-colors cursor-pointer border-l-4 relative",
+                transaction.status === "unread" ? "border-l-mobius-blue bg-blue-50/30" : "border-l-transparent",
+                selectedTransaction?.id === transaction.id ? "bg-mobius-blue/10" : "hover:bg-mobius-gray-50"
+              )}
+              onClick={() => onTransactionSelect(transaction)}
+              onMouseEnter={() => setHoveredRow(transaction.id)}
+              onMouseLeave={() => setHoveredRow(null)}
+            >
+              <div className="flex items-center space-x-3">
+                <Checkbox 
+                  checked={selectedTransactions.includes(transaction.id)}
+                  onCheckedChange={(checked) => onTransactionToggle(transaction.id, !!checked)}
+                  onClick={(e) => e.stopPropagation()}
+                />
+                
+                {/* Source Logo */}
+                {getSourceIcon(transaction.source)}
 
-              <div className="flex-1 min-w-0">
-                {/* First line: Amount + badges */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <h3 className={cn(
-                      "text-sm font-medium truncate",
-                      transaction.status === "unread" ? "text-mobius-gray-900 font-semibold" : "text-mobius-gray-700"
-                    )}>
-                      ₹{transaction.amount.toLocaleString()}
-                    </h3>
-                    {transaction.isDuplicate && (
-                      <Badge className="text-xs bg-amber-100 text-amber-800 border-amber-200">
-                        Duplicate
-                      </Badge>
-                    )}
+                <div className="flex-1 min-w-0">
+                  {/* First line: Amount + badges + status */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <h3 className={cn(
+                        "text-sm font-medium truncate",
+                        transaction.status === "unread" ? "text-mobius-gray-900 font-semibold" : "text-mobius-gray-700"
+                      )}>
+                        ₹{transaction.amount.toLocaleString()}
+                      </h3>
+                      {transaction.isDuplicate && (
+                        <Badge className="text-xs bg-amber-100 text-amber-800 border-amber-200">
+                          Duplicate
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      {/* Status Icon */}
+                      {getStatusIcon(transaction.status)}
+                      
+                      {/* Quick Actions - show on hover */}
+                      {hoveredRow === transaction.id && transaction.status === "unread" && (
+                        <div className="flex space-x-1" onClick={(e) => e.stopPropagation()}>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-6 w-6 p-0"
+                            onClick={() => onQuickApprove(transaction.id)}
+                          >
+                            <CheckCircle2 className="w-3 h-3" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-6 w-6 p-0"
+                            onClick={() => onQuickAssign(transaction.id)}
+                          >
+                            <UserCheck className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   
-                  <div className="flex items-center space-x-3">
-                    {/* Quick Actions - show on hover */}
-                    {hoveredRow === transaction.id && transaction.status === "unread" && (
-                      <div className="flex space-x-1" onClick={(e) => e.stopPropagation()}>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="h-6 w-6 p-0"
-                          onClick={() => onQuickApprove(transaction.id)}
-                        >
-                          <CheckCircle2 className="w-3 h-3" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="h-6 w-6 p-0"
-                          onClick={() => onQuickAssign(transaction.id)}
-                        >
-                          <UserCheck className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    )}
+                  {/* Second line: Vendor + Description */}
+                  <div className="mt-1">
+                    <p className={cn(
+                      "text-sm truncate",
+                      transaction.status === "unread" ? "text-mobius-gray-600" : "text-mobius-gray-500"
+                    )}>
+                      {getAbbreviatedVendor(transaction.vendor)} • {transaction.description}
+                    </p>
                   </div>
-                </div>
-                
-                {/* Second line: Vendor + Description */}
-                <div className="mt-1">
-                  <p className={cn(
-                    "text-sm truncate",
-                    transaction.status === "unread" ? "text-mobius-gray-600" : "text-mobius-gray-500"
-                  )}>
-                    {getAbbreviatedVendor(transaction.vendor)} • {transaction.description}
-                  </p>
-                </div>
 
-                {/* Third line: Client and Date */}
-                <div className="mt-1">
-                  <p className={cn(
-                    "text-sm truncate",
-                    transaction.status === "unread" ? "text-mobius-gray-600" : "text-mobius-gray-500"
-                  )}>
-                    {transaction.client} • {new Date(transaction.date).toLocaleDateString()}
-                  </p>
+                  {/* Third line: Client and Date */}
+                  <div className="mt-1">
+                    <p className={cn(
+                      "text-sm truncate",
+                      transaction.status === "unread" ? "text-mobius-gray-600" : "text-mobius-gray-500"
+                    )}>
+                      {transaction.client} • {new Date(transaction.date).toLocaleDateString()}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </ScrollArea>
     </Card>
   );
 }

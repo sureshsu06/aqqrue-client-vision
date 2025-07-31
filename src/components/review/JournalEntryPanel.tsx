@@ -3,26 +3,22 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
 import { 
   Edit3, 
   Eye, 
   RotateCcw,
-  ExternalLink,
-  UserCheck,
-  CheckCircle2
+  ExternalLink
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface JournalEntryPanelProps {
   transaction: any;
   onEdit: () => void;
-  onAssignToController: () => void;
+  onSeeHow: () => void;
 }
 
-export function JournalEntryPanel({ transaction, onEdit, onAssignToController }: JournalEntryPanelProps) {
+export function JournalEntryPanel({ transaction, onEdit, onSeeHow }: JournalEntryPanelProps) {
   const [showDetails, setShowDetails] = useState(false);
-  const [comment, setComment] = useState("");
 
   // Mock journal entry data with proper prepaid treatment for Vanta
   const journalEntry = getJournalEntryForTransaction(transaction);
@@ -79,7 +75,7 @@ export function JournalEntryPanel({ transaction, onEdit, onAssignToController }:
         {/* Journal Entry Lines Table */}
         <div>
           <div className="grid grid-cols-4 gap-4 text-xs font-medium text-mobius-gray-500 uppercase tracking-wide mb-3 pb-2 border-b border-mobius-gray-200">
-            <div>ACCOUNT (GL CODE)</div>
+            <div>ACCOUNT</div>
             <div className="text-right">DEBIT</div>
             <div className="text-right">CREDIT</div>
             <div className="text-right">CONF.</div>
@@ -88,10 +84,7 @@ export function JournalEntryPanel({ transaction, onEdit, onAssignToController }:
           <div className="space-y-3">
             {journalEntry.entries.map((entry, index) => (
               <div key={index} className="grid grid-cols-4 gap-4 text-sm">
-                <div className="font-medium text-mobius-gray-900">
-                  <div>{entry.account}</div>
-                  <div className="text-xs text-mobius-gray-500 font-normal">{entry.glCode || `GL-${(1000 + index * 10).toString()}`}</div>
-                </div>
+                <div className="font-medium text-mobius-gray-900">{entry.account}</div>
                 <div className="text-right font-variant-numeric: tabular-nums font-medium">
                   {entry.debit ? `₹${entry.debit.toFixed(2)}` : "—"}
                 </div>
@@ -109,58 +102,12 @@ export function JournalEntryPanel({ transaction, onEdit, onAssignToController }:
           
           <Separator className="my-3" />
           
-          {(() => {
-            const totalDebit = journalEntry.entries.reduce((sum, entry) => sum + (entry.debit || 0), 0);
-            const totalCredit = journalEntry.entries.reduce((sum, entry) => sum + (entry.credit || 0), 0);
-            const isBalanced = Math.abs(totalDebit - totalCredit) < 0.01;
-            
-            return (
-              <div className="grid grid-cols-4 gap-4 text-sm font-medium">
-                <div className="text-mobius-gray-600">Totals</div>
-                <div className={cn("text-right font-medium", isBalanced ? "text-green-600" : "text-red-600")}>
-                  ₹{totalDebit.toFixed(2)}
-                </div>
-                <div className={cn("text-right font-medium", isBalanced ? "text-green-600" : "text-red-600")}>
-                  ₹{totalCredit.toFixed(2)}
-                </div>
-                <div className={cn("text-right font-medium", isBalanced ? "text-green-600" : "text-red-600")}>
-                  {isBalanced ? "✓ Balanced" : "✗ Unbalanced"}
-                </div>
-              </div>
-            );
-          })()}
-        </div>
-
-        <Separator />
-        
-        {/* Comment Box */}
-        <div className="space-y-2">
-          <label htmlFor="comment" className="text-sm font-medium text-mobius-gray-700">
-            Add Comment (Optional)
-          </label>
-          <Textarea
-            id="comment"
-            placeholder="Add context or notes for later reference..."
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            className="min-h-[80px]"
-          />
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex justify-end space-x-3 pt-4">
-          <Button variant="outline" onClick={onEdit}>
-            <Edit3 className="w-4 h-4 mr-2" />
-            Edit
-          </Button>
-          <Button variant="outline" onClick={onAssignToController}>
-            <UserCheck className="w-4 h-4 mr-2" />
-            Assign to Controller
-          </Button>
-          <Button className="bg-status-done hover:bg-status-done/90">
-            <CheckCircle2 className="w-4 h-4 mr-2" />
-            Approve
-          </Button>
+          <div className="grid grid-cols-4 gap-4 text-sm font-medium">
+            <div className="text-mobius-gray-600">Balance</div>
+            <div className="text-right text-mobius-gray-400">—</div>
+            <div className="text-right text-mobius-gray-400">—</div>
+            <div className="text-right text-status-done font-medium">₹0.00 ✓</div>
+          </div>
         </div>
 
         {showDetails && (
@@ -214,11 +161,11 @@ function getJournalEntryForTransaction(transaction: any) {
         entryType: "Professional Fees",
         narration: "Being the monthly professional charges for the month of May 2025 payable to JCSS & Associates LLP vide invoice no. ASO-I/109/25-26 dtd 26.05.2025",
         entries: [
-          { account: "Professional Fees", debit: 80000, credit: 0, confidence: 95, glCode: "GL-6100" },
-          { account: "Input CGST", debit: 7200, credit: 0, confidence: 100, glCode: "GL-1501" },
-          { account: "Input SGST", debit: 7200, credit: 0, confidence: 100, glCode: "GL-1502" },
-          { account: "TDS on Professional Charges", debit: 0, credit: 8000, confidence: 100, glCode: "GL-2301" },
-          { account: "JCSS & Associates LLP", debit: 0, credit: 86400, confidence: 100, glCode: "GL-2001" }
+          { account: "Professional Fees", debit: 80000, credit: 0, confidence: 95 },
+          { account: "Input CGST", debit: 7200, credit: 0, confidence: 100 },
+          { account: "Input SGST", debit: 7200, credit: 0, confidence: 100 },
+          { account: "TDS on Professional Charges", debit: 0, credit: 8000, confidence: 100 },
+          { account: "JCSS & Associates LLP", debit: 0, credit: 86400, confidence: 100 }
         ]
       };
 
@@ -230,11 +177,11 @@ function getJournalEntryForTransaction(transaction: any) {
         entryType: "Professional Fees",
         narration: "Being the Professional fee towards N-STP condonation of invoices payable to JCSS & Associates LLP vide invoice no. ASO-I/117/25-26 dtd 26.05.2025",
         entries: [
-          { account: "Professional Fees", debit: 60000, credit: 0, confidence: 95, glCode: "GL-6100" },
-          { account: "Input CGST", debit: 5400, credit: 0, confidence: 100, glCode: "GL-1501" },
-          { account: "Input SGST", debit: 5400, credit: 0, confidence: 100, glCode: "GL-1502" },
-          { account: "TDS on Professional Charges", debit: 0, credit: 6000, confidence: 100, glCode: "GL-2301" },
-          { account: "JCSS & Associates LLP", debit: 0, credit: 64800, confidence: 100, glCode: "GL-2001" }
+          { account: "Professional Fees", debit: 60000, credit: 0, confidence: 95 },
+          { account: "Input CGST", debit: 5400, credit: 0, confidence: 100 },
+          { account: "Input SGST", debit: 5400, credit: 0, confidence: 100 },
+          { account: "TDS on Professional Charges", debit: 0, credit: 6000, confidence: 100 },
+          { account: "JCSS & Associates LLP", debit: 0, credit: 64800, confidence: 100 }
         ]
       };
 
@@ -246,9 +193,9 @@ function getJournalEntryForTransaction(transaction: any) {
         entryType: "Rates & Taxes",
         narration: "Being the charges paid to NDML vide inv no. RTA/05/2526/4104 dtd 31.05.2025",
         entries: [
-          { account: "Rates & Taxes", debit: 10000, credit: 0, confidence: 95, glCode: "GL-6300" },
-          { account: "Input IGST", debit: 1800, credit: 0, confidence: 100, glCode: "GL-1503" },
-          { account: "NSDL Database Management Ltd", debit: 0, credit: 11800, confidence: 100, glCode: "GL-2002" }
+          { account: "Rates & Taxes", debit: 10000, credit: 0, confidence: 95 },
+          { account: "Input IGST", debit: 1800, credit: 0, confidence: 100 },
+          { account: "NSDL Database Management Ltd", debit: 0, credit: 11800, confidence: 100 }
         ]
       };
 
@@ -260,10 +207,10 @@ function getJournalEntryForTransaction(transaction: any) {
         entryType: "Freight and Postage",
         narration: "Being the Freight charges for shipping a laptop to Tanvi Arora",
         entries: [
-          { account: "Freight and Postage", debit: 4500, credit: 0, confidence: 95, glCode: "GL-6400" },
-          { account: "Input CGST", debit: 405, credit: 0, confidence: 100, glCode: "GL-1501" },
-          { account: "Input SGST", debit: 405, credit: 0, confidence: 100, glCode: "GL-1502" },
-          { account: "Sogo Computers Pvt Ltd", debit: 0, credit: 5310, confidence: 100, glCode: "GL-2003" }
+          { account: "Freight and Postage", debit: 4500, credit: 0, confidence: 95 },
+          { account: "Input CGST", debit: 405, credit: 0, confidence: 100 },
+          { account: "Input SGST", debit: 405, credit: 0, confidence: 100 },
+          { account: "Sogo Computers Pvt Ltd", debit: 0, credit: 5310, confidence: 100 }
         ]
       };
 
@@ -275,10 +222,10 @@ function getJournalEntryForTransaction(transaction: any) {
         entryType: "Freight and Postage",
         narration: "Being the Freight charges for shipping a laptop to Kamal Chandani",
         entries: [
-          { account: "Freight and Postage", debit: 4500, credit: 0, confidence: 95, glCode: "GL-6400" },
-          { account: "Input CGST", debit: 405, credit: 0, confidence: 100, glCode: "GL-1501" },
-          { account: "Input SGST", debit: 405, credit: 0, confidence: 100, glCode: "GL-1502" },
-          { account: "Sogo Computers Pvt Ltd", debit: 0, credit: 5310, confidence: 100, glCode: "GL-2003" }
+          { account: "Freight and Postage", debit: 4500, credit: 0, confidence: 95 },
+          { account: "Input CGST", debit: 405, credit: 0, confidence: 100 },
+          { account: "Input SGST", debit: 405, credit: 0, confidence: 100 },
+          { account: "Sogo Computers Pvt Ltd", debit: 0, credit: 5310, confidence: 100 }
         ]
       };
 
@@ -290,11 +237,11 @@ function getJournalEntryForTransaction(transaction: any) {
         entryType: "Rent",
         narration: "Being the charges for office space for May 2025",
         entries: [
-          { account: "Rent", debit: 87000, credit: 0, confidence: 95, glCode: "GL-6200" },
-          { account: "Input CGST", debit: 7830, credit: 0, confidence: 100, glCode: "GL-1501" },
-          { account: "Input SGST", debit: 7830, credit: 0, confidence: 100, glCode: "GL-1502" },
-          { account: "Clayworks Spaces Technologies Pvt Ltd", debit: 0, credit: 93960, confidence: 100, glCode: "GL-2004" },
-          { account: "TDS on Rent", debit: 0, credit: 8700, confidence: 100, glCode: "GL-2302" }
+          { account: "Rent", debit: 87000, credit: 0, confidence: 95 },
+          { account: "Input CGST", debit: 7830, credit: 0, confidence: 100 },
+          { account: "Input SGST", debit: 7830, credit: 0, confidence: 100 },
+          { account: "Clayworks Spaces Technologies Pvt Ltd", debit: 0, credit: 93960, confidence: 100 },
+          { account: "TDS on Rent", debit: 0, credit: 8700, confidence: 100 }
         ]
       };
 
@@ -306,11 +253,11 @@ function getJournalEntryForTransaction(transaction: any) {
         entryType: "Rent",
         narration: "Being the charges for car parking and two wheeler parking for April 2025 vide invoice no. INV-25/26/0376 Dtd. 08.05.2025",
         entries: [
-          { account: "Rent", debit: 4450, credit: 0, confidence: 95, glCode: "GL-6200" },
-          { account: "Input CGST", debit: 400.50, credit: 0, confidence: 100, glCode: "GL-1501" },
-          { account: "Input SGST", debit: 400.50, credit: 0, confidence: 100, glCode: "GL-1502" },
-          { account: "Clayworks Spaces Technologies Pvt Ltd", debit: 0, credit: 4806, confidence: 100, glCode: "GL-2004" },
-          { account: "TDS on Rent", debit: 0, credit: 445, confidence: 100, glCode: "GL-2302" }
+          { account: "Rent", debit: 4450, credit: 0, confidence: 95 },
+          { account: "Input CGST", debit: 400.50, credit: 0, confidence: 100 },
+          { account: "Input SGST", debit: 400.50, credit: 0, confidence: 100 },
+          { account: "Clayworks Spaces Technologies Pvt Ltd", debit: 0, credit: 4806, confidence: 100 },
+          { account: "TDS on Rent", debit: 0, credit: 445, confidence: 100 }
         ]
       };
 
@@ -322,10 +269,10 @@ function getJournalEntryForTransaction(transaction: any) {
         entryType: "Computers",
         narration: "Being Dell laptop (5 Nos) purchased from Sogo Computers Pvt Ltd vide bill no. Pcd/25-26/001143 dated 19-05-2025 amount Rs. 4,80,850.",
         entries: [
-          { account: "Computers", debit: 407500, credit: 0, confidence: 95, glCode: "GL-1400" },
-          { account: "Input CGST", debit: 36675, credit: 0, confidence: 100, glCode: "GL-1501" },
-          { account: "Input SGST", debit: 36675, credit: 0, confidence: 100, glCode: "GL-1502" },
-          { account: "Sogo Computers Pvt Ltd", debit: 0, credit: 480850, confidence: 100, glCode: "GL-2003" }
+          { account: "Computers", debit: 407500, credit: 0, confidence: 95 },
+          { account: "Input CGST", debit: 36675, credit: 0, confidence: 100 },
+          { account: "Input SGST", debit: 36675, credit: 0, confidence: 100 },
+          { account: "Sogo Computers Pvt Ltd", debit: 0, credit: 480850, confidence: 100 }
         ]
       };
 
@@ -337,10 +284,10 @@ function getJournalEntryForTransaction(transaction: any) {
         entryType: "Computers",
         narration: "Being the purchase of laptop 1 Nos and shipped to Tanvi Arora",
         entries: [
-          { account: "Computers", debit: 81500, credit: 0, confidence: 95, glCode: "GL-1400" },
-          { account: "Input CGST", debit: 7335, credit: 0, confidence: 100, glCode: "GL-1501" },
-          { account: "Input SGST", debit: 7335, credit: 0, confidence: 100, glCode: "GL-1502" },
-          { account: "Sogo Computers Pvt Ltd", debit: 0, credit: 96170, confidence: 100, glCode: "GL-2003" }
+          { account: "Computers", debit: 81500, credit: 0, confidence: 95 },
+          { account: "Input CGST", debit: 7335, credit: 0, confidence: 100 },
+          { account: "Input SGST", debit: 7335, credit: 0, confidence: 100 },
+          { account: "Sogo Computers Pvt Ltd", debit: 0, credit: 96170, confidence: 100 }
         ]
       };
 
@@ -352,10 +299,10 @@ function getJournalEntryForTransaction(transaction: any) {
         entryType: "Computers",
         narration: "Being the purchase of laptop 1 Nos and shipped to Kamal Chandani",
         entries: [
-          { account: "Computers", debit: 81500, credit: 0, confidence: 95, glCode: "GL-1400" },
-          { account: "Input CGST", debit: 7335, credit: 0, confidence: 100, glCode: "GL-1501" },
-          { account: "Input SGST", debit: 7335, credit: 0, confidence: 100, glCode: "GL-1502" },
-          { account: "Sogo Computers Pvt Ltd", debit: 0, credit: 96170, confidence: 100, glCode: "GL-2003" }
+          { account: "Computers", debit: 81500, credit: 0, confidence: 95 },
+          { account: "Input CGST", debit: 7335, credit: 0, confidence: 100 },
+          { account: "Input SGST", debit: 7335, credit: 0, confidence: 100 },
+          { account: "Sogo Computers Pvt Ltd", debit: 0, credit: 96170, confidence: 100 }
         ]
       };
 
@@ -368,10 +315,10 @@ function getJournalEntryForTransaction(transaction: any) {
         entryType: "General Expense",
         narration: `Being the expense payable to ${transaction.vendor}`,
         entries: [
-          { account: "General Expense", debit: transaction.amount * 0.85, credit: 0, confidence: 95, glCode: "GL-6999" },
-          { account: "Input CGST", debit: transaction.amount * 0.075, credit: 0, confidence: 100, glCode: "GL-1501" },
-          { account: "Input SGST", debit: transaction.amount * 0.075, credit: 0, confidence: 100, glCode: "GL-1502" },
-          { account: transaction.vendor, debit: 0, credit: transaction.amount, confidence: 100, glCode: "GL-2999" }
+          { account: "General Expense", debit: transaction.amount * 0.85, credit: 0, confidence: 95 },
+          { account: "Input CGST", debit: transaction.amount * 0.075, credit: 0, confidence: 100 },
+          { account: "Input SGST", debit: transaction.amount * 0.075, credit: 0, confidence: 100 },
+          { account: transaction.vendor, debit: 0, credit: transaction.amount, confidence: 100 }
         ]
       };
   }

@@ -8,8 +8,7 @@ import {
   Eye, 
   X, 
   ArrowLeft,
-  AlertTriangle,
-  UserCheck
+  AlertTriangle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DocumentViewer } from "./review/DocumentViewer";
@@ -112,12 +111,7 @@ export function ReviewInterface({ transaction, onClose }: ReviewInterfaceProps) 
                 <JournalEntryPanel 
                   transaction={transaction}
                   onEdit={handleEdit}
-                  onAssignToController={() => {
-                    toast({
-                      title: "Assigned to Controller",
-                      description: "Transaction has been forwarded to the controller for review"
-                    });
-                  }}
+                  onSeeHow={handleSeeHow}
                 />
               </TabsContent>
 
@@ -149,14 +143,9 @@ export function ReviewInterface({ transaction, onClose }: ReviewInterfaceProps) 
               <Edit3 className="w-4 h-4 mr-2" />
               Edit
             </Button>
-            <Button variant="outline" onClick={() => {
-              toast({
-                title: "Assigned to Controller",
-                description: "Transaction has been forwarded to the controller for review"
-              });
-            }}>
-              <UserCheck className="w-4 h-4 mr-2" />
-              Assign to Controller
+            <Button variant="outline" onClick={handleSeeHow}>
+              <Eye className="w-4 h-4 mr-2" />
+              See How
             </Button>
             <Button className="bg-status-done hover:bg-status-done/90" onClick={handleApprove}>
               <CheckCircle2 className="w-4 h-4 mr-2" />
