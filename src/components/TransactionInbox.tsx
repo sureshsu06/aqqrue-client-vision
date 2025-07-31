@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { InboxHeader } from "./inbox/InboxHeader";
 import { InboxList, Transaction } from "./inbox/InboxList";
 import { DocumentPane } from "./inbox/DocumentPane";
@@ -23,8 +22,7 @@ import {
   ArrowUpDown,
   ChevronDown,
   Undo2,
-  Filter,
-  ChevronLeft
+  Filter
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -230,7 +228,6 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
   const [role, setRole] = useState("accountant");
   const [mode, setMode] = useState("review-all");
   const [confidenceThreshold, setConfidenceThreshold] = useState(95);
-  const [isInboxCollapsed, setIsInboxCollapsed] = useState(false);
   const { toast } = useToast();
 
   const filteredTransactions = mockTransactions.filter(transaction => {
@@ -316,74 +313,67 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
 
       {/* Integrated Bills Filter Bar */}
       <div className="flex items-center justify-between py-3 px-4 bg-white border-b border-mobius-gray-200">
-        <div className="flex items-center space-x-2">
-          {/* Collapse Inbox Button */}
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-9 w-9 p-0 justify-center bg-white rounded-lg"
-            onClick={() => setIsInboxCollapsed(!isInboxCollapsed)}
-            title={isInboxCollapsed ? "Expand inbox" : "Collapse inbox"}
-          >
-            <ChevronLeft className={`w-4 h-4 transition-transform ${isInboxCollapsed ? 'rotate-180' : ''}`} />
-          </Button>
+        <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-2">
+            {/* Bills Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-9 w-9 p-0 justify-center bg-white rounded-lg">
+                  <Filter className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-40 bg-white border border-mobius-gray-200">
+                <DropdownMenuItem 
+                  className="flex items-center space-x-2"
+                  onClick={() => setSelectedFilter("bills")}
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>Bills (8)</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="flex items-center space-x-2"
+                  onClick={() => setSelectedFilter("cards")}
+                >
+                  <CreditCard className="w-4 h-4" />
+                  <span>Cards (4)</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="flex items-center space-x-2"
+                  onClick={() => setSelectedFilter("all")}
+                >
+                  <Filter className="w-4 h-4" />
+                  <span>All (12)</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-          {/* Bills Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-9 w-9 p-0 justify-center bg-white rounded-lg">
-                <Filter className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-40 bg-white border border-mobius-gray-200">
-              <DropdownMenuItem 
-                className="flex items-center space-x-2"
-                onClick={() => setSelectedFilter("bills")}
-              >
-                <FileText className="w-4 h-4" />
-                <span>Bills (8)</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                className="flex items-center space-x-2"
-                onClick={() => setSelectedFilter("cards")}
-              >
-                <CreditCard className="w-4 h-4" />
-                <span>Cards (4)</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                className="flex items-center space-x-2"
-                onClick={() => setSelectedFilter("all")}
-              >
-                <Filter className="w-4 h-4" />
-                <span>All (12)</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Date Sort Icon */}
-          <Button variant="ghost" size="sm" className="h-9 w-9 p-0 justify-center bg-white rounded-lg">
-            <ArrowUpDown className="w-4 h-4 text-mobius-gray-600" />
-          </Button>
+            {/* Date Sort Icon */}
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <ArrowUpDown className="w-4 h-4 text-mobius-gray-600" />
+            </Button>
+          </div>
 
           {/* All/Unread Toggle */}
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center">
             <Button 
+              variant={selectedStatus === "all" ? "default" : "ghost"}
               size="sm"
-              className={`h-9 px-3 rounded-lg ${
+              className={`px-4 py-2 rounded-none border-b-2 ${
                 selectedStatus === "all" 
-                  ? "text-mobius-blue font-medium bg-transparent hover:bg-mobius-gray-50" 
-                  : "text-mobius-gray-600 bg-transparent hover:bg-mobius-gray-50"
+                  ? "border-mobius-blue bg-transparent text-mobius-blue hover:bg-mobius-blue/5" 
+                  : "border-transparent text-mobius-gray-600 hover:text-mobius-gray-900"
               }`}
               onClick={() => setSelectedStatus("all")}
             >
               All
             </Button>
             <Button 
+              variant={selectedStatus === "unread" ? "default" : "ghost"}
               size="sm"
-              className={`h-9 px-3 rounded-lg ${
+              className={`px-4 py-2 rounded-none border-b-2 ${
                 selectedStatus === "unread" 
-                  ? "text-mobius-blue font-medium bg-transparent hover:bg-mobius-gray-50" 
-                  : "text-mobius-gray-600 bg-transparent hover:bg-mobius-gray-50"
+                  ? "border-mobius-blue bg-transparent text-mobius-blue hover:bg-mobius-blue/5" 
+                  : "border-transparent text-mobius-gray-600 hover:text-mobius-gray-900"
               }`}
               onClick={() => setSelectedStatus("unread")}
             >
@@ -415,35 +405,27 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
 
       {/* Inbox with Reading Pane */}
       <div className="flex-1 flex min-h-0">
-        {!isInboxCollapsed && (
-          <div className="w-1/5">
-            <ScrollArea className="h-full">
-              <InboxList
-                transactions={filteredTransactions}
-                selectedTransaction={selectedTransaction}
-                selectedTransactions={selectedTransactions}
-                onTransactionSelect={handleTransactionSelect}
-                onTransactionToggle={handleTransactionToggle}
-                onQuickApprove={handleQuickApprove}
-                onQuickAssign={handleQuickAssign}
-              />
-            </ScrollArea>
-          </div>
-        )}
+        <div className="w-1/5">
+          <InboxList
+            transactions={filteredTransactions}
+            selectedTransaction={selectedTransaction}
+            selectedTransactions={selectedTransactions}
+            onTransactionSelect={handleTransactionSelect}
+            onTransactionToggle={handleTransactionToggle}
+            onQuickApprove={handleQuickApprove}
+            onQuickAssign={handleQuickAssign}
+          />
+        </div>
         
         {selectedTransaction && (
           <>
-            <ScrollArea className="flex-1">
-              <DocumentPane transaction={selectedTransaction} />
-            </ScrollArea>
-            <ScrollArea className="flex-1">
-              <AnalysisPane 
-                transaction={selectedTransaction}
-                onApprove={handleApprove}
-                onEdit={handleEdit}
-                onSeeHow={handleSeeHow}
-              />
-            </ScrollArea>
+            <DocumentPane transaction={selectedTransaction} />
+            <AnalysisPane 
+              transaction={selectedTransaction}
+              onApprove={handleApprove}
+              onEdit={handleEdit}
+              onSeeHow={handleSeeHow}
+            />
           </>
         )}
       </div>
