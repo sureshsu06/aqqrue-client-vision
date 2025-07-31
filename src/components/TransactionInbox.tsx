@@ -200,134 +200,20 @@ const mockTransactions: Transaction[] = [
     confidence: 97,
     pdfFile: "Mahat Labs Pvt Ltd_Invoice_309_29.05.2025.pdf",
     documentUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=1000&fit=crop"
-  },
-  {
-    id: "13",
-    vendor: "TechWorld Solutions",
-    amount: 35400,
-    source: "email",
-    type: "bill",
-    status: "unread",
-    date: "2025-05-28",
-    description: "Software License Renewal",
-    client: "Elire",
-    confidence: 93,
-    pdfFile: "TW-5901.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?w=800&h=1000&fit=crop"
-  },
-  {
-    id: "14",
-    vendor: "Digital Marketing Hub",
-    amount: 75000,
-    source: "brex",
-    type: "card",
-    status: "review",
-    date: "2025-05-27",
-    description: "Social Media Campaign",
-    client: "Wonderslate",
-    confidence: 89,
-    pdfFile: "DMH-032.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=1000&fit=crop"
-  },
-  {
-    id: "15",
-    vendor: "CloudCorp Services",
-    amount: 28900,
-    source: "ramp",
-    type: "card",
-    status: "approved",
-    date: "2025-05-26",
-    description: "Cloud Storage",
-    client: "HEPL",
-    confidence: 98,
-    isRecurring: true,
-    pdfFile: "CC-1425.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800&h=1000&fit=crop"
-  },
-  {
-    id: "16",
-    vendor: "Office Depot",
-    amount: 12850,
-    source: "email",
-    type: "bill",
-    status: "unread",
-    date: "2025-05-25",
-    description: "Office Furniture",
-    client: "Mahat",
-    confidence: 91,
-    pdfFile: "OD-7821.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=1000&fit=crop"
-  },
-  {
-    id: "17",
-    vendor: "Legal Associates",
-    amount: 125000,
-    source: "email",
-    type: "bill",
-    status: "review",
-    date: "2025-05-24",
-    description: "Legal Consultation",
-    client: "Elire",
-    confidence: 97,
-    pdfFile: "LA-4902.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&h=1000&fit=crop"
-  },
-  {
-    id: "18",
-    vendor: "Energy Solutions Ltd",
-    amount: 45600,
-    source: "drive",
-    type: "bill",
-    status: "done",
-    date: "2025-05-23",
-    description: "Electricity Bill",
-    client: "HEPL",
-    confidence: 100,
-    isRecurring: true,
-    pdfFile: "ES-3456.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800&h=1000&fit=crop"
-  },
-  {
-    id: "19",
-    vendor: "Travel Express",
-    amount: 18750,
-    source: "brex",
-    type: "card",
-    status: "unread",
-    date: "2025-05-22",
-    description: "Business Travel",
-    client: "Wonderslate",
-    confidence: 85,
-    pdfFile: "TE-9087.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&h=1000&fit=crop"
-  },
-  {
-    id: "20",
-    vendor: "Security Systems Pro",
-    amount: 67200,
-    source: "email",
-    type: "bill",
-    status: "approved",
-    date: "2025-05-21",
-    description: "Security System Installation",
-    client: "Elire",
-    confidence: 94,
-    pdfFile: "SSP-2341.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=1000&fit=crop"
   }
 ];
 
 const filters = [
-  { id: "all", label: "All", count: 20, icon: Check },
-  { id: "bills", label: "Bills", count: 14, icon: FileText },
-  { id: "cards", label: "Credit Cards", count: 6, icon: CreditCard },
+  { id: "all", label: "All", count: 12, icon: Check },
+  { id: "bills", label: "Bills", count: 8, icon: FileText },
+  { id: "cards", label: "Credit Cards", count: 4, icon: CreditCard },
   { id: "contracts", label: "Contracts", count: 0, icon: FileText }
 ];
 
 const statusFilters = [
-  { id: "unread", label: "Unread", count: 10, icon: Mail },
-  { id: "today", label: "Today", count: 5, icon: Clock },
-  { id: "week", label: "This Week", count: 8, icon: Clock }
+  { id: "unread", label: "Unread", count: 7, icon: Mail },
+  { id: "today", label: "Today", count: 3, icon: Clock },
+  { id: "week", label: "This Week", count: 5, icon: Clock }
 ];
 
 interface TransactionInboxProps {
@@ -442,21 +328,21 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
                   onClick={() => setSelectedFilter("bills")}
                 >
                   <FileText className="w-4 h-4" />
-                  <span>Bills (14)</span>
+                  <span>Bills (8)</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="flex items-center space-x-2"
                   onClick={() => setSelectedFilter("cards")}
                 >
                   <CreditCard className="w-4 h-4" />
-                  <span>Cards (6)</span>
+                  <span>Cards (4)</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="flex items-center space-x-2"
                   onClick={() => setSelectedFilter("all")}
                 >
                   <Filter className="w-4 h-4" />
-                  <span>All (20)</span>
+                  <span>All (12)</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
