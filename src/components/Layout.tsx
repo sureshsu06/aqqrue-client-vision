@@ -49,8 +49,12 @@ export function Layout({ children }: LayoutProps) {
       <div className="w-16 h-screen bg-white border-r border-mobius-gray-100 flex flex-col items-center sticky top-0">
         {/* Logo */}
         <div className="p-4 border-b border-mobius-gray-100">
-          <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">M</span>
+          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+            <img 
+              src="/mobius-logo.png" 
+              alt="Mobius"
+              className="w-6 h-6 object-contain"
+            />
           </div>
         </div>
 

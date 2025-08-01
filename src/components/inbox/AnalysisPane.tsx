@@ -530,15 +530,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                       {/* Undo Button */}
                       <div className="flex justify-between mb-0.5">
                         <div>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="h-6 w-6 p-0"
-                            onClick={handleEditClick}
-                            title="Edit"
-                          >
-                            <Edit3 className="w-3 h-3" />
-                          </Button>
+                          <h4 className="text-sm font-medium text-mobius-gray-900">Proposed Entries</h4>
                         </div>
                         <div className="flex gap-2">
                           <Button 
@@ -726,6 +718,20 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                           isBalanced(isEditMode ? editedJournalEntry : journalEntry) ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50"
                         )}>
                           {isBalanced(isEditMode ? editedJournalEntry : journalEntry) ? "✓ Balanced" : "✗ Unbalanced"}
+                        </div>
+                        
+                        {/* Edit Button - moved to bottom right */}
+                        <div className="flex justify-end mt-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-6 px-2"
+                            onClick={handleEditClick}
+                            title="Edit"
+                          >
+                            <Edit3 className="w-3 h-3 mr-1" />
+                            Edit
+                          </Button>
                         </div>
                       </div>
 
@@ -973,7 +979,7 @@ function getJournalEntryForTransaction(transaction: any) {
     case "9": // Wonderslate - Laptop for Tanvi Arora
       return {
         ...baseEntry,
-        invoiceNumber: "WONDER-LAPTOP-001",
+        invoiceNumber: "Pcd/2526/00159",
         totalAmount: 96170,
         entryType: "Computers",
         narration: "Being the purchase of laptop 1 Nos and shipped to Tanvi Arora",
