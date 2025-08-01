@@ -1108,8 +1108,8 @@ const Settings = () => {
                         <span className="text-sm">{category}</span>
                         <Badge variant="outline" className="ml-auto">
                           {accounts.length} accounts
-                        </Badge>
-                      </div>
+                    </Badge>
+                    </div>
                     </Button>
                   </div>
                   

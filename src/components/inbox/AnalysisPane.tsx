@@ -501,7 +501,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
         <Tabs defaultValue="summary" className="h-full flex flex-col">
               <TabsList className="grid grid-cols-2 w-[calc(100%-2rem)] mx-4 mt-4 mb-2">
             <TabsTrigger value="summary">Summary</TabsTrigger>
-            <TabsTrigger value="analysis">Analysis</TabsTrigger>
+            <TabsTrigger value="analysis">Workings</TabsTrigger>
           </TabsList>
 
               <div className="flex-1 overflow-y-auto px-4 pb-4">
@@ -525,31 +525,35 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                           <p className="text-mobius-gray-500">Currency:</p>
                           <p className="font-medium">Indian Rupee (₹)</p>
                         </div>
-                    {journalEntry.isRecurring && (
-                      <div>
-                        <p className="text-mobius-gray-500">Recurring:</p>
-                        <p className="font-medium flex items-center">
-                          <RotateCcw className="w-3 h-3 mr-1" />
-                          Monthly on 1st
-                        </p>
-                      </div>
-                    )}
                     </div>
 
                       {/* Undo Button */}
-                      <div className="flex justify-end mb-1 gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className={cn("h-6 w-6 p-0", isFormulaMode ? "bg-blue-100 text-blue-600" : "")}
-                          onClick={() => setIsFormulaMode(!isFormulaMode)}
-                          title={isFormulaMode ? "Disable Formula Mode" : "Enable Formula Mode"}
-                        >
-                          <span className="text-xs font-bold">fx</span>
-                        </Button>
-                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                          <RotateCcw className="w-3 h-3" />
-                        </Button>
+                      <div className="flex justify-between mb-0.5">
+                        <div>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-6 w-6 p-0"
+                            onClick={handleEditClick}
+                            title="Edit"
+                          >
+                            <Edit3 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className={cn("h-6 w-6 p-0", isFormulaMode ? "bg-blue-100 text-blue-600" : "")}
+                            onClick={() => setIsFormulaMode(!isFormulaMode)}
+                            title={isFormulaMode ? "Disable Formula Mode" : "Enable Formula Mode"}
+                          >
+                            <span className="text-xs font-bold">fx</span>
+                          </Button>
+                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                            <RotateCcw className="w-3 h-3" />
+                          </Button>
+                        </div>
                       </div>
 
                       {/* Formula Mode Instructions */}
@@ -812,18 +816,12 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                 </Button>
               </div>
             ) : (
-        <div className="space-y-2">
-          <Button className="bg-status-done hover:bg-status-done/90 w-full" onClick={onApprove}>
-            <CheckCircle2 className="w-4 h-4 mr-2" />
-            Approve
+        <div className="flex justify-start space-x-2">
+          <Button className="bg-status-done hover:bg-status-done/90 w-12 h-10" onClick={onApprove}>
+            <CheckCircle2 className="w-4 h-4" />
           </Button>
-                <Button variant="outline" className="w-full" onClick={() => console.log("Assign to Controller")}>
-                  <UserCheck className="w-4 h-4 mr-2" />
-                  Assign to Controller
-            </Button>
-                <Button variant="outline" className="w-full" onClick={handleEditClick}>
-              <Edit3 className="w-4 h-4 mr-2" />
-              Edit
+                <Button variant="outline" className="w-12 h-10" onClick={() => console.log("Assign to Controller")}>
+                  <UserCheck className="w-4 h-4" />
             </Button>
           </div>
             )}

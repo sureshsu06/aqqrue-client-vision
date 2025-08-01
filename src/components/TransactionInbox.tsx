@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -239,6 +239,13 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
     }
     return true;
   });
+
+  // Auto-select first transaction when component mounts or filters change
+  useEffect(() => {
+    if (filteredTransactions.length > 0 && !selectedTransaction) {
+      setSelectedTransaction(filteredTransactions[0]);
+    }
+  }, [filteredTransactions, selectedTransaction]);
 
   const unreadCount = mockTransactions.filter(t => t.status === "unread").length;
   const doneCount = mockTransactions.filter(t => t.status === "done").length;
