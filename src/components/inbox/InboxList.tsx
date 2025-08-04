@@ -21,6 +21,7 @@ export interface Transaction {
   id: string;
   vendor: string;
   amount: number;
+  currency?: string;
   source: "email" | "drive" | "brex" | "ramp";
   type: "bill" | "card" | "contract";
   status: "unread" | "review" | "approved" | "done";
@@ -32,6 +33,12 @@ export interface Transaction {
   isRecurring?: boolean;
   documentUrl?: string;
   pdfFile?: string;
+  // Contract-specific fields
+  contractStartDate?: string;
+  contractEndDate?: string;
+  billingCycle?: string;
+  contractValue?: number;
+  contractTerm?: string;
 }
 
 interface InboxListProps {
@@ -287,8 +294,8 @@ export function InboxList({
   };
 
   return (
-    <Card className="flex-1 bg-white shadow-mobius-md">
-      <div className="divide-y divide-mobius-gray-100">
+    <div className="bg-white shadow-mobius-md h-full flex flex-col overflow-hidden">
+      <div className="divide-y divide-mobius-gray-100 flex-1 overflow-y-auto">
         {transactions.map((transaction) => (
           <div
             key={transaction.id}
@@ -383,6 +390,6 @@ export function InboxList({
           </div>
         ))}
       </div>
-    </Card>
+    </div>
   );
 }

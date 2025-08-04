@@ -2,7 +2,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Filter, Archive, UserCheck, MailOpen, Undo2, Upload, Plus } from "lucide-react";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Filter, Archive, UserCheck, MailOpen, Undo2, Upload, Plus, ArrowUpDown, FileText, CreditCard, ChevronDown } from "lucide-react";
 
 interface InboxHeaderProps {
   unreadCount: number;
@@ -11,9 +17,13 @@ interface InboxHeaderProps {
   role: string;
   mode: string;
   confidenceThreshold: number;
+  selectedFilter: string;
+  selectedStatus: string;
   onRoleChange: (role: string) => void;
   onModeChange: (mode: string) => void;
   onConfidenceChange: (threshold: number) => void;
+  onFilterChange: (filter: string) => void;
+  onStatusChange: (status: string) => void;
 }
 
 export function InboxHeader({ 
@@ -23,9 +33,13 @@ export function InboxHeader({
   role, 
   mode, 
   confidenceThreshold,
+  selectedFilter,
+  selectedStatus,
   onRoleChange,
   onModeChange,
-  onConfidenceChange
+  onConfidenceChange,
+  onFilterChange,
+  onStatusChange
 }: InboxHeaderProps) {
   const progressPercent = Math.round((doneCount / totalCount) * 100);
 
@@ -112,20 +126,73 @@ export function InboxHeader({
 
             <div className="h-4 w-px bg-mobius-gray-300 mx-2" />
             
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
-                >
+            {/* Bills Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0 justify-center bg-white rounded">
                   <Filter className="w-4 h-4 text-mobius-gray-600" />
                 </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Filter transactions</p>
-              </TooltipContent>
-            </Tooltip>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-40 bg-white border border-mobius-gray-200">
+                <DropdownMenuItem 
+                  className="flex items-center space-x-2"
+                  onClick={() => onFilterChange("bills")}
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>Bills (12)</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="flex items-center space-x-2"
+                  onClick={() => onFilterChange("cards")}
+                >
+                  <CreditCard className="w-4 h-4" />
+                  <span>Cards (0)</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="flex items-center space-x-2"
+                  onClick={() => onFilterChange("contracts")}
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>Contracts (6)</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="flex items-center space-x-2"
+                  onClick={() => onFilterChange("all")}
+                >
+                  <Filter className="w-4 h-4" />
+                  <span>All (18)</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Date Sort Icon */}
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <ArrowUpDown className="w-4 h-4 text-mobius-gray-600" />
+            </Button>
+
+            {/* Status Filter Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 px-3 text-sm">
+                  {selectedStatus === "all" ? "All" : "Unread"}
+                  <ChevronDown className="w-3 h-3 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-32 bg-white border border-mobius-gray-200">
+                <DropdownMenuItem 
+                  className="flex items-center space-x-2"
+                  onClick={() => onStatusChange("all")}
+                >
+                  <span>All</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="flex items-center space-x-2"
+                  onClick={() => onStatusChange("unread")}
+                >
+                  <span>Unread</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </TooltipProvider>
         </div>
 

@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,7 +14,9 @@ import {
   Save,
   X,
   Plus,
-  UserCheck
+  UserCheck,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Transaction } from "./InboxList";
@@ -34,6 +35,10 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
   const [editedJournalEntry, setEditedJournalEntry] = useState<any>(null);
   const [journalEntry, setJournalEntry] = useState<any>(null);
   const [isFormulaMode, setIsFormulaMode] = useState(false); // Formula mode toggle
+  const [isWorkingsExpanded, setIsWorkingsExpanded] = useState(false); // New state for workings expansion
+  const [activeTab, setActiveTab] = useState<'summary' | 'ledger'>('summary'); // New state for tab management
+  const [isScheduleEditMode, setIsScheduleEditMode] = useState(false); // New state for schedule edit mode
+  const [editedSchedule, setEditedSchedule] = useState<any[]>([]); // New state for edited schedule
 
   // Initialize journal entry data safely
   useEffect(() => {
@@ -438,12 +443,91 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
     }
   };
 
+  const handleSeeHow = () => {
+    onSeeHow();
+  };
+
+  // Handle schedule edit mode
+  const handleScheduleEditClick = () => {
+    console.log("Edit schedule clicked");
+    const schedule = generateDeferredRevenueSchedule(transaction);
+    console.log("Generated schedule:", schedule);
+    setEditedSchedule([...schedule]);
+    setIsScheduleEditMode(true);
+    console.log("Edit mode set to true");
+  };
+
+  const handleScheduleSave = () => {
+    console.log("Saving edited schedule:", editedSchedule);
+    setIsScheduleEditMode(false);
+    setEditedSchedule([]);
+  };
+
+  const handleScheduleCancel = () => {
+    setIsScheduleEditMode(false);
+    setEditedSchedule([]);
+  };
+
+  const updateScheduleEntry = (index: number, field: string, value: any) => {
+    if (!editedSchedule[index]) return;
+    
+    const updatedSchedule = [...editedSchedule];
+    updatedSchedule[index] = { ...updatedSchedule[index], [field]: value };
+    setEditedSchedule(updatedSchedule);
+  };
+
+  // Generate deferred revenue schedule for SaaS contracts
+  const generateDeferredRevenueSchedule = (transaction: Transaction) => {
+    if (transaction.type !== 'contract' || !transaction.contractValue || !transaction.contractTerm) {
+      return [];
+    }
+
+    const totalValue = transaction.contractValue;
+    const billingCycle = transaction.billingCycle || 'monthly';
+    
+    // Always show month-wise recognition for proper deferred revenue tracking
+    let totalMonths = 12; // Default to 12 months
+    
+    if (billingCycle === 'annual') {
+      // For annual contracts, calculate total months from contract term
+      const termYears = parseInt(transaction.contractTerm.split(' ')[0]);
+      totalMonths = termYears * 12;
+    } else {
+      // For monthly contracts, use the term months
+      totalMonths = parseInt(transaction.contractTerm.split(' ')[0]);
+    }
+    
+    const monthlyRevenue = totalValue / totalMonths;
+    const schedule = [];
+    
+    for (let i = 1; i <= Math.min(totalMonths, 12); i++) { // Show max 12 months
+      const recognized = monthlyRevenue;
+      const remainingDeferred = totalValue - (recognized * i);
+      
+      schedule.push({
+        period: `Month ${i}`,
+        monthlyRevenue: Math.round(monthlyRevenue),
+        deferredRevenue: Math.round(Math.max(0, remainingDeferred)),
+        recognized: Math.round(recognized)
+      });
+    }
+    
+    return schedule;
+  };
+
   const analysisSteps = getAnalysisSteps(transaction);
 
   return (
-    <div className="w-[500px] border-l border-mobius-gray-100 flex flex-col bg-white">
+    <div className="bg-white flex flex-col h-full">
       {/* Header */}
-      <div className="p-4 border-b border-mobius-gray-100">
+      <div className="p-4 border-b border-mobius-gray-100 flex-shrink-0">
+        {/* Client Pill */}
+        <div className="mb-3">
+          <Badge variant="outline" className="bg-mobius-blue/10 text-mobius-blue border-mobius-blue/20 text-sm font-medium">
+            {transaction.client}
+          </Badge>
+        </div>
+        
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-semibold text-lg">{transaction.vendor}</h3>
           <Badge 
@@ -479,7 +563,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
         )}
 
         <p className="text-sm text-mobius-gray-500">
-          ₹{transaction.amount.toLocaleString()} • {new Date(transaction.date).toLocaleDateString()}
+          {transaction.type === 'contract' ? '$' : '₹'}{transaction.amount.toLocaleString()} • {new Date(transaction.date).toLocaleDateString()}
         </p>
       </div>
 
@@ -496,39 +580,411 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
       {/* Content - only render if journalEntry exists */}
       {journalEntry && (
         <>
-      {/* Tabs */}
-      <div className="flex-1 overflow-hidden">
-        <Tabs defaultValue="summary" className="h-full flex flex-col">
-              <TabsList className="grid grid-cols-2 w-[calc(100%-2rem)] mx-4 mt-4 mb-2">
-            <TabsTrigger value="summary">Summary</TabsTrigger>
-            <TabsTrigger value="analysis">Workings</TabsTrigger>
-          </TabsList>
+      {/* Tab Navigation - Above the fold */}
+      <div className="px-4 py-3 bg-white">
+        <div className="bg-mobius-gray-50 rounded-lg p-1">
+          <div className="flex">
+            <button
+              onClick={() => setActiveTab('summary')}
+              className={cn(
+                "flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors",
+                activeTab === 'summary'
+                  ? "bg-white text-mobius-gray-900 shadow-sm"
+                  : "text-mobius-gray-600 hover:text-mobius-gray-900"
+              )}
+            >
+              Summary
+            </button>
+            <button
+              onClick={() => setActiveTab('ledger')}
+              className={cn(
+                "flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors",
+                activeTab === 'ledger'
+                  ? "bg-white text-mobius-gray-900 shadow-sm"
+                  : "text-mobius-gray-600 hover:text-mobius-gray-900"
+              )}
+            >
+              Ledger
+            </button>
+          </div>
+        </div>
+      </div>
 
-              <div className="flex-1 overflow-y-auto px-4 pb-4">
-            <TabsContent value="summary" className="mt-0">
-              <Card className="p-4">
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col bg-white">
+        <div className="flex-1 overflow-y-auto px-4 pb-4">
+          <div className="p-4">
+            <div className="space-y-4">
+              <div className="space-y-3 text-sm">
+                <div>
+                  <p className="text-mobius-gray-500">Client:</p>
+                  <p className="font-medium">{journalEntry.client}</p>
+                </div>
+                <div>
+                  <p className="text-mobius-gray-500">Invoice #:</p>
+                  <p className="font-medium">{journalEntry.invoiceNumber} 
+                    {journalEntry.isBillable && (
+                      <Badge variant="outline" className="ml-2 text-xs">Billable ✓</Badge>
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-mobius-gray-500">Currency:</p>
+                  <p className="font-medium">{transaction.type === 'contract' ? 'US Dollar ($)' : 'Indian Rupee (₹)'}</p>
+                </div>
+              </div>
+
+              {/* Tab Content */}
+              {activeTab === 'summary' ? (
                 <div className="space-y-4">
-                  <div className="space-y-3 text-sm">
-                    <div>
-                      <p className="text-mobius-gray-500">Client:</p>
-                      <p className="font-medium">{journalEntry.client}</p>
-                    </div>
-                    <div>
-                      <p className="text-mobius-gray-500">Invoice #:</p>
-                      <p className="font-medium">{journalEntry.invoiceNumber} 
-                        {journalEntry.isBillable && (
-                          <Badge variant="outline" className="ml-2 text-xs">Billable ✓</Badge>
-                        )}
-                      </p>
-                    </div>
-                        <div>
-                          <p className="text-mobius-gray-500">Currency:</p>
-                          <p className="font-medium">Indian Rupee (₹)</p>
+                  {transaction.type === 'contract' ? (
+                    // SaaS Contract Details for Revenue
+                    <div className="space-y-6">
+                      {/* Contract Details */}
+                      <div className="bg-mobius-gray-50 rounded-lg p-4">
+                        <h4 className="text-sm font-medium text-mobius-gray-900 mb-3">Contract Details</h4>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <p className="text-mobius-gray-500">Contract Value:</p>
+                            <p className="font-medium">${transaction.contractValue?.toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-mobius-gray-500">Currency:</p>
+                            <p className="font-medium">{transaction.currency || 'USD'}</p>
+                          </div>
+                          <div>
+                            <p className="text-mobius-gray-500">Contract Term:</p>
+                            <p className="font-medium">{transaction.contractTerm}</p>
+                          </div>
+                          <div>
+                            <p className="text-mobius-gray-500">Billing Cycle:</p>
+                            <p className="font-medium">{transaction.billingCycle}</p>
+                          </div>
+                          <div>
+                            <p className="text-mobius-gray-500">Start Date:</p>
+                            <p className="font-medium">{transaction.contractStartDate}</p>
+                          </div>
+                          <div>
+                            <p className="text-mobius-gray-500">End Date:</p>
+                            <p className="font-medium">{transaction.contractEndDate}</p>
+                          </div>
                         </div>
-                    </div>
+                      </div>
 
+                      {/* Deferred Revenue Schedule */}
+                      <div className="p-4">
+                        <h4 className="text-sm font-medium text-mobius-gray-900 mb-3">Deferred Revenue Schedule</h4>
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-4 gap-2 text-xs font-medium text-mobius-gray-500 uppercase tracking-wide">
+                            <div>Period</div>
+                            <div className="text-right">Monthly Revenue</div>
+                            <div className="text-right">Deferred Revenue</div>
+                            <div className="text-right">Recognized</div>
+                          </div>
+                          
+                          {(() => {
+                            const schedule = isScheduleEditMode ? editedSchedule : generateDeferredRevenueSchedule(transaction);
+                            console.log("Rendering schedule:", schedule, "Edit mode:", isScheduleEditMode);
+                            return schedule.map((period, index) => (
+                              <div key={index} className="grid grid-cols-4 gap-2 text-sm border-b border-mobius-gray-200 pb-2">
+                                <div className="font-medium">{period.period}</div>
+                                <div className="text-right">
+                                  {isScheduleEditMode ? (
+                                    <Input
+                                      type="number"
+                                      value={period.monthlyRevenue}
+                                      onChange={(e) => updateScheduleEntry(index, 'monthlyRevenue', parseFloat(e.target.value) || 0)}
+                                      className="h-6 text-sm text-right border-mobius-gray-200 w-20"
+                                    />
+                                  ) : (
+                                    `$${period.monthlyRevenue.toLocaleString()}`
+                                  )}
+                                </div>
+                                <div className="text-right">
+                                  {isScheduleEditMode ? (
+                                    <Input
+                                      type="number"
+                                      value={period.deferredRevenue}
+                                      onChange={(e) => updateScheduleEntry(index, 'deferredRevenue', parseFloat(e.target.value) || 0)}
+                                      className="h-6 text-sm text-right border-mobius-gray-200 w-20"
+                                    />
+                                  ) : (
+                                    `$${period.deferredRevenue.toLocaleString()}`
+                                  )}
+                                </div>
+                                <div className="text-right">
+                                  {isScheduleEditMode ? (
+                                    <Input
+                                      type="number"
+                                      value={period.recognized}
+                                      onChange={(e) => updateScheduleEntry(index, 'recognized', parseFloat(e.target.value) || 0)}
+                                      className="h-6 text-sm text-right border-mobius-gray-200 w-20"
+                                    />
+                                  ) : (
+                                    `$${period.recognized.toLocaleString()}`
+                                  )}
+                                </div>
+                              </div>
+                            ));
+                          })()}
+                        </div>
+                        
+                        {/* Edit/Save/Cancel Buttons - below the table */}
+                        <div className="flex justify-end mt-3 space-x-2">
+                          {isScheduleEditMode ? (
+                            <>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-6 px-2"
+                                onClick={handleScheduleSave}
+                                title="Save Schedule"
+                              >
+                                <Save className="w-3 h-3 mr-1" />
+                                Save
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-6 px-2"
+                                onClick={handleScheduleCancel}
+                                title="Cancel"
+                              >
+                                <X className="w-3 h-3 mr-1" />
+                                Cancel
+                              </Button>
+                            </>
+                          ) : (
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-6 px-2"
+                              onClick={handleScheduleEditClick}
+                              title="Edit Schedule"
+                            >
+                              <Edit3 className="w-3 h-3 mr-1" />
+                              Edit
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Editable Journal Entry Table for Contracts */}
+                      <div className="p-4">
+                        <div className="flex justify-between mb-4">
+                          <h4 className="text-sm font-medium text-mobius-gray-900">Journal Entries</h4>
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className={cn("h-6 w-6 p-0", isFormulaMode ? "bg-blue-100 text-blue-600" : "")}
+                              onClick={() => setIsFormulaMode(!isFormulaMode)}
+                              title={isFormulaMode ? "Disable Formula Mode" : "Enable Formula Mode"}
+                            >
+                              <span className="text-xs font-bold">fx</span>
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                              <RotateCcw className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Formula Mode Instructions */}
+                        {isFormulaMode && (
+                          <div className="mb-4 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
+                            <p className="font-medium mb-1">Formula Mode Active</p>
+                            <p>Use Excel-like formulas: <code className="bg-blue-100 px-1 rounded">=B1*0.1</code>, <code className="bg-blue-100 px-1 rounded">=SUM(B1:B3)</code>, <code className="bg-blue-100 px-1 rounded">10%*C2</code></p>
+                            <p className="text-blue-600 mt-1">B = Debit column, C = Credit column, numbers = row index (1-based)</p>
+                          </div>
+                        )}
+
+                        <Separator className="my-4" />
+
+                        {/* Journal Entry Table */}
+                        <div className="mt-4">
+                          <div className="grid grid-cols-12 gap-2 text-xs font-medium text-mobius-gray-500 uppercase tracking-wide mb-3 pt-2">
+                            <div className="col-span-5 pl-0">ACCOUNT</div>
+                            <div className="col-span-3 text-right">DEBIT</div>
+                            <div className="col-span-3 text-right">CREDIT</div>
+                            <div className="col-span-1"></div>
+                          </div>
+                          
+                          {/* Column Headers for Formula Reference */}
+                          {isFormulaMode && (
+                            <div className="grid grid-cols-12 gap-2 text-xs font-medium text-blue-600 mb-1">
+                              <div className="col-span-5 pl-0">A</div>
+                              <div className="col-span-3 text-right">B</div>
+                              <div className="col-span-3 text-right">C</div>
+                              <div className="col-span-1"></div>
+                            </div>
+                          )}
+                          
+                          <div className="space-y-1">
+                            {(isEditMode ? editedJournalEntry : journalEntry).entries.map((entry: any, index: number) => (
+                              <div key={index} className="grid grid-cols-12 gap-2 text-sm items-center group">
+                                <div className="col-span-5 font-medium text-sm">
+                                  {isEditMode ? (
+                                    <Select 
+                                      value={entry.account} 
+                                      onValueChange={(value) => updateJournalEntry(index, 'account', value)}
+                                    >
+                                      <SelectTrigger className="h-8 text-sm border-mobius-gray-200 text-left justify-start">
+                                        <SelectValue className="text-sm text-left" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="Cash/Accounts Receivable">Cash/Accounts Receivable</SelectItem>
+                                        <SelectItem value="Deferred Revenue">Deferred Revenue</SelectItem>
+                                        <SelectItem value="SaaS Revenue">SaaS Revenue</SelectItem>
+                                        <SelectItem value="Professional Fees">Professional Fees</SelectItem>
+                                        <SelectItem value="Rent">Rent</SelectItem>
+                                        <SelectItem value="Computers">Computers</SelectItem>
+                                        <SelectItem value="Freight and Postage">Freight and Postage</SelectItem>
+                                        <SelectItem value="Rates & Taxes">Rates & Taxes</SelectItem>
+                                        <SelectItem value="Input CGST">Input CGST</SelectItem>
+                                        <SelectItem value="Input SGST">Input SGST</SelectItem>
+                                        <SelectItem value="Input IGST">Input IGST</SelectItem>
+                                        <SelectItem value="TDS on Professional Charges">TDS on Professional Charges</SelectItem>
+                                        <SelectItem value="TDS on Rent">TDS on Rent</SelectItem>
+                                        <SelectItem value="JCSS & Associates LLP">JCSS & Associates LLP</SelectItem>
+                                        <SelectItem value="Sogo Computers Pvt Ltd">Sogo Computers Pvt Ltd</SelectItem>
+                                        <SelectItem value="Clayworks Spaces Technologies Pvt Ltd">Clayworks Spaces Technologies Pvt Ltd</SelectItem>
+                                        <SelectItem value="NSDL Database Management Ltd">NSDL Database Management Ltd</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  ) : (
+                                    <div>
+                                      <div className="font-medium">{entry.account} <span className="text-xs text-mobius-gray-500 font-normal">({getGLAccountCode(entry.account)})</span></div>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="col-span-3 text-right">
+                                  {isEditMode ? (
+                                    <Input
+                                      type="text"
+                                      value={entry.debit?.toString() || ''}
+                                      onChange={(e) => updateJournalEntry(index, 'debit', e.target.value)}
+                                      onBlur={() => evaluateFormulaOnBlur(index, 'debit')}
+                                      onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                          evaluateFormulaOnBlur(index, 'debit');
+                                          e.currentTarget.blur();
+                                        }
+                                      }}
+                                      className={cn(
+                                        "h-8 text-sm text-right border-mobius-gray-200",
+                                        isFormulaMode ? "bg-blue-50 border-blue-300 font-mono" : "font-variant-numeric tabular-nums"
+                                      )}
+                                      placeholder={isFormulaMode ? "=B1*0.1" : "0.00"}
+                                      inputMode="text"
+                                      autoComplete="off"
+                                      spellCheck="false"
+                                      style={isFormulaMode ? { fontVariantNumeric: 'normal' } : {}}
+                                    />
+                                  ) : (
+                                    entry.debit ? `$${entry.debit.toFixed(2)}` : "—"
+                                  )}
+                                </div>
+                                <div className="col-span-3 text-right">
+                                  {isEditMode ? (
+                                    <Input
+                                      type="text"
+                                      value={entry.credit?.toString() || ''}
+                                      onChange={(e) => updateJournalEntry(index, 'credit', e.target.value)}
+                                      onBlur={() => evaluateFormulaOnBlur(index, 'credit')}
+                                      onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                          evaluateFormulaOnBlur(index, 'credit');
+                                          e.currentTarget.blur();
+                                        }
+                                      }}
+                                      className={cn(
+                                        "h-8 text-sm text-right border-mobius-gray-200",
+                                        isFormulaMode ? "bg-blue-50 border-blue-300 font-mono" : "font-variant-numeric tabular-nums"
+                                      )}
+                                      placeholder={isFormulaMode ? "=C1*0.1" : "0.00"}
+                                      inputMode="text"
+                                      autoComplete="off"
+                                      spellCheck="false"
+                                      style={isFormulaMode ? { fontVariantNumeric: 'normal' } : {}}
+                                    />
+                                  ) : (
+                                    entry.credit ? `$${entry.credit.toFixed(2)}` : "—"
+                                  )}
+                                </div>
+                                {/* Delete button - positioned in the last column */}
+                                <div className="col-span-1 flex justify-center">
+                                  {isEditMode && editedJournalEntry?.entries.length > 1 && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 w-6 p-0 text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                                      onClick={() => deleteRow(index)}
+                                      title="Delete row"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          {/* Add Row on Hover */}
+                          {isEditMode && (
+                            <div 
+                              className="group relative mt-2 p-1 border-2 border-dashed border-mobius-gray-200 rounded-lg hover:border-mobius-gray-300 transition-colors cursor-pointer"
+                              onClick={addRow}
+                            >
+                              <div className="flex items-center justify-center">
+                                <Plus className="w-4 h-4 text-mobius-gray-400 group-hover:text-mobius-gray-600 transition-colors" />
+                              </div>
+                              {/* Tooltip */}
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-mobius-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                                Drag to add or remove rows
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-mobius-gray-800"></div>
+                              </div>
+                            </div>
+                          )}
+                          
+                          <Separator className="my-2" />
+                          
+                          {/* Totals Row */}
+                          <div className="grid grid-cols-12 gap-2 text-sm font-medium">
+                            <div className="col-span-5">Totals</div>
+                            <div className="col-span-3 text-right">{getTotalDebit(journalEntry, transaction)}</div>
+                            <div className="col-span-3 text-right">{getTotalCredit(journalEntry, transaction)}</div>
+                            <div className="col-span-1"></div>
+                          </div>
+                          
+                          {/* Balance Status */}
+                          <div className={cn(
+                            "text-center text-xs mt-1 p-1 rounded",
+                            isBalanced(isEditMode ? editedJournalEntry : journalEntry) ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50"
+                          )}>
+                            {isBalanced(isEditMode ? editedJournalEntry : journalEntry) ? "✓ Balanced" : "✗ Unbalanced"}
+                          </div>
+                          
+                          {/* Edit Button - moved to bottom right */}
+                          <div className="flex justify-end mt-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-6 px-2"
+                              onClick={handleEditClick}
+                              title="Edit"
+                            >
+                              <Edit3 className="w-3 h-3 mr-1" />
+                              Edit
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    // Regular Analysis for Bills/Expenses
+                    <>
                       {/* Undo Button */}
-                      <div className="flex justify-between mb-0.5">
+                      <div className="flex justify-between mb-4">
                         <div>
                           <h4 className="text-sm font-medium text-mobius-gray-900">Proposed Entries</h4>
                         </div>
@@ -550,18 +1006,18 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
 
                       {/* Formula Mode Instructions */}
                       {isFormulaMode && (
-                        <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
+                        <div className="mb-4 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
                           <p className="font-medium mb-1">Formula Mode Active</p>
                           <p>Use Excel-like formulas: <code className="bg-blue-100 px-1 rounded">=B1*0.1</code>, <code className="bg-blue-100 px-1 rounded">=SUM(B1:B3)</code>, <code className="bg-blue-100 px-1 rounded">10%*C2</code></p>
                           <p className="text-blue-600 mt-1">B = Debit column, C = Credit column, numbers = row index (1-based)</p>
                         </div>
                       )}
 
-                  <Separator />
+                      <Separator className="my-4" />
 
-                  {/* Journal Entry Table */}
-                  <div>
-                        <div className="grid grid-cols-12 gap-2 text-xs font-medium text-mobius-gray-500 uppercase tracking-wide mb-2">
+                      {/* Journal Entry Table */}
+                      <div className="mt-4">
+                        <div className="grid grid-cols-12 gap-2 text-xs font-medium text-mobius-gray-500 uppercase tracking-wide mb-3 pt-2">
                           <div className="col-span-5 pl-0">ACCOUNT</div>
                           <div className="col-span-3 text-right">DEBIT</div>
                           <div className="col-span-3 text-right">CREDIT</div>
@@ -637,7 +1093,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                                     style={isFormulaMode ? { fontVariantNumeric: 'normal' } : {}}
                                   />
                                 ) : (
-                                  entry.debit ? `₹${entry.debit.toFixed(2)}` : "—"
+                                  entry.debit ? `$${entry.debit.toFixed(2)}` : "—"
                                 )}
                               </div>
                               <div className="col-span-3 text-right">
@@ -664,7 +1120,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                                     style={isFormulaMode ? { fontVariantNumeric: 'normal' } : {}}
                                   />
                                 ) : (
-                                  entry.credit ? `₹${entry.credit.toFixed(2)}` : "—"
+                                  entry.credit ? `$${entry.credit.toFixed(2)}` : "—"
                                 )}
                               </div>
                               {/* Delete button - positioned in the last column */}
@@ -683,8 +1139,8 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                               </div>
                             </div>
                           ))}
-                    </div>
-                    
+                        </div>
+                        
                         {/* Add Row on Hover */}
                         {isEditMode && (
                           <div 
@@ -693,22 +1149,22 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                           >
                             <div className="flex items-center justify-center">
                               <Plus className="w-4 h-4 text-mobius-gray-400 group-hover:text-mobius-gray-600 transition-colors" />
-                      </div>
+                            </div>
                             {/* Tooltip */}
                             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-mobius-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
                               Drag to add or remove rows
                               <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-mobius-gray-800"></div>
-                      </div>
-                    </div>
+                            </div>
+                          </div>
                         )}
-                    
-                    <Separator className="my-2" />
-                    
+                        
+                        <Separator className="my-2" />
+                        
                         {/* Totals Row */}
                         <div className="grid grid-cols-12 gap-2 text-sm font-medium">
                           <div className="col-span-5">Totals</div>
-                          <div className="col-span-3 text-right">{getTotalDebit(journalEntry)}</div>
-                          <div className="col-span-3 text-right">{getTotalCredit(journalEntry)}</div>
+                          <div className="col-span-3 text-right">{getTotalDebit(journalEntry, transaction)}</div>
+                          <div className="col-span-3 text-right">{getTotalCredit(journalEntry, transaction)}</div>
                           <div className="col-span-1"></div>
                         </div>
                         
@@ -734,72 +1190,145 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                           </Button>
                         </div>
                       </div>
+                    </>
+                  )}
 
-                      {/* Comment Box */}
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-mobius-gray-700">Comments</label>
-                        <textarea
-                          className="w-full h-20 p-2 text-sm border border-mobius-gray-200 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-mobius-blue focus:border-transparent"
-                          placeholder="Add context or notes for this transaction..."
-                        />
-                      </div>
-                </div>
-              </Card>
-            </TabsContent>
+                  {/* Comment Box */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-mobius-gray-700">Comments</label>
+                    <textarea
+                      className="w-full h-20 p-2 text-sm border border-mobius-gray-200 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-mobius-blue focus:border-transparent"
+                      placeholder="Add context or notes for this transaction..."
+                    />
+                  </div>
 
-            <TabsContent value="analysis" className="mt-0">
-              <div className="space-y-3">
-                {analysisSteps.map((step) => (
-                  <Card key={step.step} className="p-3">
-                        <div className="space-y-3">
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-start space-x-3 flex-1">
-                        <div className={cn(
-                                "w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium mt-0.5",
-                          step.status === "complete" 
-                            ? "bg-status-done text-white"
-                            : step.status === "skip"
-                            ? "bg-mobius-gray-300 text-mobius-gray-600"
-                            : "bg-status-pending text-white"
-                        )}>
-                          {step.status === "complete" ? "✓" : step.step}
-                        </div>
-                              <div className="flex-1">
-                                <h4 className="font-medium text-sm mb-1">{step.title}</h4>
-                                <p className="text-xs text-mobius-gray-600 leading-relaxed">{step.result}</p>
-                              </div>
-                      </div>
-                      {step.status === "complete" && (
-                              <Badge variant="outline" className="bg-status-done/10 text-status-done border-status-done/20 text-xs ml-2">
-                          {step.confidence}%
+                  {/* Workings Section - Expandable */}
+                  <Separator />
+                  <div className="space-y-3">
+                    <button
+                      onClick={() => setIsWorkingsExpanded(!isWorkingsExpanded)}
+                      className="flex items-center justify-between w-full text-left hover:bg-mobius-gray-50 p-2 rounded-lg transition-colors"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <h4 className="text-sm font-medium text-mobius-gray-900">Analysis Workings</h4>
+                        <Badge variant="outline" className="bg-status-done/10 text-status-done border-status-done/20 text-xs">
+                          {confidence}%
                         </Badge>
+                      </div>
+                      {isWorkingsExpanded ? (
+                        <ChevronDown className="w-4 h-4 text-mobius-gray-500" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4 text-mobius-gray-500" />
                       )}
+                    </button>
+                    
+                    {isWorkingsExpanded && (
+                      <div className="space-y-3 pl-4">
+                        {analysisSteps.map((step) => (
+                          <Card key={step.step} className="p-3">
+                            <div className="space-y-3">
+                              <div className="flex items-start justify-between">
+                                <div className="flex items-start space-x-3 flex-1">
+                                  <div className={cn(
+                                    "w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium mt-0.5",
+                                    step.status === "complete" 
+                                      ? "bg-status-done text-white"
+                                      : step.status === "skip"
+                                      ? "bg-mobius-gray-300 text-mobius-gray-600"
+                                      : "bg-status-pending text-white"
+                                  )}>
+                                    {step.status === "complete" ? "✓" : step.step}
+                                  </div>
+                                  <div className="flex-1">
+                                    <h4 className="font-medium text-sm mb-1">{step.title}</h4>
+                                    <p className="text-xs text-mobius-gray-600 leading-relaxed">{step.result}</p>
+                                  </div>
+                                </div>
+                                {step.status === "complete" && (
+                                  <Badge variant="outline" className="bg-status-done/10 text-status-done border-status-done/20 text-xs ml-2">
+                                    {step.confidence}%
+                                  </Badge>
+                                )}
+                              </div>
+                              
+                              {/* Comment and Retry Section */}
+                              <div className="space-y-2">
+                                <div className="flex items-center space-x-2">
+                                  <Input
+                                    placeholder="Add a comment or correction for this analysis step..."
+                                    className="h-8 text-xs border-mobius-gray-200 flex-1"
+                                  />
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => console.log(`Retry ${step.title} for transaction ${transaction.id}`)}
+                                  >
+                                    <RotateCcw className="w-3 h-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                /* Ledger Tab Content */
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h4 className="text-sm font-medium text-mobius-gray-900">Vendor Ledger</h4>
+                    <Badge variant="outline" className="text-xs">
+                      {transaction.vendor}
+                    </Badge>
+                  </div>
+                  
+                  {/* Current Balance */}
+                  <div className="bg-mobius-gray-50 p-3 rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-mobius-gray-600">Current Balance</span>
+                      <span className="text-lg font-semibold text-mobius-gray-900">
+                        ₹{getVendorBalance(transaction.vendor).toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Past Journal Entries */}
+                  <div className="space-y-3">
+                    <h5 className="text-sm font-medium text-mobius-gray-700">Past Journal Entries</h5>
+                    <div className="space-y-2">
+                      {getPastJournalEntries(transaction.vendor).map((entry, index) => (
+                        <div key={index} className="border border-mobius-gray-200 rounded-lg p-3">
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <p className="text-sm font-medium text-mobius-gray-900">{entry.invoiceNumber}</p>
+                              <p className="text-xs text-mobius-gray-500">{new Date(entry.date).toLocaleDateString()}</p>
+                            </div>
+                            <Badge variant="outline" className="text-xs">
+                              {entry.status}
+                            </Badge>
                           </div>
-                          
-                          {/* Comment and Retry Section */}
-                          <div className="space-y-2">
-                            <div className="flex items-center space-x-2">
-                              <Input
-                                placeholder="Add a comment or correction for this analysis step..."
-                                className="h-8 text-xs border-mobius-gray-200 flex-1"
-                              />
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="h-8 w-8 p-0"
-                                onClick={() => console.log(`Retry ${step.title} for transaction ${transaction.id}`)}
-                              >
-                                <RotateCcw className="w-3 h-3" />
-                              </Button>
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <span className="text-mobius-gray-500">Amount:</span>
+                              <span className="ml-2 font-medium">₹{entry.amount.toLocaleString()}</span>
+                            </div>
+                            <div>
+                              <span className="text-mobius-gray-500">Type:</span>
+                              <span className="ml-2 font-medium">{entry.type}</span>
                             </div>
                           </div>
+                        </div>
+                      ))}
                     </div>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        </Tabs>
+        </div>
       </div>
 
       {/* Footer Actions */}
@@ -844,7 +1373,7 @@ function getJournalEntryForTransaction(transaction: any) {
     vendor: transaction.vendor,
     amount: transaction.amount,
     date: transaction.date,
-    client: "Elire", // All transactions are for Elire
+    client: transaction.client, // Use the actual transaction client
     isRecurring: transaction.isRecurring,
     isBillable: true,
     costCenter: "US Operations",
@@ -1006,6 +1535,84 @@ function getJournalEntryForTransaction(transaction: any) {
         ]
       };
 
+    case "13": // Bishop Wisecarver - RhythmsAI OKR Platform
+      return {
+        ...baseEntry,
+        invoiceNumber: "RHYTHMS-BW-001",
+        totalAmount: 7020,
+        entryType: "SaaS Revenue",
+        narration: "Being the SaaS revenue from Bishop Wisecarver for RhythmsAI OKR Platform subscription",
+        entries: [
+          { account: "Cash/Accounts Receivable", debit: 7020, credit: 0, confidence: 100 },
+          { account: "Deferred Revenue", debit: 0, credit: 7020, confidence: 100 }
+        ]
+      };
+
+    case "14": // MARKETview Technology - RhythmsAI OKR Platform
+      return {
+        ...baseEntry,
+        invoiceNumber: "RHYTHMS-MV-001",
+        totalAmount: 10000,
+        entryType: "SaaS Revenue",
+        narration: "Being the SaaS revenue from MARKETview Technology for RhythmsAI OKR Platform subscription",
+        entries: [
+          { account: "Cash/Accounts Receivable", debit: 10000, credit: 0, confidence: 100 },
+          { account: "Deferred Revenue", debit: 0, credit: 10000, confidence: 100 }
+        ]
+      };
+
+    case "15": // Sera - SaaS Cloud Services
+      return {
+        ...baseEntry,
+        invoiceNumber: "RHYTHMS-SERA-001",
+        totalAmount: 95000,
+        entryType: "SaaS Revenue",
+        narration: "Being the SaaS revenue from Sera for cloud services subscription",
+        entries: [
+          { account: "Cash/Accounts Receivable", debit: 95000, credit: 0, confidence: 100 },
+          { account: "Deferred Revenue", debit: 0, credit: 95000, confidence: 100 }
+        ]
+      };
+
+    case "16": // Valpak - SaaS Cloud Services
+      return {
+        ...baseEntry,
+        invoiceNumber: "RHYTHMS-VALPAK-001",
+        totalAmount: 75000,
+        entryType: "SaaS Revenue",
+        narration: "Being the SaaS revenue from Valpak for cloud services subscription",
+        entries: [
+          { account: "Cash/Accounts Receivable", debit: 75000, credit: 0, confidence: 100 },
+          { account: "Deferred Revenue", debit: 0, credit: 75000, confidence: 100 }
+        ]
+      };
+
+    case "17": // Networkology - SaaS Cloud Services
+      return {
+        ...baseEntry,
+        invoiceNumber: "RHYTHMS-NET-001",
+        totalAmount: 110000,
+        entryType: "SaaS Revenue",
+        narration: "Being the SaaS revenue from Networkology for cloud services subscription",
+        entries: [
+          { account: "Cash/Accounts Receivable", debit: 110000, credit: 0, confidence: 100 },
+          { account: "Deferred Revenue", debit: 0, credit: 110000, confidence: 100 }
+        ]
+      };
+
+    case "18": // AlineOps - SaaS Cloud Services
+      return {
+        ...baseEntry,
+        invoiceNumber: "RHYTHMS-ALINE-001",
+        totalAmount: 135000,
+        entryType: "SaaS Revenue",
+        narration: "Being the SaaS revenue from AlineOps for cloud services subscription",
+        entries: [
+          { account: "Cash/Accounts Receivable", debit: 135000, credit: 0, confidence: 100 },
+          { account: "Deferred Revenue", debit: 0, credit: 135000, confidence: 100 }
+        ]
+      };
+
     default:
       // Fallback for any other transactions
       return {
@@ -1027,6 +1634,12 @@ function getJournalEntryForTransaction(transaction: any) {
 // Helper function to get GL account code
 function getGLAccountCode(accountName: string) {
   switch (accountName) {
+    case "Cash/Accounts Receivable":
+      return "1001";
+    case "Deferred Revenue":
+      return "2001";
+    case "SaaS Revenue":
+      return "4001";
     case "Professional Fees":
       return "1010";
     case "Rent":
@@ -1061,13 +1674,17 @@ function getGLAccountCode(accountName: string) {
 }
 
 // Helper function to get total debit
-function getTotalDebit(journalEntry: any) {
-  return `₹${journalEntry.entries.reduce((sum: number, entry: any) => sum + (entry.debit || 0), 0).toFixed(2)}`;
+function getTotalDebit(journalEntry: any, transaction?: any) {
+  const amount = journalEntry.entries.reduce((sum: number, entry: any) => sum + (entry.debit || 0), 0);
+  const currency = transaction?.type === 'contract' ? '$' : '₹';
+  return `${currency}${amount.toFixed(2)}`;
 }
 
 // Helper function to get total credit
-function getTotalCredit(journalEntry: any) {
-  return `₹${journalEntry.entries.reduce((sum: number, entry: any) => sum + (entry.credit || 0), 0).toFixed(2)}`;
+function getTotalCredit(journalEntry: any, transaction?: any) {
+  const amount = journalEntry.entries.reduce((sum: number, entry: any) => sum + (entry.credit || 0), 0);
+  const currency = transaction?.type === 'contract' ? '$' : '₹';
+  return `${currency}${amount.toFixed(2)}`;
 }
 
 // Helper function to check if journal entry is balanced
@@ -1075,4 +1692,1068 @@ function isBalanced(journalEntry: any) {
   const totalDebit = journalEntry.entries.reduce((sum: number, entry: any) => sum + (entry.debit || 0), 0);
   const totalCredit = journalEntry.entries.reduce((sum: number, entry: any) => sum + (entry.credit || 0), 0);
   return Math.abs(totalDebit - totalCredit) < 0.01; // Allow for floating point inaccuracies
+}
+
+// Helper function to get vendor balance
+function getVendorBalance(vendorName: string) {
+  console.log('Getting balance for vendor:', vendorName);
+  
+  // Mock data - in real app this would come from the backend
+  // These balances are calculated as net outstanding amounts after all invoices and payments
+  const vendorBalances: { [key: string]: number } = {
+    "JCSS & Associates LLP": 0, // All invoices paid (86400+64800+86400+64800 - 86400-64800-86400-64800 = 0)
+    "JCSS & Associates": 0,
+    "JCSS": 0,
+    "Sogo Computers Pvt Ltd": 0, // All invoices paid (480850+96170+5310+192340+5310 - 480850-96170-5310-192340-5310 = 0)
+    "Sogo Computers": 0,
+    "Sogo": 0,
+    "Clayworks Spaces Technologies Pvt Ltd": 0, // All invoices paid (102660+5251+102660+5251+102660 - 102660-5251-102660-5251-102660 = 0)
+    "Clayworks Spaces Technologies": 0,
+    "Clayworks Spaces Pvt Ltd": 0,
+    "Clayworks Spaces": 0,
+    "Clayworks": 0,
+    "NSDL Database Management Ltd": 0, // All invoices paid (11800+11800+11800 - 11800-11800-11800 = 0)
+    "NSDL Database Management": 0,
+    "NSDL": 0,
+    "Mahat Labs Pvt Ltd": 0, // All invoices paid (480850+240425+480850 - 480850-240425-480850 = 0)
+    "Mahat Labs": 0,
+    "Mahat": 0,
+    "Wonderslate": 0, // All invoices paid (96170+96170+96170 - 96170-96170-96170 = 0)
+    "HEPL": 0 // All invoices paid (96170+96170+96170 - 96170-96170-96170 = 0)
+  };
+  
+  // Try exact match first
+  let balance = vendorBalances[vendorName];
+  
+  // If no exact match, try partial matching
+  if (balance === undefined) {
+    const vendorKeys = Object.keys(vendorBalances);
+    for (const key of vendorKeys) {
+      if (vendorName.toLowerCase().includes(key.toLowerCase()) || 
+          key.toLowerCase().includes(vendorName.toLowerCase())) {
+        balance = vendorBalances[key];
+        console.log('Found partial match:', key, 'for vendor:', vendorName);
+        break;
+      }
+    }
+  }
+  
+  balance = balance || 0;
+  console.log('Balance found:', balance);
+  return balance;
+}
+
+// Helper function to get past journal entries for a vendor
+function getPastJournalEntries(vendorName: string) {
+  console.log('Getting past entries for vendor:', vendorName);
+  
+  // Mock data - in real app this would come from the backend
+  const pastEntries: { [key: string]: any[] } = {
+    "JCSS & Associates LLP": [
+      {
+        invoiceNumber: "ASO-I/108/25-26",
+        date: "2025-04-26",
+        amount: 86400,
+        type: "Professional Fees",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-001",
+        date: "2025-04-30",
+        amount: -86400,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "ASO-I/107/25-26",
+        date: "2025-03-26",
+        amount: 64800,
+        type: "Professional Fees",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-002",
+        date: "2025-03-31",
+        amount: -64800,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "ASO-I/106/25-26",
+        date: "2025-02-26",
+        amount: 86400,
+        type: "Professional Fees",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-003",
+        date: "2025-02-28",
+        amount: -86400,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "ASO-I/105/25-26",
+        date: "2025-01-26",
+        amount: 64800,
+        type: "Professional Fees",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-004",
+        date: "2025-01-31",
+        amount: -64800,
+        type: "Payment",
+        status: "Paid"
+      }
+    ],
+    "Sogo Computers Pvt Ltd": [
+      {
+        invoiceNumber: "Pcd/25-26/001142",
+        date: "2025-04-19",
+        amount: 480850,
+        type: "Computers",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-005",
+        date: "2025-04-25",
+        amount: -480850,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "Pcd/25-26/001141",
+        date: "2025-03-19",
+        amount: 96170,
+        type: "Computers",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-006",
+        date: "2025-03-25",
+        amount: -96170,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "SOGO-FREIGHT-003",
+        date: "2025-04-15",
+        amount: 5310,
+        type: "Freight and Postage",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-007",
+        date: "2025-04-20",
+        amount: -5310,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "Pcd/25-26/001140",
+        date: "2025-02-19",
+        amount: 192340,
+        type: "Computers",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-008",
+        date: "2025-02-25",
+        amount: -192340,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "SOGO-FREIGHT-004",
+        date: "2025-03-15",
+        amount: 5310,
+        type: "Freight and Postage",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-009",
+        date: "2025-03-20",
+        amount: -5310,
+        type: "Payment",
+        status: "Paid"
+      }
+    ],
+    "Sogo Computers": [
+      {
+        invoiceNumber: "Pcd/25-26/001142",
+        date: "2025-04-19",
+        amount: 480850,
+        type: "Computers",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-005",
+        date: "2025-04-25",
+        amount: -480850,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "Pcd/25-26/001141",
+        date: "2025-03-19",
+        amount: 96170,
+        type: "Computers",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-006",
+        date: "2025-03-25",
+        amount: -96170,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "SOGO-FREIGHT-003",
+        date: "2025-04-15",
+        amount: 5310,
+        type: "Freight and Postage",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-007",
+        date: "2025-04-20",
+        amount: -5310,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "Pcd/25-26/001140",
+        date: "2025-02-19",
+        amount: 192340,
+        type: "Computers",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-008",
+        date: "2025-02-25",
+        amount: -192340,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "SOGO-FREIGHT-004",
+        date: "2025-03-15",
+        amount: 5310,
+        type: "Freight and Postage",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-009",
+        date: "2025-03-20",
+        amount: -5310,
+        type: "Payment",
+        status: "Paid"
+      }
+    ],
+    "Sogo": [
+      {
+        invoiceNumber: "Pcd/25-26/001142",
+        date: "2025-04-19",
+        amount: 480850,
+        type: "Computers",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-005",
+        date: "2025-04-25",
+        amount: -480850,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "Pcd/25-26/001141",
+        date: "2025-03-19",
+        amount: 96170,
+        type: "Computers",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-006",
+        date: "2025-03-25",
+        amount: -96170,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "SOGO-FREIGHT-003",
+        date: "2025-04-15",
+        amount: 5310,
+        type: "Freight and Postage",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-007",
+        date: "2025-04-20",
+        amount: -5310,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "Pcd/25-26/001140",
+        date: "2025-02-19",
+        amount: 192340,
+        type: "Computers",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-008",
+        date: "2025-02-25",
+        amount: -192340,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "SOGO-FREIGHT-004",
+        date: "2025-03-15",
+        amount: 5310,
+        type: "Freight and Postage",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-009",
+        date: "2025-03-20",
+        amount: -5310,
+        type: "Payment",
+        status: "Paid"
+      }
+    ],
+    "Clayworks Spaces Technologies Pvt Ltd": [
+      {
+        invoiceNumber: "INV-25/26/0257",
+        date: "2025-04-08",
+        amount: 102660,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-010",
+        date: "2025-04-15",
+        amount: -102660,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "INV-25/26/0375",
+        date: "2025-03-08",
+        amount: 5251,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-011",
+        date: "2025-03-15",
+        amount: -5251,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "INV-25/26/0256",
+        date: "2025-03-08",
+        amount: 102660,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-012",
+        date: "2025-03-15",
+        amount: -102660,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "INV-25/26/0374",
+        date: "2025-02-08",
+        amount: 5251,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-013",
+        date: "2025-02-15",
+        amount: -5251,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "INV-25/26/0255",
+        date: "2025-02-08",
+        amount: 102660,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-014",
+        date: "2025-02-15",
+        amount: -102660,
+        type: "Payment",
+        status: "Paid"
+      }
+    ],
+    "Clayworks Spaces Technologies": [
+      {
+        invoiceNumber: "INV-25/26/0257",
+        date: "2025-04-08",
+        amount: 102660,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-010",
+        date: "2025-04-15",
+        amount: -102660,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "INV-25/26/0375",
+        date: "2025-03-08",
+        amount: 5251,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-011",
+        date: "2025-03-15",
+        amount: -5251,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "INV-25/26/0256",
+        date: "2025-03-08",
+        amount: 102660,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-012",
+        date: "2025-03-15",
+        amount: -102660,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "INV-25/26/0374",
+        date: "2025-02-08",
+        amount: 5251,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-013",
+        date: "2025-02-15",
+        amount: -5251,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "INV-25/26/0255",
+        date: "2025-02-08",
+        amount: 102660,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-014",
+        date: "2025-02-15",
+        amount: -102660,
+        type: "Payment",
+        status: "Paid"
+      }
+    ],
+    "Clayworks Spaces Pvt Ltd": [
+      {
+        invoiceNumber: "INV-25/26/0257",
+        date: "2025-04-08",
+        amount: 102660,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-010",
+        date: "2025-04-15",
+        amount: -102660,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "INV-25/26/0375",
+        date: "2025-03-08",
+        amount: 5251,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-011",
+        date: "2025-03-15",
+        amount: -5251,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "INV-25/26/0256",
+        date: "2025-03-08",
+        amount: 102660,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-012",
+        date: "2025-03-15",
+        amount: -102660,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "INV-25/26/0374",
+        date: "2025-02-08",
+        amount: 5251,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-013",
+        date: "2025-02-15",
+        amount: -5251,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "INV-25/26/0255",
+        date: "2025-02-08",
+        amount: 102660,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-014",
+        date: "2025-02-15",
+        amount: -102660,
+        type: "Payment",
+        status: "Paid"
+      }
+    ],
+    "Clayworks Spaces": [
+      {
+        invoiceNumber: "INV-25/26/0257",
+        date: "2025-04-08",
+        amount: 102660,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-010",
+        date: "2025-04-15",
+        amount: -102660,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "INV-25/26/0375",
+        date: "2025-03-08",
+        amount: 5251,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-011",
+        date: "2025-03-15",
+        amount: -5251,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "INV-25/26/0256",
+        date: "2025-03-08",
+        amount: 102660,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-012",
+        date: "2025-03-15",
+        amount: -102660,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "INV-25/26/0374",
+        date: "2025-02-08",
+        amount: 5251,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-013",
+        date: "2025-02-15",
+        amount: -5251,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "INV-25/26/0255",
+        date: "2025-02-08",
+        amount: 102660,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-014",
+        date: "2025-02-15",
+        amount: -102660,
+        type: "Payment",
+        status: "Paid"
+      }
+    ],
+    "Clayworks": [
+      {
+        invoiceNumber: "INV-25/26/0257",
+        date: "2025-04-08",
+        amount: 102660,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-010",
+        date: "2025-04-15",
+        amount: -102660,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "INV-25/26/0375",
+        date: "2025-03-08",
+        amount: 5251,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-011",
+        date: "2025-03-15",
+        amount: -5251,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "INV-25/26/0256",
+        date: "2025-03-08",
+        amount: 102660,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-012",
+        date: "2025-03-15",
+        amount: -102660,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "INV-25/26/0374",
+        date: "2025-02-08",
+        amount: 5251,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-013",
+        date: "2025-02-15",
+        amount: -5251,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "INV-25/26/0255",
+        date: "2025-02-08",
+        amount: 102660,
+        type: "Rent",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-014",
+        date: "2025-02-15",
+        amount: -102660,
+        type: "Payment",
+        status: "Paid"
+      }
+    ],
+    "NSDL Database Management Ltd": [
+      {
+        invoiceNumber: "RTA/04/2526/4103",
+        date: "2025-04-30",
+        amount: 11800,
+        type: "Rates & Taxes",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-015",
+        date: "2025-05-05",
+        amount: -11800,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "RTA/03/2526/4102",
+        date: "2025-03-31",
+        amount: 11800,
+        type: "Rates & Taxes",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-016",
+        date: "2025-04-05",
+        amount: -11800,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "RTA/02/2526/4101",
+        date: "2025-02-28",
+        amount: 11800,
+        type: "Rates & Taxes",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-017",
+        date: "2025-03-05",
+        amount: -11800,
+        type: "Payment",
+        status: "Paid"
+      }
+    ],
+    "NSDL Database Management": [
+      {
+        invoiceNumber: "RTA/04/2526/4103",
+        date: "2025-04-30",
+        amount: 11800,
+        type: "Rates & Taxes",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-015",
+        date: "2025-05-05",
+        amount: -11800,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "RTA/03/2526/4102",
+        date: "2025-03-31",
+        amount: 11800,
+        type: "Rates & Taxes",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-016",
+        date: "2025-04-05",
+        amount: -11800,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "RTA/02/2526/4101",
+        date: "2025-02-28",
+        amount: 11800,
+        type: "Rates & Taxes",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-017",
+        date: "2025-03-05",
+        amount: -11800,
+        type: "Payment",
+        status: "Paid"
+      }
+    ],
+    "NSDL": [
+      {
+        invoiceNumber: "RTA/04/2526/4103",
+        date: "2025-04-30",
+        amount: 11800,
+        type: "Rates & Taxes",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-015",
+        date: "2025-05-05",
+        amount: -11800,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "RTA/03/2526/4102",
+        date: "2025-03-31",
+        amount: 11800,
+        type: "Rates & Taxes",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-016",
+        date: "2025-04-05",
+        amount: -11800,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "RTA/02/2526/4101",
+        date: "2025-02-28",
+        amount: 11800,
+        type: "Rates & Taxes",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-017",
+        date: "2025-03-05",
+        amount: -11800,
+        type: "Payment",
+        status: "Paid"
+      }
+    ],
+    "Mahat Labs Pvt Ltd": [
+      {
+        invoiceNumber: "Pcd/25-26/001142",
+        date: "2025-04-19",
+        amount: 480850,
+        type: "Computers",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-018",
+        date: "2025-04-25",
+        amount: -480850,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "Pcd/25-26/001141",
+        date: "2025-03-19",
+        amount: 240425,
+        type: "Computers",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-019",
+        date: "2025-03-25",
+        amount: -240425,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "Pcd/25-26/001140",
+        date: "2025-02-19",
+        amount: 480850,
+        type: "Computers",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-020",
+        date: "2025-02-25",
+        amount: -480850,
+        type: "Payment",
+        status: "Paid"
+      }
+    ],
+    "Mahat Labs": [
+      {
+        invoiceNumber: "Pcd/25-26/001142",
+        date: "2025-04-19",
+        amount: 480850,
+        type: "Computers",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-018",
+        date: "2025-04-25",
+        amount: -480850,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "Pcd/25-26/001141",
+        date: "2025-03-19",
+        amount: 240425,
+        type: "Computers",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-019",
+        date: "2025-03-25",
+        amount: -240425,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "Pcd/25-26/001140",
+        date: "2025-02-19",
+        amount: 480850,
+        type: "Computers",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-020",
+        date: "2025-02-25",
+        amount: -480850,
+        type: "Payment",
+        status: "Paid"
+      }
+    ],
+    "Mahat": [
+      {
+        invoiceNumber: "Pcd/25-26/001142",
+        date: "2025-04-19",
+        amount: 480850,
+        type: "Computers",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-018",
+        date: "2025-04-25",
+        amount: -480850,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "Pcd/25-26/001141",
+        date: "2025-03-19",
+        amount: 240425,
+        type: "Computers",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-019",
+        date: "2025-03-25",
+        amount: -240425,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "Pcd/25-26/001140",
+        date: "2025-02-19",
+        amount: 480850,
+        type: "Computers",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-020",
+        date: "2025-02-25",
+        amount: -480850,
+        type: "Payment",
+        status: "Paid"
+      }
+    ],
+    "Wonderslate": [
+      {
+        invoiceNumber: "Pcd/2526/00158",
+        date: "2025-04-19",
+        amount: 96170,
+        type: "Computers",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-021",
+        date: "2025-04-25",
+        amount: -96170,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "Pcd/2526/00157",
+        date: "2025-03-19",
+        amount: 96170,
+        type: "Computers",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-022",
+        date: "2025-03-25",
+        amount: -96170,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "Pcd/2526/00156",
+        date: "2025-02-19",
+        amount: 96170,
+        type: "Computers",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-023",
+        date: "2025-02-25",
+        amount: -96170,
+        type: "Payment",
+        status: "Paid"
+      }
+    ],
+    "HEPL": [
+      {
+        invoiceNumber: "HEPL-LAPTOP-002",
+        date: "2025-04-19",
+        amount: 96170,
+        type: "Computers",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-024",
+        date: "2025-04-25",
+        amount: -96170,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "HEPL-LAPTOP-003",
+        date: "2025-03-19",
+        amount: 96170,
+        type: "Computers",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-025",
+        date: "2025-03-25",
+        amount: -96170,
+        type: "Payment",
+        status: "Paid"
+      },
+      {
+        invoiceNumber: "HEPL-LAPTOP-004",
+        date: "2025-02-19",
+        amount: 96170,
+        type: "Computers",
+        status: "Approved"
+      },
+      {
+        invoiceNumber: "PAYMENT-026",
+        date: "2025-02-25",
+        amount: -96170,
+        type: "Payment",
+        status: "Paid"
+      }
+    ]
+  };
+  
+  // Try exact match first
+  let entries = pastEntries[vendorName];
+  
+  // If no exact match, try partial matching
+  if (!entries) {
+    const vendorKeys = Object.keys(pastEntries);
+    for (const key of vendorKeys) {
+      if (vendorName.toLowerCase().includes(key.toLowerCase()) || 
+          key.toLowerCase().includes(vendorName.toLowerCase())) {
+        entries = pastEntries[key];
+        console.log('Found partial match for entries:', key, 'for vendor:', vendorName);
+        break;
+      }
+    }
+  }
+  
+  entries = entries || [];
+  console.log('Entries found:', entries.length);
+  return entries;
 }

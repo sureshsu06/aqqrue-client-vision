@@ -22,7 +22,8 @@ import {
   ArrowUpDown,
   ChevronDown,
   Undo2,
-  Filter
+  Filter,
+  Upload
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -38,7 +39,7 @@ const mockTransactions: Transaction[] = [
     description: "Professional Fees - May 2025",
     client: "Elire",
     isRecurring: true,
-    pdfFile: "ASO-I_109_25-26Sign_Elire%20Global.pdf",
+    pdfFile: "bills/ASO-I_109_25-26Sign_Elire Global.pdf",
     documentUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=1000&fit=crop"
   },
   {
@@ -52,7 +53,7 @@ const mockTransactions: Transaction[] = [
     description: "Professional Fees - N-STP Condonation",
     client: "Elire",
     confidence: 95,
-    pdfFile: "ASO-I_117_25-26_Elire Global.pdf",
+    pdfFile: "bills/ASO-I_117_25-26_Elire Global.pdf",
     documentUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&h=1000&fit=crop"
   },
   {
@@ -66,7 +67,7 @@ const mockTransactions: Transaction[] = [
     description: "Equity AMC",
     client: "Elire",
     confidence: 98,
-    pdfFile: "EGS001.pdf",
+    pdfFile: "bills/EGS001.pdf",
     documentUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=1000&fit=crop"
   },
   {
@@ -80,7 +81,7 @@ const mockTransactions: Transaction[] = [
     description: "Freight Charges",
     client: "Elire",
     confidence: 88,
-    pdfFile: "Hys-1117.pdf",
+    pdfFile: "bills/Hys-1117.pdf",
     documentUrl: "https://images.unsplash.com/photo-1483058712412-4245e9b90334?w=800&h=1000&fit=crop"
   },
   {
@@ -95,7 +96,7 @@ const mockTransactions: Transaction[] = [
     client: "Elire",
     confidence: 100,
     isRecurring: true,
-    pdfFile: "Hys-1121.pdf",
+    pdfFile: "bills/Hys-1121.pdf",
     documentUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=1000&fit=crop"
   },
   {
@@ -110,7 +111,7 @@ const mockTransactions: Transaction[] = [
     client: "Elire",
     confidence: 92,
     isRecurring: true,
-    pdfFile: "INV-25260258.pdf",
+    pdfFile: "bills/INV-25260258.pdf",
     documentUrl: "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=800&h=1000&fit=crop"
   },
   {
@@ -125,7 +126,7 @@ const mockTransactions: Transaction[] = [
     client: "Elire",
     confidence: 87,
     isRecurring: true,
-    pdfFile: "INV-25260376.pdf",
+    pdfFile: "bills/INV-25260376.pdf",
     documentUrl: "https://images.unsplash.com/photo-1572044162444-ad60f128bdea?w=800&h=1000&fit=crop"
   },
   {
@@ -140,7 +141,7 @@ const mockTransactions: Transaction[] = [
     client: "Elire",
     confidence: 96,
     isRecurring: true,
-    pdfFile: "PCD-143.pdf",
+    pdfFile: "bills/PCD-143.pdf",
     documentUrl: "https://images.unsplash.com/photo-1633114127408-af671c774b39?w=800&h=1000&fit=crop"
   },
   {
@@ -155,7 +156,7 @@ const mockTransactions: Transaction[] = [
     client: "Elire",
     confidence: 94,
     isRecurring: true,
-    pdfFile: "PCD-159.pdf",
+    pdfFile: "bills/PCD-159.pdf",
     documentUrl: "https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=800&h=1000&fit=crop"
   },
   {
@@ -170,7 +171,7 @@ const mockTransactions: Transaction[] = [
     client: "Elire",
     confidence: 91,
     isRecurring: true,
-    pdfFile: "PCD-160.pdf",
+    pdfFile: "bills/PCD-160.pdf",
     documentUrl: "https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=800&h=1000&fit=crop"
   },
   {
@@ -184,7 +185,7 @@ const mockTransactions: Transaction[] = [
     description: "Monitor LG",
     client: "Mahat",
     confidence: 99,
-    pdfFile: "725-MAHAT LABS (1).pdf",
+    pdfFile: "bills/725-MAHAT LABS (1).pdf",
     documentUrl: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=1000&fit=crop"
   },
   {
@@ -198,16 +199,137 @@ const mockTransactions: Transaction[] = [
     description: "Office Supplies",
     client: "Mahat",
     confidence: 97,
-    pdfFile: "Mahat Labs Pvt Ltd_Invoice_309_29.05.2025.pdf",
+    pdfFile: "bills/Mahat Labs Pvt Ltd_Invoice_309_29.05.2025.pdf",
     documentUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=1000&fit=crop"
+  },
+  // Contract transactions for Revenue tab
+  {
+    id: "13",
+    vendor: "Bishop Wisecarver",
+    amount: 7020,
+    currency: "USD",
+    source: "email",
+    type: "contract",
+    status: "unread",
+    date: "2025-05-25",
+    description: "RhythmsAI OKR Platform - 65 Owner Users",
+    client: "Rhythms",
+    confidence: 85,
+    pdfFile: "contracts/Bishop Wisecarver_Complete_with_Docusign_Rhythms_-_Cloud_Servi (2).pdf",
+    documentUrl: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&h=1000&fit=crop",
+    contractStartDate: "2025-10-01",
+    contractEndDate: "2026-09-30",
+    billingCycle: "annual",
+    contractValue: 7020,
+    contractTerm: "1 year"
+  },
+  {
+    id: "14",
+    vendor: "MARKETview Technology, LLC",
+    amount: 10000,
+    currency: "USD",
+    source: "drive",
+    type: "contract",
+    status: "review",
+    date: "2025-05-20",
+    description: "RhythmsAI OKR Platform - 100 Permitted Users",
+    client: "Rhythms",
+    confidence: 92,
+    pdfFile: "contracts/MARKETview_Complete_with_Docusign_Rhythms_-_Cloud_Servi (1).pdf",
+    documentUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=1000&fit=crop",
+    contractStartDate: "2025-09-01",
+    contractEndDate: "2028-08-31",
+    billingCycle: "annual",
+    contractValue: 30000,
+    contractTerm: "3 years"
+  },
+  {
+    id: "15",
+    vendor: "Sera",
+    amount: 95000,
+    currency: "USD",
+    source: "email",
+    type: "contract",
+    status: "done",
+    date: "2025-05-15",
+    description: "SaaS Cloud Services Agreement",
+    client: "Rhythms",
+    confidence: 98,
+    pdfFile: "contracts/Sera_Complete_with_Docusign_Rhythms_-_Cloud_Servi (2).pdf",
+    documentUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=1000&fit=crop",
+    contractStartDate: "2025-06-01",
+    contractEndDate: "2026-05-31",
+    billingCycle: "monthly",
+    contractValue: 95000,
+    contractTerm: "12 months"
+  },
+  {
+    id: "16",
+    vendor: "Valpak",
+    amount: 75000,
+    currency: "USD",
+    source: "email",
+    type: "contract",
+    status: "unread",
+    date: "2025-05-10",
+    description: "SaaS Cloud Services Agreement",
+    client: "Rhythms",
+    confidence: 88,
+    pdfFile: "contracts/050825 Rhythms Valpak Cloud Services Agreement - signed - signed.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=1000&fit=crop",
+    contractStartDate: "2025-06-01",
+    contractEndDate: "2026-05-31",
+    billingCycle: "monthly",
+    contractValue: 75000,
+    contractTerm: "12 months"
+  },
+  {
+    id: "17",
+    vendor: "Networkology",
+    amount: 110000,
+    currency: "USD",
+    source: "drive",
+    type: "contract",
+    status: "review",
+    date: "2025-05-05",
+    description: "SaaS Cloud Services Agreement",
+    client: "Rhythms",
+    confidence: 94,
+    pdfFile: "contracts/Rhythms - Cloud Services Agreement - Networkology.doc.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=1000&fit=crop",
+    contractStartDate: "2025-06-01",
+    contractEndDate: "2026-05-31",
+    billingCycle: "monthly",
+    contractValue: 110000,
+    contractTerm: "12 months"
+  },
+  {
+    id: "18",
+    vendor: "AlineOps",
+    amount: 135000,
+    currency: "USD",
+    source: "email",
+    type: "contract",
+    status: "done",
+    date: "2025-05-01",
+    description: "SaaS Cloud Services Agreement",
+    client: "Rhythms",
+    confidence: 96,
+    pdfFile: "contracts/Rhythms - Cloud Services Agreement - AlineOps.docx.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=800&h=1000&fit=crop",
+    contractStartDate: "2025-06-01",
+    contractEndDate: "2026-05-31",
+    billingCycle: "monthly",
+    contractValue: 135000,
+    contractTerm: "12 months"
   }
 ];
 
 const filters = [
-  { id: "all", label: "All", count: 12, icon: Check },
-  { id: "bills", label: "Bills", count: 8, icon: FileText },
-  { id: "cards", label: "Credit Cards", count: 4, icon: CreditCard },
-  { id: "contracts", label: "Contracts", count: 0, icon: FileText }
+  { id: "all", label: "All", count: 18, icon: Check },
+  { id: "bills", label: "Bills", count: 12, icon: FileText },
+  { id: "cards", label: "Credit Cards", count: 0, icon: CreditCard },
+  { id: "contracts", label: "Contracts", count: 6, icon: FileText }
 ];
 
 const statusFilters = [
@@ -222,7 +344,8 @@ interface TransactionInboxProps {
 
 export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps) {
   const [selectedFilter, setSelectedFilter] = useState("bills");
-  const [selectedStatus, setSelectedStatus] = useState("unread");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [selectedTab, setSelectedTab] = useState<"expenses" | "revenue">("expenses");
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [role, setRole] = useState("accountant");
@@ -231,12 +354,26 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
   const { toast } = useToast();
 
   const filteredTransactions = mockTransactions.filter(transaction => {
-    if (selectedFilter !== "all" && !transaction.type.includes(selectedFilter.slice(0, -1))) {
+    // Filter by tab (expenses/revenue) - this takes priority
+    if (selectedTab === "expenses" && transaction.type !== "bill") {
       return false;
     }
+    if (selectedTab === "revenue" && transaction.type !== "contract") {
+      return false;
+    }
+    
+    // Filter by transaction type (only applies when not using tab filtering)
+    if (selectedFilter !== "all" && selectedFilter !== "bills" && selectedFilter !== "contracts") {
+      if (!transaction.type.includes(selectedFilter.slice(0, -1))) {
+        return false;
+      }
+    }
+    
+    // Filter by status
     if (selectedStatus === "unread" && transaction.status !== "unread") {
       return false;
     }
+    
     return true;
   });
 
@@ -303,7 +440,7 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col overflow-hidden">
       
       {/* Add the InboxHeader component */}
       <InboxHeader
@@ -313,81 +450,57 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
         role="accountant"
         mode="review-all"
         confidenceThreshold={95}
+        selectedFilter={selectedFilter}
+        selectedStatus={selectedStatus}
         onRoleChange={() => {}}
         onModeChange={() => {}}
         onConfidenceChange={() => {}}
+        onFilterChange={setSelectedFilter}
+        onStatusChange={setSelectedStatus}
       />
 
-      {/* Integrated Bills Filter Bar */}
-      <div className="flex items-center justify-between py-3 px-4 bg-white border-b border-mobius-gray-200">
-        <div className="flex items-center space-x-6">
-          <div className="flex items-center space-x-2">
-            {/* Bills Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-9 w-9 p-0 justify-center bg-white rounded-lg">
-                  <Filter className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-40 bg-white border border-mobius-gray-200">
-                <DropdownMenuItem 
-                  className="flex items-center space-x-2"
-                  onClick={() => setSelectedFilter("bills")}
-                >
-                  <FileText className="w-4 h-4" />
-                  <span>Bills (8)</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="flex items-center space-x-2"
-                  onClick={() => setSelectedFilter("cards")}
-                >
-                  <CreditCard className="w-4 h-4" />
-                  <span>Cards (4)</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="flex items-center space-x-2"
-                  onClick={() => setSelectedFilter("all")}
-                >
-                  <Filter className="w-4 h-4" />
-                  <span>All (12)</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+      {/* Revenue/Expenses Tabs Row */}
+      <div className="flex items-center justify-between py-3 px-4 bg-white border-b border-mobius-gray-200 flex-shrink-0">
+        <div className="flex items-center">
+          <Button 
+            variant={selectedTab === "expenses" ? "default" : "ghost"}
+            size="sm"
+            className={`px-4 py-2 rounded-none border-b-2 ${
+              selectedTab === "expenses" 
+                ? "border-mobius-blue bg-transparent text-mobius-blue hover:bg-mobius-blue/5" 
+                : "border-transparent text-mobius-gray-600 hover:text-mobius-gray-900"
+            }`}
+            onClick={() => setSelectedTab("expenses")}
+          >
+            Expenses
+          </Button>
+          <Button 
+            variant={selectedTab === "revenue" ? "default" : "ghost"}
+            size="sm"
+            className={`px-4 py-2 rounded-none border-b-2 ${
+              selectedTab === "revenue" 
+                ? "border-mobius-blue bg-transparent text-mobius-blue hover:bg-mobius-blue/5" 
+                : "border-transparent text-mobius-gray-600 hover:text-mobius-gray-900"
+            }`}
+            onClick={() => setSelectedTab("revenue")}
+          >
+            Revenue
+          </Button>
+        </div>
 
-            {/* Date Sort Icon */}
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-              <ArrowUpDown className="w-4 h-4 text-mobius-gray-600" />
-            </Button>
-          </div>
-
-          {/* All/Unread Toggle */}
+        {/* Upload Button for Revenue tab */}
+        {selectedTab === "revenue" && (
           <div className="flex items-center">
             <Button 
-              variant={selectedStatus === "all" ? "default" : "ghost"}
-              size="sm"
-              className={`px-4 py-2 rounded-none border-b-2 ${
-                selectedStatus === "all" 
-                  ? "border-mobius-blue bg-transparent text-mobius-blue hover:bg-mobius-blue/5" 
-                  : "border-transparent text-mobius-gray-600 hover:text-mobius-gray-900"
-              }`}
-              onClick={() => setSelectedStatus("all")}
+              variant="outline" 
+              size="sm" 
+              className="h-8 px-3 text-sm"
             >
-              All
-            </Button>
-            <Button 
-              variant={selectedStatus === "unread" ? "default" : "ghost"}
-              size="sm"
-              className={`px-4 py-2 rounded-none border-b-2 ${
-                selectedStatus === "unread" 
-                  ? "border-mobius-blue bg-transparent text-mobius-blue hover:bg-mobius-blue/5" 
-                  : "border-transparent text-mobius-gray-600 hover:text-mobius-gray-900"
-              }`}
-              onClick={() => setSelectedStatus("unread")}
-            >
-              Unread
+              <Upload className="w-4 h-4 mr-2" />
+              Upload Contract
             </Button>
           </div>
-        </div>
+        )}
 
         {/* Undo Button - positioned to the right */}
         <div className="flex items-center">
@@ -411,28 +524,42 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
       </div>
 
       {/* Inbox with Reading Pane */}
-      <div className="flex-1 flex min-h-0">
-        <div className="w-1/5">
-          <InboxList
-            transactions={filteredTransactions}
-            selectedTransaction={selectedTransaction}
-            selectedTransactions={selectedTransactions}
-            onTransactionSelect={handleTransactionSelect}
-            onTransactionToggle={handleTransactionToggle}
-            onQuickApprove={handleQuickApprove}
-            onQuickAssign={handleQuickAssign}
-          />
+      <div className="flex-1 flex min-h-0 overflow-hidden">
+        {/* Inbox List - Independent scrolling */}
+        <div className="w-1/5 flex flex-col min-h-0 border-r border-mobius-gray-100">
+          <div className="flex-1 overflow-y-auto">
+            <InboxList
+              transactions={filteredTransactions}
+              selectedTransaction={selectedTransaction}
+              selectedTransactions={selectedTransactions}
+              onTransactionSelect={handleTransactionSelect}
+              onTransactionToggle={handleTransactionToggle}
+              onQuickApprove={handleQuickApprove}
+              onQuickAssign={handleQuickAssign}
+            />
+          </div>
         </div>
         
         {selectedTransaction && (
           <>
-            <DocumentPane transaction={selectedTransaction} />
-            <AnalysisPane 
-              transaction={selectedTransaction}
-              onApprove={handleApprove}
-              onEdit={handleEdit}
-              onSeeHow={handleSeeHow}
-            />
+            {/* Document Pane - Independent scrolling */}
+            <div className="w-2/5 flex flex-col min-h-0 border-l border-mobius-gray-100">
+              <div className="flex-1 overflow-y-auto">
+                <DocumentPane transaction={selectedTransaction} />
+              </div>
+            </div>
+            
+            {/* Analysis Pane - Independent scrolling */}
+            <div className="w-2/5 flex flex-col min-h-0 border-l border-mobius-gray-100">
+              <div className="flex-1 overflow-y-auto">
+                <AnalysisPane 
+                  transaction={selectedTransaction}
+                  onApprove={handleApprove}
+                  onEdit={handleEdit}
+                  onSeeHow={handleSeeHow}
+                />
+              </div>
+            </div>
           </>
         )}
       </div>

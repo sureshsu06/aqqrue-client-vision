@@ -37,14 +37,15 @@ const clients = [
   "Elire", 
   "Mahat",
   "HEPL",
-  "Wonderslate"
+  "Wonderslate",
+  "Rhythms"
 ];
 
 export function Layout({ children }: LayoutProps) {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-mobius-gray-50 flex">
+    <div className="h-screen bg-mobius-gray-50 flex overflow-hidden">
       {/* Left Ribbon */}
       <div className="w-16 h-screen bg-white border-r border-mobius-gray-100 flex flex-col items-center sticky top-0">
         {/* Logo */}
@@ -106,9 +107,9 @@ export function Layout({ children }: LayoutProps) {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Top Header */}
-        <header className="bg-white border-b border-mobius-gray-100 px-6 py-4">
+        <header className="bg-white border-b border-mobius-gray-100 px-6 py-4 flex-shrink-0">
           <div className="flex items-center justify-between">
             {/* Client Pills */}
             <div className="flex items-center space-x-2">
@@ -150,7 +151,7 @@ export function Layout({ children }: LayoutProps) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 overflow-hidden">
           {children}
         </main>
       </div>

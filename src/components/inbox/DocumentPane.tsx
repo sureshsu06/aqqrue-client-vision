@@ -60,9 +60,9 @@ export function DocumentPane({ transaction }: DocumentPaneProps) {
   };
 
   return (
-    <div className="flex-1 bg-white border-l border-mobius-gray-100 flex flex-col">
+    <div className="bg-white flex flex-col h-full">
       {/* Header */}
-      <div className="p-4 border-b border-mobius-gray-100">
+      <div className="p-4 border-b border-mobius-gray-100 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <h4 className="font-medium text-sm">Original Document</h4>
@@ -113,18 +113,21 @@ export function DocumentPane({ transaction }: DocumentPaneProps) {
       </div>
 
       {/* Document Content */}
-      <div className="flex-1 p-4">
+      <div className="flex-1 p-4 overflow-y-auto">
         {pdfUrl ? (
-          <div className="h-full border border-mobius-gray-200 rounded-lg overflow-hidden">
-            <embed
-              src={pdfUrl}
-              type="application/pdf"
-              className="w-full h-full"
-            />
+          <div className="h-full">
+            <div className="border border-mobius-gray-200 rounded-lg overflow-hidden h-full">
+              <embed
+                src={pdfUrl}
+                type="application/pdf"
+                className="w-full h-full"
+                style={{ minHeight: '600px' }}
+              />
+            </div>
           </div>
         ) : (
-          <div className="h-full flex items-center justify-center text-mobius-gray-500">
-            <div className="text-center">
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center text-mobius-gray-500">
               <FileText className="w-8 h-8 mx-auto mb-3 stroke-current fill-none" />
               <p className="font-medium">No Document Available</p>
               <p className="text-sm">Upload a document to view it here</p>
