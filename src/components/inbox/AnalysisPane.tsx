@@ -39,11 +39,16 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
   const [activeTab, setActiveTab] = useState<'summary' | 'ledger'>('summary'); // New state for tab management
   const [isScheduleEditMode, setIsScheduleEditMode] = useState(false); // New state for schedule edit mode
   const [editedSchedule, setEditedSchedule] = useState<any[]>([]); // New state for edited schedule
+  const [error, setError] = useState<string | null>(null); // Add error state
 
   // Initialize journal entry data safely
   useEffect(() => {
     try {
+      console.log('Initializing AnalysisPane for transaction:', transaction);
+      setError(null); // Clear any previous errors
+      
       const entry = getJournalEntryForTransaction(transaction);
+      console.log('Generated journal entry:', entry);
       setJournalEntry(entry);
       
       // Initialize edited journal entry when in edit mode
@@ -52,16 +57,18 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
       }
     } catch (error) {
       console.error('Error initializing journal entry:', error);
+      setError(`Failed to load transaction data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      
       // Set a fallback journal entry
       setJournalEntry({
-        client: "Elire",
+        client: transaction.client || "Elire",
         invoiceNumber: "INV-2025-001",
-        totalAmount: transaction.amount,
-        entryType: "General Expense",
-        narration: `Being the expense payable to ${transaction.vendor}`,
+        totalAmount: transaction.amount || 0,
+        entryType: transaction.type === 'contract' ? "SaaS Revenue" : "General Expense",
+        narration: `Being the ${transaction.type === 'contract' ? 'revenue' : 'expense'} from ${transaction.vendor}`,
         entries: [
-          { account: "General Expense", debit: transaction.amount * 0.85, credit: 0, confidence: 95 },
-          { account: transaction.vendor, debit: 0, credit: transaction.amount, confidence: 100 }
+          { account: transaction.type === 'contract' ? "Cash/Accounts Receivable" : "General Expense", debit: transaction.amount || 0, credit: 0, confidence: 95 },
+          { account: transaction.type === 'contract' ? "Deferred Revenue" : transaction.vendor, debit: 0, credit: transaction.amount || 0, confidence: 100 }
         ]
       });
     }
@@ -297,28 +304,28 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
         title: "Extraction",
         status: "complete" as const,
         confidence: 100,
-        result: `Extracted ₹${transaction.amount.toLocaleString()} from ${transaction.vendor} invoice with 100% accuracy`
+        result: `Extracted ${transaction.currency === 'USD' ? '$' : '₹'}${(transaction.amount || 0).toLocaleString()} from ${transaction.vendor} ${transaction.type === 'contract' ? 'contract' : 'invoice'} with 100% accuracy`
     },
     {
       step: 2,
-        title: "Capex/Opex",
+        title: transaction.type === 'contract' ? "ASC 606 Analysis" : "Capex/Opex",
         status: "complete" as const,
         confidence: 95,
-        result: getCapexOpexResult(transaction)
+        result: transaction.type === 'contract' ? getASC606Result(transaction) : getCapexOpexResult(transaction)
     },
     {
       step: 3,
-        title: "GST Applicability",
+        title: transaction.type === 'contract' ? "Revenue Recognition" : "GST Applicability",
         status: "complete" as const,
         confidence: 100,
-        result: getGSTResult(transaction)
+        result: transaction.type === 'contract' ? getRevenueRecognitionResult(transaction) : getGSTResult(transaction)
     },
     {
       step: 4,
-        title: "TDS",
+        title: transaction.type === 'contract' ? "Deferred Revenue" : "TDS",
         status: "complete" as const,
         confidence: 100,
-        result: getTDSResult(transaction)
+        result: transaction.type === 'contract' ? getDeferredRevenueResult(transaction) : getTDSResult(transaction)
     },
     {
       step: 5,
@@ -485,37 +492,154 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
     const totalValue = transaction.contractValue;
     const billingCycle = transaction.billingCycle || 'monthly';
     
-    // Always show month-wise recognition for proper deferred revenue tracking
+    // Contract-specific logic based on ASC 606 analysis
     let totalMonths = 12; // Default to 12 months
+    let monthlyRevenue = totalValue / totalMonths;
+    let startMonth = 1;
+    let startDate = new Date(transaction.contractStartDate || transaction.date);
     
-    if (billingCycle === 'annual') {
-      // For annual contracts, calculate total months from contract term
-      const termYears = parseInt(transaction.contractTerm.split(' ')[0]);
-      totalMonths = termYears * 12;
+    // Handle specific contracts based on vendor
+    if (transaction.vendor === "Clipper Media Acquisition I, LLC") {
+      // 11-month contract with 1-month evaluation period
+      totalMonths = 11;
+      monthlyRevenue = totalValue / totalMonths; // $7,999 ÷ 11 = $727.18
+      startMonth = 1; // Revenue recognition starts from month 1
+      startDate = new Date("2025-06-13"); // Contract start date
+    } else if (transaction.vendor === "Bishop Wisecarver") {
+      // 10-month contract with 2-month termination right
+      totalMonths = 10;
+      monthlyRevenue = totalValue / totalMonths; // $7,020 ÷ 10 = $702
+      startMonth = 1; // Revenue recognition starts from month 1
+      startDate = new Date("2025-10-01"); // Revenue recognition starts 10/1/25
+    } else if (transaction.vendor === "MARKETview Technology, LLC") {
+      // 38-month contract with partial revenue recognition in first year
+      totalMonths = 38;
+      monthlyRevenue = totalValue / totalMonths; // $30,000 ÷ 38 = $789.47
+      startMonth = 1; // Revenue recognition starts from month 1
+      startDate = new Date("2025-07-01"); // Contract start date
     } else {
-      // For monthly contracts, use the term months
-      totalMonths = parseInt(transaction.contractTerm.split(' ')[0]);
+      // Default logic for other contracts
+      if (billingCycle === 'annual') {
+        const termYears = parseInt(transaction.contractTerm.split(' ')[0]);
+        totalMonths = termYears * 12;
+      } else {
+        totalMonths = parseInt(transaction.contractTerm.split(' ')[0]);
+      }
+      monthlyRevenue = totalValue / totalMonths;
     }
     
-    const monthlyRevenue = totalValue / totalMonths;
     const schedule = [];
     
     for (let i = 1; i <= Math.min(totalMonths, 12); i++) { // Show max 12 months
       const recognized = monthlyRevenue;
       const remainingDeferred = totalValue - (recognized * i);
       
+      // Calculate the date for this period
+      const periodDate = new Date(startDate);
+      periodDate.setMonth(periodDate.getMonth() + i - 1);
+      const periodDateStr = periodDate.toLocaleDateString('en-US', { 
+        month: 'short', 
+        year: 'numeric' 
+      });
+      
       schedule.push({
-        period: `Month ${i}`,
-        monthlyRevenue: Math.round(monthlyRevenue),
-        deferredRevenue: Math.round(Math.max(0, remainingDeferred)),
-        recognized: Math.round(recognized)
+        period: periodDateStr,
+        monthlyRevenue: Math.round(monthlyRevenue * 100) / 100,
+        deferredRevenue: Math.round(Math.max(0, remainingDeferred) * 100) / 100,
+        recognized: Math.round(recognized * 100) / 100
       });
     }
     
     return schedule;
   };
 
+  const getASC606Result = (transaction: any) => {
+    switch (transaction.vendor) {
+      case "Clipper Media Acquisition I, LLC":
+        return "Contract identified with 1-month evaluation period (5/13/25-6/12/25). Revenue recognition begins 6/13/25 over 11 months";
+      case "Bishop Wisecarver":
+        return "Contract becomes non-cancellable after 9/30/25 (2-month termination right). Before 10/1/25, no enforceable contract for revenue recognition";
+      case "MARKETview Technology, LLC":
+        return "3-year contract (38 months) with annual billing. Revenue recognition begins 7/1/25 over 38 months";
+      default:
+        return "Contract terms analyzed under ASC 606. Revenue recognition period determined based on performance obligations";
+    }
+  };
+
+  const getRevenueRecognitionResult = (transaction: any) => {
+    switch (transaction.vendor) {
+      case "Clipper Media Acquisition I, LLC":
+        return "Monthly revenue: $727.18 ($7,999 ÷ 11 months). Straight-line recognition from 6/13/25 to 5/12/26";
+      case "Bishop Wisecarver":
+        return "Service period: 10/1/25 - 7/31/26 (10 months). Monthly revenue: $702 ($7,020 ÷ 10 months)";
+      case "MARKETview Technology, LLC":
+        return "Monthly revenue: $789.47 ($30,000 ÷ 38 months). Straight-line recognition from 7/1/25 to 8/31/28";
+      default:
+        return "Revenue recognized over contract term using straight-line method as services are delivered continuously";
+    }
+  };
+
+  const getDeferredRevenueResult = (transaction: any) => {
+    switch (transaction.vendor) {
+      case "Clipper Media Acquisition I, LLC":
+        return "Initial deferred revenue: $7,999. Monthly reduction: $727.18. Final balance: $0 by 5/12/26";
+      case "Bishop Wisecarver":
+        return "On 10/1/25: Dr. Accounts Receivable $7,020, Cr. Deferred Revenue $7,020. Monthly: Dr. Deferred Revenue $702, Cr. Revenue $702";
+      case "MARKETview Technology, LLC":
+        return "Year 1: $7,894.74 deferred, $2,105.26 recognized. Total contract: $30,000 over 38 months";
+      default:
+        return "Deferred revenue liability created for unearned portion. Monthly recognition reduces liability as services are performed";
+    }
+  };
+
+  // Move analysisSteps calculation here, after all helper functions are declared
   const analysisSteps = getAnalysisSteps(transaction);
+
+  // Helper function to get currency symbol based on transaction type
+  const getCurrencySymbol = (transaction: any) => {
+    return transaction.type === 'contract' ? '$' : '₹';
+  };
+
+  // Helper function to generate analysis summary
+  const getAnalysisSummary = (transaction: any) => {
+    if (transaction.type === 'contract') {
+      switch (transaction.vendor) {
+        case "Bishop Wisecarver":
+          return "This SaaS contract with Bishop Wisecarver includes a 2-month termination right that expires on 9/30/25. Under ASC 606, revenue recognition cannot begin until the contract becomes non-cancellable on 10/1/25. The total contract value of $7,020 will be recognized over 10 months from 10/1/25 to 7/31/26 at $702 per month. The initial journal entry on 10/1/25 will debit Accounts Receivable and credit Deferred Revenue for the full amount, followed by monthly entries debiting Deferred Revenue and crediting Revenue as services are delivered.";
+        case "Clipper Media Acquisition I, LLC":
+          return "This SaaS subscription contract includes a 1-month evaluation period from 5/13/25 to 6/12/25, during which the customer can terminate without penalty. Revenue recognition begins on 6/13/25 over the remaining 11 months of the contract. The total value of $7,999 will be recognized at $727.18 per month using the straight-line method as the service is delivered continuously over the contract term.";
+        case "MARKETview Technology, LLC":
+          return "This 3-year SaaS contract with MARKETview Technology spans 38 months with annual billing. The total contract value of $30,000 will be recognized over the full contract period at $789.47 per month. In the first year, $7,894.74 will remain as deferred revenue while $2,105.26 will be recognized as revenue, reflecting the partial year of service delivery.";
+        default:
+          return `This ${transaction.type} transaction with ${transaction.vendor} has been analyzed under ASC 606 revenue recognition standards. The contract terms have been evaluated to determine the appropriate revenue recognition period and method. The journal entries reflect the proper accounting treatment based on the performance obligations and service delivery schedule.`;
+      }
+    } else {
+      // For expense transactions - provide specific analysis based on transaction ID
+      switch (transaction.id) {
+        case "1":
+        case "2":
+          return `This professional fees transaction with ${transaction.vendor} has been classified as an operating expense (Opex) for monthly professional services. The transaction includes CGST and SGST at 9% each, with full input credit available under Section 16. TDS at 10% under Section 194J is applicable as the invoice amount exceeds the ₹30,000 annual threshold for professional fees. The journal entries ensure proper expense recognition and compliance with Indian tax regulations.`;
+        case "3":
+          return `This regulatory compliance transaction with ${transaction.vendor} has been classified as an operating expense (Opex) for equity AMC charges. The transaction includes IGST at 18%, with input credit available for business use under Section 16. No TDS is applicable as this is a regulatory compliance charge. The journal entries ensure proper expense recognition and compliance with Indian tax regulations.`;
+        case "4":
+        case "5":
+          return `This freight and logistics transaction with ${transaction.vendor} has been classified as an operating expense (Opex) for shipping charges. The transaction includes CGST and SGST at 9% each, with input credit available for business expenses. No TDS is applicable as this is a freight service. The journal entries ensure proper expense recognition and compliance with Indian tax regulations.`;
+        case "6":
+        case "7":
+          return `This office rent transaction with ${transaction.vendor} has been classified as an operating expense (Opex) for office space and parking charges. The transaction includes CGST and SGST at 9% each, with input credit available for office rent. TDS at 10% under Section 194I is applicable as the invoice amount exceeds the ₹2,40,000 annual threshold for rent payments. The journal entries ensure proper expense recognition and compliance with Indian tax regulations.`;
+        case "8":
+        case "9":
+        case "10":
+          return `This computer hardware transaction with ${transaction.vendor} has been classified as a capital expenditure (Capex) for laptop purchases. The transaction includes CGST and SGST at 9% each, with input credit available for capital goods. No TDS is applicable as this is a goods purchase. The journal entries ensure proper asset capitalization and compliance with Indian tax regulations.`;
+        case "11":
+          return `This monitor equipment transaction with ${transaction.vendor} has been classified as a capital expenditure (Capex) for monitor purchase. The transaction includes CGST and SGST at 9% each, with input credit available for capital goods. No TDS is applicable as this is a goods purchase. The journal entries ensure proper asset capitalization and compliance with Indian tax regulations.`;
+        case "12":
+          return `This office supplies transaction with ${transaction.vendor} has been classified as an operating expense (Opex) for office supplies and consumables. The transaction includes CGST and SGST at 9% each, with input credit available for office supplies. No TDS is applicable as this is a goods purchase below threshold. The journal entries ensure proper expense recognition and compliance with Indian tax regulations.`;
+        default:
+          return `This ${transaction.type} transaction with ${transaction.vendor} has been analyzed for proper expense classification and tax treatment. The transaction has been categorized as either capital expenditure (Capex) or operating expense (Opex) based on the nature of the goods or services. GST/TDS implications have been evaluated and the appropriate input credits and withholding tax treatments have been applied. The journal entries ensure proper expense recognition and compliance with Indian tax regulations.`;
+      }
+    }
+  };
 
   return (
     <div className="bg-white flex flex-col h-full">
@@ -563,7 +687,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
         )}
 
         <p className="text-sm text-mobius-gray-500">
-          {transaction.type === 'contract' ? '$' : '₹'}{transaction.amount.toLocaleString()} • {new Date(transaction.date).toLocaleDateString()}
+          {transaction.type === 'contract' ? '$' : '₹'}{(transaction.amount || 0).toLocaleString()} • {new Date(transaction.date || new Date()).toLocaleDateString()}
         </p>
       </div>
 
@@ -577,8 +701,27 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
         </div>
       )}
 
-      {/* Content - only render if journalEntry exists */}
-      {journalEntry && (
+      {/* Error state */}
+      {error && (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center text-red-600 p-4">
+            <AlertTriangle className="w-8 h-8 mx-auto mb-2" />
+            <p className="font-medium">Error Loading Transaction</p>
+            <p className="text-sm text-red-500 mt-1">{error}</p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="mt-3"
+              onClick={() => window.location.reload()}
+            >
+              Retry
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Content - only render if journalEntry exists and no error */}
+      {journalEntry && !error && (
         <>
       {/* Tab Navigation - Above the fold */}
       <div className="px-4 py-3 bg-white">
@@ -612,8 +755,8 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col bg-white">
-        <div className="flex-1 overflow-y-auto px-4 pb-4">
-          <div className="p-4">
+        <div className="flex-1 overflow-y-auto px-2 pb-4">
+          <div className="p-2">
             <div className="space-y-4">
               <div className="space-y-3 text-sm">
                 <div>
@@ -639,14 +782,14 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                 <div className="space-y-4">
                   {transaction.type === 'contract' ? (
                     // SaaS Contract Details for Revenue
-                    <div className="space-y-6">
+                    <div className="space-y-4">
                       {/* Contract Details */}
-                      <div className="bg-mobius-gray-50 rounded-lg p-4">
+                      <div className="bg-mobius-gray-50 rounded-lg p-3">
                         <h4 className="text-sm font-medium text-mobius-gray-900 mb-3">Contract Details</h4>
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
                             <p className="text-mobius-gray-500">Contract Value:</p>
-                            <p className="font-medium">${transaction.contractValue?.toLocaleString()}</p>
+                            <p className="font-medium">${(transaction.contractValue || 0).toLocaleString()}</p>
                           </div>
                           <div>
                             <p className="text-mobius-gray-500">Currency:</p>
@@ -654,25 +797,25 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                           </div>
                           <div>
                             <p className="text-mobius-gray-500">Contract Term:</p>
-                            <p className="font-medium">{transaction.contractTerm}</p>
+                            <p className="font-medium">{transaction.contractTerm || 'N/A'}</p>
                           </div>
                           <div>
                             <p className="text-mobius-gray-500">Billing Cycle:</p>
-                            <p className="font-medium">{transaction.billingCycle}</p>
+                            <p className="font-medium">{transaction.billingCycle || 'N/A'}</p>
                           </div>
                           <div>
                             <p className="text-mobius-gray-500">Start Date:</p>
-                            <p className="font-medium">{transaction.contractStartDate}</p>
+                            <p className="font-medium">{transaction.contractStartDate || 'N/A'}</p>
                           </div>
                           <div>
                             <p className="text-mobius-gray-500">End Date:</p>
-                            <p className="font-medium">{transaction.contractEndDate}</p>
+                            <p className="font-medium">{transaction.contractEndDate || 'N/A'}</p>
                           </div>
                         </div>
                       </div>
 
                       {/* Deferred Revenue Schedule */}
-                      <div className="p-4">
+                      <div className="p-3">
                         <h4 className="text-sm font-medium text-mobius-gray-900 mb-3">Deferred Revenue Schedule</h4>
                         <div className="space-y-3">
                           <div className="grid grid-cols-4 gap-2 text-xs font-medium text-mobius-gray-500 uppercase tracking-wide">
@@ -770,7 +913,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                       </div>
 
                       {/* Editable Journal Entry Table for Contracts */}
-                      <div className="p-4">
+                      <div className="p-3">
                         <div className="flex justify-between mb-4">
                           <h4 className="text-sm font-medium text-mobius-gray-900">Journal Entries</h4>
                           <div className="flex gap-2">
@@ -881,7 +1024,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                                       style={isFormulaMode ? { fontVariantNumeric: 'normal' } : {}}
                                     />
                                   ) : (
-                                    entry.debit ? `$${entry.debit.toFixed(2)}` : "—"
+                                    entry.debit ? `${getCurrencySymbol(transaction)}${entry.debit.toFixed(2)}` : "—"
                                   )}
                                 </div>
                                 <div className="col-span-3 text-right">
@@ -908,7 +1051,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                                       style={isFormulaMode ? { fontVariantNumeric: 'normal' } : {}}
                                     />
                                   ) : (
-                                    entry.credit ? `$${entry.credit.toFixed(2)}` : "—"
+                                    entry.credit ? `${getCurrencySymbol(transaction)}${entry.credit.toFixed(2)}` : "—"
                                   )}
                                 </div>
                                 {/* Delete button - positioned in the last column */}
@@ -976,6 +1119,61 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                               <Edit3 className="w-3 h-3 mr-1" />
                               Edit
                             </Button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Monthly Scheduled Entries for Revenue Recognition */}
+                      <div className="p-3">
+                        <h4 className="text-sm font-medium text-mobius-gray-900 mb-3">Monthly Scheduled Entries</h4>
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-12 gap-2 text-xs font-medium text-mobius-gray-500 uppercase tracking-wide mb-3 pt-2">
+                            <div className="col-span-5 pl-0">ACCOUNT</div>
+                            <div className="col-span-3 text-right">DEBIT</div>
+                            <div className="col-span-3 text-right">CREDIT</div>
+                            <div className="col-span-1"></div>
+                          </div>
+                          
+                          <div className="space-y-1">
+                            <div className="grid grid-cols-12 gap-2 text-sm items-center group">
+                              <div className="col-span-5 font-medium text-sm">
+                                <div>
+                                  <div className="font-medium">Deferred Revenue <span className="text-xs text-mobius-gray-500 font-normal">(2001)</span></div>
+                                </div>
+                              </div>
+                              <div className="col-span-3 text-right">
+                                ${(() => {
+                                  const schedule = generateDeferredRevenueSchedule(transaction);
+                                  return schedule.length > 0 ? schedule[0].monthlyRevenue.toFixed(2) : "0.00";
+                                })()}
+                              </div>
+                              <div className="col-span-3 text-right">
+                                —
+                              </div>
+                              <div className="col-span-1"></div>
+                            </div>
+                            
+                            <div className="grid grid-cols-12 gap-2 text-sm items-center group">
+                              <div className="col-span-5 font-medium text-sm">
+                                <div>
+                                  <div className="font-medium">Revenue <span className="text-xs text-mobius-gray-500 font-normal">(4001)</span></div>
+                                </div>
+                              </div>
+                              <div className="col-span-3 text-right">
+                                —
+                              </div>
+                              <div className="col-span-3 text-right">
+                                ${(() => {
+                                  const schedule = generateDeferredRevenueSchedule(transaction);
+                                  return schedule.length > 0 ? schedule[0].monthlyRevenue.toFixed(2) : "0.00";
+                                })()}
+                              </div>
+                              <div className="col-span-1"></div>
+                            </div>
+                          </div>
+                          
+                          <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
+                            <p className="text-blue-600">Monthly entry made as services are delivered over the contract term.</p>
                           </div>
                         </div>
                       </div>
@@ -1093,7 +1291,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                                     style={isFormulaMode ? { fontVariantNumeric: 'normal' } : {}}
                                   />
                                 ) : (
-                                  entry.debit ? `$${entry.debit.toFixed(2)}` : "—"
+                                  entry.debit ? `${getCurrencySymbol(transaction)}${entry.debit.toFixed(2)}` : "—"
                                 )}
                               </div>
                               <div className="col-span-3 text-right">
@@ -1120,7 +1318,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                                     style={isFormulaMode ? { fontVariantNumeric: 'normal' } : {}}
                                   />
                                 ) : (
-                                  entry.credit ? `$${entry.credit.toFixed(2)}` : "—"
+                                  entry.credit ? `${getCurrencySymbol(transaction)}${entry.credit.toFixed(2)}` : "—"
                                 )}
                               </div>
                               {/* Delete button - positioned in the last column */}
@@ -1193,86 +1391,40 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                     </>
                   )}
 
-                  {/* Comment Box */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-mobius-gray-700">Comments</label>
-                    <textarea
-                      className="w-full h-20 p-2 text-sm border border-mobius-gray-200 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-mobius-blue focus:border-transparent"
-                      placeholder="Add context or notes for this transaction..."
-                    />
-                  </div>
-
-                  {/* Workings Section - Expandable */}
+                  {/* Analysis Summary Section */}
                   <Separator />
                   <div className="space-y-3">
-                    <button
-                      onClick={() => setIsWorkingsExpanded(!isWorkingsExpanded)}
-                      className="flex items-center justify-between w-full text-left hover:bg-mobius-gray-50 p-2 rounded-lg transition-colors"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <h4 className="text-sm font-medium text-mobius-gray-900">Analysis Workings</h4>
-                        <Badge variant="outline" className="bg-status-done/10 text-status-done border-status-done/20 text-xs">
-                          {confidence}%
-                        </Badge>
-                      </div>
-                      {isWorkingsExpanded ? (
-                        <ChevronDown className="w-4 h-4 text-mobius-gray-500" />
-                      ) : (
-                        <ChevronRight className="w-4 h-4 text-mobius-gray-500" />
-                      )}
-                    </button>
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-medium text-mobius-gray-900">Analysis Summary</h4>
+                      <Badge variant="outline" className="bg-status-done/10 text-status-done border-status-done/20 text-xs">
+                        {confidence}%
+                      </Badge>
+                    </div>
                     
-                    {isWorkingsExpanded && (
-                      <div className="space-y-3 pl-4">
-                        {analysisSteps.map((step) => (
-                          <Card key={step.step} className="p-3">
-                            <div className="space-y-3">
-                              <div className="flex items-start justify-between">
-                                <div className="flex items-start space-x-3 flex-1">
-                                  <div className={cn(
-                                    "w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium mt-0.5",
-                                    step.status === "complete" 
-                                      ? "bg-status-done text-white"
-                                      : step.status === "skip"
-                                      ? "bg-mobius-gray-300 text-mobius-gray-600"
-                                      : "bg-status-pending text-white"
-                                  )}>
-                                    {step.status === "complete" ? "✓" : step.step}
-                                  </div>
-                                  <div className="flex-1">
-                                    <h4 className="font-medium text-sm mb-1">{step.title}</h4>
-                                    <p className="text-xs text-mobius-gray-600 leading-relaxed">{step.result}</p>
-                                  </div>
-                                </div>
-                                {step.status === "complete" && (
-                                  <Badge variant="outline" className="bg-status-done/10 text-status-done border-status-done/20 text-xs ml-2">
-                                    {step.confidence}%
-                                  </Badge>
-                                )}
-                              </div>
-                              
-                              {/* Comment and Retry Section */}
-                              <div className="space-y-2">
-                                <div className="flex items-center space-x-2">
-                                  <Input
-                                    placeholder="Add a comment or correction for this analysis step..."
-                                    className="h-8 text-xs border-mobius-gray-200 flex-1"
-                                  />
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    className="h-8 w-8 p-0"
-                                    onClick={() => console.log(`Retry ${step.title} for transaction ${transaction.id}`)}
-                                  >
-                                    <RotateCcw className="w-3 h-3" />
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                          </Card>
-                        ))}
+                    <div className="bg-mobius-gray-50 rounded-lg p-4">
+                      <p className="text-sm text-mobius-gray-700 leading-relaxed">
+                        {getAnalysisSummary(transaction)}
+                      </p>
+                    </div>
+                    
+                    {/* Comment Section */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-mobius-gray-700">Comments</label>
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          placeholder="Add a comment or correction for this analysis..."
+                          className="h-8 text-xs border-mobius-gray-200 flex-1"
+                        />
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="h-8 w-8 p-0"
+                          onClick={() => console.log(`Retry analysis for transaction ${transaction.id}`)}
+                        >
+                          <RotateCcw className="w-3 h-3" />
+                        </Button>
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -1541,9 +1693,9 @@ function getJournalEntryForTransaction(transaction: any) {
         invoiceNumber: "RHYTHMS-BW-001",
         totalAmount: 7020,
         entryType: "SaaS Revenue",
-        narration: "Being the SaaS revenue from Bishop Wisecarver for RhythmsAI OKR Platform subscription",
+        narration: "Being the SaaS revenue from Bishop Wisecarver for RhythmsAI OKR Platform subscription - 10 month contract with 2-month termination right",
         entries: [
-          { account: "Cash/Accounts Receivable", debit: 7020, credit: 0, confidence: 100 },
+          { account: "Accounts Receivable", debit: 7020, credit: 0, confidence: 100 },
           { account: "Deferred Revenue", debit: 0, credit: 7020, confidence: 100 }
         ]
       };
@@ -1554,10 +1706,11 @@ function getJournalEntryForTransaction(transaction: any) {
         invoiceNumber: "RHYTHMS-MV-001",
         totalAmount: 10000,
         entryType: "SaaS Revenue",
-        narration: "Being the SaaS revenue from MARKETview Technology for RhythmsAI OKR Platform subscription",
+        narration: "Being the SaaS revenue from MARKETview Technology for RhythmsAI OKR Platform subscription - 38 month contract (Year 1 of 3)",
         entries: [
           { account: "Cash/Accounts Receivable", debit: 10000, credit: 0, confidence: 100 },
-          { account: "Deferred Revenue", debit: 0, credit: 10000, confidence: 100 }
+          { account: "Deferred Revenue", debit: 0, credit: 7894.74, confidence: 100 },
+          { account: "Revenue", debit: 0, credit: 2105.26, confidence: 100 }
         ]
       };
 
@@ -1574,16 +1727,16 @@ function getJournalEntryForTransaction(transaction: any) {
         ]
       };
 
-    case "16": // Valpak - SaaS Cloud Services
+    case "16": // Clipper Media Acquisition I, LLC - SaaS Cloud Services
       return {
         ...baseEntry,
-        invoiceNumber: "RHYTHMS-VALPAK-001",
-        totalAmount: 75000,
+        invoiceNumber: "RHYTHMS-CLIPPER-001",
+        totalAmount: 7999,
         entryType: "SaaS Revenue",
-        narration: "Being the SaaS revenue from Valpak for cloud services subscription",
+        narration: "Being the SaaS revenue from Clipper Media Acquisition I, LLC for RhythmsAI OKR Platform subscription - 11 month contract",
         entries: [
-          { account: "Cash/Accounts Receivable", debit: 75000, credit: 0, confidence: 100 },
-          { account: "Deferred Revenue", debit: 0, credit: 75000, confidence: 100 }
+          { account: "Cash/Accounts Receivable", debit: 7999, credit: 0, confidence: 100 },
+          { account: "Deferred Revenue", debit: 0, credit: 7999, confidence: 100 }
         ]
       };
 
