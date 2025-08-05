@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Filter, Archive, UserCheck, MailOpen, Undo2, Upload, Plus, ArrowUpDown, FileText, CreditCard, ChevronDown } from "lucide-react";
+import { Filter, Archive, UserCheck, MailOpen, Undo2, Upload, Plus, ArrowUpDown, FileText, CreditCard, ChevronDown, GripVertical } from "lucide-react";
 
 interface InboxHeaderProps {
   unreadCount: number;
@@ -24,6 +24,7 @@ interface InboxHeaderProps {
   onConfidenceChange: (threshold: number) => void;
   onFilterChange: (filter: string) => void;
   onStatusChange: (status: string) => void;
+  onResetPanelSizes?: () => void;
 }
 
 export function InboxHeader({ 
@@ -39,7 +40,8 @@ export function InboxHeader({
   onModeChange,
   onConfidenceChange,
   onFilterChange,
-  onStatusChange
+  onStatusChange,
+  onResetPanelSizes
 }: InboxHeaderProps) {
   const progressPercent = Math.round((doneCount / totalCount) * 100);
 
@@ -139,7 +141,7 @@ export function InboxHeader({
                   onClick={() => onFilterChange("bills")}
                 >
                   <FileText className="w-4 h-4" />
-                  <span>Bills (12)</span>
+                  <span>Bills (8)</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="flex items-center space-x-2"
@@ -160,7 +162,7 @@ export function InboxHeader({
                   onClick={() => onFilterChange("all")}
                 >
                   <Filter className="w-4 h-4" />
-                  <span>All (18)</span>
+                  <span>All (24)</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -237,6 +239,27 @@ export function InboxHeader({
                 Auto-posting ≥{confidenceThreshold}%
               </Badge>
             </div>
+          )}
+
+          {/* Reset Panel Sizes Button */}
+          {onResetPanelSizes && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
+                    onClick={onResetPanelSizes}
+                  >
+                    <GripVertical className="w-4 h-4 text-mobius-gray-600" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Reset panel sizes</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
         </div>
       </div>

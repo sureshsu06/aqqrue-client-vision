@@ -5,7 +5,10 @@ import {
   FileText,
   Download,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Mail,
+  MessageSquare,
+  Upload
 } from "lucide-react";
 import { Transaction } from "./InboxList";
 
@@ -123,6 +126,54 @@ export function DocumentPane({ transaction }: DocumentPaneProps) {
                 className="w-full h-full"
                 style={{ minHeight: '600px' }}
               />
+            </div>
+          </div>
+        ) : transaction.type === "credit-card" && !transaction.pdfFile ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center text-mobius-gray-500 max-w-md">
+              <FileText className="w-12 h-12 mx-auto mb-4 stroke-current fill-none text-mobius-gray-400" />
+              <h3 className="font-semibold text-lg mb-2 text-mobius-gray-700">Invoice Not Available</h3>
+              <p className="text-sm mb-6 text-mobius-gray-600">
+                This credit card transaction has been processed but the corresponding invoice is not yet available. 
+                The transaction has been temporarily posted to the Suspense Account.
+              </p>
+              <div className="space-y-3">
+                <div className="flex justify-center space-x-4">
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    className="h-10 w-10 p-0 rounded-full"
+                    onClick={() => {
+                      // TODO: Implement email notification
+                      console.log("Email notification for transaction:", transaction.id);
+                    }}
+                  >
+                    <Mail className="w-5 h-5" />
+                  </Button>
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    className="h-10 w-10 p-0 rounded-full"
+                    onClick={() => {
+                      // TODO: Implement slack notification
+                      console.log("Slack notification for transaction:", transaction.id);
+                    }}
+                  >
+                    <MessageSquare className="w-5 h-5" />
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-10 w-10 p-0 rounded-full"
+                    onClick={() => {
+                      // TODO: Implement manual invoice upload
+                      console.log("Upload invoice manually for transaction:", transaction.id);
+                    }}
+                  >
+                    <Upload className="w-5 h-5" />
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         ) : (

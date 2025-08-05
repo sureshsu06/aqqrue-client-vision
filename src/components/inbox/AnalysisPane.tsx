@@ -597,7 +597,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
 
   // Helper function to get currency symbol based on transaction type
   const getCurrencySymbol = (transaction: any) => {
-    return transaction.type === 'contract' ? '$' : '₹';
+    return (transaction.type === 'contract' || transaction.type === 'credit-card') ? '$' : '₹';
   };
 
   // Helper function to generate analysis summary
@@ -612,6 +612,38 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
           return "This 3-year SaaS contract with MARKETview Technology spans 38 months with annual billing. The total contract value of $30,000 will be recognized over the full contract period at $789.47 per month. In the first year, $7,894.74 will remain as deferred revenue while $2,105.26 will be recognized as revenue, reflecting the partial year of service delivery.";
         default:
           return `This ${transaction.type} transaction with ${transaction.vendor} has been analyzed under ASC 606 revenue recognition standards. The contract terms have been evaluated to determine the appropriate revenue recognition period and method. The journal entries reflect the proper accounting treatment based on the performance obligations and service delivery schedule.`;
+      }
+    } else if (transaction.type === 'credit-card') {
+      // Credit card transaction analysis
+      switch (transaction.id) {
+        case "28":
+          return "This HubSpot subscription transaction has been classified as a software subscription expense. The quarterly billing of $2,324.11 covers Marketing Hub Starter and Sales Hub Professional services. This is a recurring operating expense that should be recognized in the period the services are consumed. The journal entry debits Software Subscriptions and credits the Suspense Account, as the invoice is available for proper expense classification.";
+        case "29":
+          return "This duplicate HubSpot transaction has been identified and flagged. The same quarterly subscription charge of $2,324.11 appears twice in the system. This duplicate should be removed to prevent double expense recognition. The journal entry structure remains the same but with reduced confidence due to duplication.";
+        case "30":
+          return "This Gumloop Starter Plan subscription transaction has been classified as a software subscription expense. The monthly charge of $97.00 covers 30,000 units of service. This is a recurring operating expense that should be recognized monthly as the service is consumed. The journal entry debits Software Subscriptions and credits the Suspense Account, as the invoice is available for proper expense classification.";
+        case "31":
+          return "This X Premium subscription transaction has been classified as a software subscription expense. The monthly charge of $716.30 covers premium features for social media management. This is a recurring operating expense that should be recognized monthly as the service is consumed. The journal entry debits Software Subscriptions and credits the Suspense Account, as the invoice is available for proper expense classification.";
+        case "32":
+          return "This Pitch Pro subscription transaction has been classified as a software subscription expense. The monthly charge of $43.75 covers 3 user seats for presentation software. This is a recurring operating expense that should be recognized monthly as the service is consumed. The journal entry debits Software Subscriptions and credits the Suspense Account, as the invoice is available for proper expense classification.";
+        case "33":
+          return "This Calendly Teams subscription transaction has been classified as a software subscription expense. The monthly charge of $22.04 covers team scheduling services. This is a recurring operating expense that should be recognized monthly as the service is consumed. The journal entry debits Software Subscriptions and credits the Suspense Account, as the invoice is available for proper expense classification.";
+        case "34":
+          return "This Typeform Business subscription transaction has been classified as a software subscription expense. The monthly charge of $109.10 covers business form creation services. This is a recurring operating expense that should be recognized monthly as the service is consumed. The journal entry debits Software Subscriptions and credits the Suspense Account, as the invoice is available for proper expense classification.";
+        case "35":
+          return "This Stripe payment processing transaction has been temporarily posted to the Suspense Account as the corresponding invoice is not yet available. The monthly charge of $299.00 covers payment processing fees. Once the invoice is received, this will be reclassified to the appropriate expense account. The journal entry debits Suspense Account and credits the Brex corporate card liability.";
+        case "36":
+          return "This AWS cloud infrastructure transaction has been temporarily posted to the Suspense Account as the corresponding invoice is not yet available. The monthly charge of $156.78 covers cloud computing services. Once the invoice is received, this will be reclassified to the appropriate expense account. The journal entry debits Suspense Account and credits the Brex corporate card liability.";
+        case "37":
+          return "This Google Cloud compute services transaction has been temporarily posted to the Suspense Account as the corresponding invoice is not yet available. The monthly charge of $89.45 covers cloud computing services. Once the invoice is received, this will be reclassified to the appropriate expense account. The journal entry debits Suspense Account and credits the Brex corporate card liability.";
+        case "38":
+          return "This Zoom Pro subscription transaction has been temporarily posted to the Suspense Account as the corresponding invoice is not yet available. The monthly charge of $149.90 covers video conferencing services. Once the invoice is received, this will be reclassified to the appropriate expense account. The journal entry debits Suspense Account and credits the Brex corporate card liability.";
+        case "39":
+          return "This Slack Standard subscription transaction has been temporarily posted to the Suspense Account as the corresponding invoice is not yet available. The monthly charge of $67.50 covers team collaboration services. Once the invoice is received, this will be reclassified to the appropriate expense account. The journal entry debits Suspense Account and credits the Brex corporate card liability.";
+        default:
+          return transaction.pdfFile 
+            ? `This credit card transaction with ${transaction.vendor} has been classified as a software subscription expense. The transaction represents a recurring operating expense that should be recognized in the period the services are consumed. The journal entry debits the expense account and credits the Suspense Account, as the invoice is available for proper expense classification.`
+            : `This credit card transaction with ${transaction.vendor} has been temporarily posted to the Suspense Account as the corresponding invoice is not yet available. Once the invoice is received, this will be reclassified to the appropriate expense account. The journal entry debits Suspense Account and credits the Brex corporate card liability.`;
       }
     } else {
       // For expense transactions - provide specific analysis based on transaction ID
@@ -687,7 +719,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
         )}
 
         <p className="text-sm text-mobius-gray-500">
-          {transaction.type === 'contract' ? '$' : '₹'}{(transaction.amount || 0).toLocaleString()} • {new Date(transaction.date || new Date()).toLocaleDateString()}
+          {(transaction.type === 'contract' || transaction.type === 'credit-card') ? '$' : '₹'}{(transaction.amount || 0).toLocaleString()} • {new Date(transaction.date || new Date()).toLocaleDateString()}
         </p>
       </div>
 
@@ -773,7 +805,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                 </div>
                 <div>
                   <p className="text-mobius-gray-500">Currency:</p>
-                  <p className="font-medium">{transaction.type === 'contract' ? 'US Dollar ($)' : 'Indian Rupee (₹)'}</p>
+                  <p className="font-medium">{(transaction.type === 'contract' || transaction.type === 'credit-card') ? 'US Dollar ($)' : 'Indian Rupee (₹)'}</p>
                 </div>
               </div>
 
@@ -782,7 +814,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                 <div className="space-y-4">
                   {transaction.type === 'contract' ? (
                     // SaaS Contract Details for Revenue
-                    <div className="space-y-4">
+                    <div className="space-y-2">
                       {/* Contract Details */}
                       <div className="bg-mobius-gray-50 rounded-lg p-3">
                         <h4 className="text-sm font-medium text-mobius-gray-900 mb-3">Contract Details</h4>
@@ -816,19 +848,56 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
 
                       {/* Deferred Revenue Schedule */}
                       <div className="p-3">
-                        <h4 className="text-sm font-medium text-mobius-gray-900 mb-3">Deferred Revenue Schedule</h4>
-                        <div className="space-y-3">
-                          <div className="grid grid-cols-4 gap-2 text-xs font-medium text-mobius-gray-500 uppercase tracking-wide">
-                            <div>Period</div>
-                            <div className="text-right">Monthly Revenue</div>
-                            <div className="text-right">Deferred Revenue</div>
-                            <div className="text-right">Recognized</div>
+                        <div className="flex justify-between mb-4">
+                          <h4 className="text-sm font-medium text-mobius-gray-900">Deferred Revenue Schedule:</h4>
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className={cn("h-6 w-6 p-0", isFormulaMode ? "bg-blue-100 text-blue-600" : "")}
+                              onClick={() => setIsFormulaMode(!isFormulaMode)}
+                              title={isFormulaMode ? "Disable Formula Mode" : "Enable Formula Mode"}
+                            >
+                              <span className="text-xs font-bold">fx</span>
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                              <RotateCcw className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Formula Mode Instructions */}
+                        {isFormulaMode && (
+                          <div className="mb-4 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
+                            <p className="font-medium mb-1">Formula Mode Active</p>
+                            <p>Use Excel-like formulas: <code className="bg-blue-100 px-1 rounded">=B1*0.1</code>, <code className="bg-blue-100 px-1 rounded">=SUM(B1:B3)</code>, <code className="bg-blue-100 px-1 rounded">10%*C2</code></p>
+                            <p className="text-blue-600 mt-1">B = Monthly Revenue column, C = Deferred Revenue column, D = Recognized column, numbers = row index (1-based)</p>
+                          </div>
+                        )}
+
+                        <Separator className="my-4" />
+
+                        {/* Deferred Revenue Schedule Table */}
+                        <div className="mt-4">
+                          <div className="grid grid-cols-4 gap-2 text-xs font-medium text-mobius-gray-500 uppercase tracking-wide mb-3 pt-2">
+                            <div>PERIOD</div>
+                            <div className="text-right">MONTHLY REVENUE</div>
+                            <div className="text-right">DEFERRED REVENUE</div>
+                            <div className="text-right">RECOGNIZED</div>
                           </div>
                           
-                          {(() => {
-                            const schedule = isScheduleEditMode ? editedSchedule : generateDeferredRevenueSchedule(transaction);
-                            console.log("Rendering schedule:", schedule, "Edit mode:", isScheduleEditMode);
-                            return schedule.map((period, index) => (
+                          {/* Column Headers for Formula Reference */}
+                          {isFormulaMode && (
+                            <div className="grid grid-cols-4 gap-2 text-xs font-medium text-blue-600 mb-1">
+                              <div>A</div>
+                              <div className="text-right">B</div>
+                              <div className="text-right">C</div>
+                              <div className="text-right">D</div>
+                            </div>
+                          )}
+                          
+                          <div className="space-y-1">
+                            {(isScheduleEditMode ? editedSchedule : generateDeferredRevenueSchedule(transaction)).map((period, index) => (
                               <div key={index} className="grid grid-cols-4 gap-2 text-sm border-b border-mobius-gray-200 pb-2">
                                 <div className="font-medium">{period.period}</div>
                                 <div className="text-right">
@@ -868,54 +937,54 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                                   )}
                                 </div>
                               </div>
-                            ));
-                          })()}
-                        </div>
-                        
-                        {/* Edit/Save/Cancel Buttons - below the table */}
-                        <div className="flex justify-end mt-3 space-x-2">
-                          {isScheduleEditMode ? (
-                            <>
+                            ))}
+                          </div>
+                          
+                          {/* Edit/Save/Cancel Buttons - below the table */}
+                          <div className="flex justify-end mt-3 space-x-2">
+                            {isScheduleEditMode ? (
+                              <>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-6 px-2"
+                                  onClick={handleScheduleSave}
+                                  title="Save Schedule"
+                                >
+                                  <Save className="w-3 h-3 mr-1" />
+                                  Save
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-6 px-2"
+                                  onClick={handleScheduleCancel}
+                                  title="Cancel"
+                                >
+                                  <X className="w-3 h-3 mr-1" />
+                                  Cancel
+                                </Button>
+                              </>
+                            ) : (
                               <Button 
                                 variant="ghost" 
                                 size="sm" 
                                 className="h-6 px-2"
-                                onClick={handleScheduleSave}
-                                title="Save Schedule"
+                                onClick={handleScheduleEditClick}
+                                title="Edit Schedule"
                               >
-                                <Save className="w-3 h-3 mr-1" />
-                                Save
+                                <Edit3 className="w-3 h-3 mr-1" />
+                                Edit
                               </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="h-6 px-2"
-                                onClick={handleScheduleCancel}
-                                title="Cancel"
-                              >
-                                <X className="w-3 h-3 mr-1" />
-                                Cancel
-                              </Button>
-                            </>
-                          ) : (
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-6 px-2"
-                              onClick={handleScheduleEditClick}
-                              title="Edit Schedule"
-                            >
-                              <Edit3 className="w-3 h-3 mr-1" />
-                              Edit
-                            </Button>
-                          )}
+                            )}
+                          </div>
                         </div>
                       </div>
 
                       {/* Editable Journal Entry Table for Contracts */}
                       <div className="p-3">
                         <div className="flex justify-between mb-4">
-                          <h4 className="text-sm font-medium text-mobius-gray-900">Journal Entries</h4>
+                          <h4 className="text-sm font-medium text-mobius-gray-900">Journal Entries:</h4>
                           <div className="flex gap-2">
                             <Button 
                               variant="ghost" 
@@ -992,6 +1061,9 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                                         <SelectItem value="Sogo Computers Pvt Ltd">Sogo Computers Pvt Ltd</SelectItem>
                                         <SelectItem value="Clayworks Spaces Technologies Pvt Ltd">Clayworks Spaces Technologies Pvt Ltd</SelectItem>
                                         <SelectItem value="NSDL Database Management Ltd">NSDL Database Management Ltd</SelectItem>
+                                        <SelectItem value="Software Subscriptions">Software Subscriptions</SelectItem>
+                                        <SelectItem value="Brex Card">Brex Card</SelectItem>
+                                        <SelectItem value="Suspense Account">Suspense Account</SelectItem>
                                       </SelectContent>
                                     </Select>
                                   ) : (
@@ -1125,14 +1197,53 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
 
                       {/* Monthly Scheduled Entries for Revenue Recognition */}
                       <div className="p-3">
-                        <h4 className="text-sm font-medium text-mobius-gray-900 mb-3">Monthly Scheduled Entries</h4>
-                        <div className="space-y-3">
+                        <div className="flex justify-between mb-4">
+                          <h4 className="text-sm font-medium text-mobius-gray-900">Monthly Scheduled Entries:</h4>
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className={cn("h-6 w-6 p-0", isFormulaMode ? "bg-blue-100 text-blue-600" : "")}
+                              onClick={() => setIsFormulaMode(!isFormulaMode)}
+                              title={isFormulaMode ? "Disable Formula Mode" : "Enable Formula Mode"}
+                            >
+                              <span className="text-xs font-bold">fx</span>
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                              <RotateCcw className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Formula Mode Instructions */}
+                        {isFormulaMode && (
+                          <div className="mb-4 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
+                            <p className="font-medium mb-1">Formula Mode Active</p>
+                            <p>Use Excel-like formulas: <code className="bg-blue-100 px-1 rounded">=B1*0.1</code>, <code className="bg-blue-100 px-1 rounded">=SUM(B1:B3)</code>, <code className="bg-blue-100 px-1 rounded">10%*C2</code></p>
+                            <p className="text-blue-600 mt-1">B = Debit column, C = Credit column, numbers = row index (1-based)</p>
+                          </div>
+                        )}
+
+                        <Separator className="my-4" />
+
+                        {/* Monthly Scheduled Entries Table */}
+                        <div className="mt-4">
                           <div className="grid grid-cols-12 gap-2 text-xs font-medium text-mobius-gray-500 uppercase tracking-wide mb-3 pt-2">
                             <div className="col-span-5 pl-0">ACCOUNT</div>
                             <div className="col-span-3 text-right">DEBIT</div>
                             <div className="col-span-3 text-right">CREDIT</div>
                             <div className="col-span-1"></div>
                           </div>
+                          
+                          {/* Column Headers for Formula Reference */}
+                          {isFormulaMode && (
+                            <div className="grid grid-cols-12 gap-2 text-xs font-medium text-blue-600 mb-1">
+                              <div className="col-span-5 pl-0">A</div>
+                              <div className="col-span-3 text-right">B</div>
+                              <div className="col-span-3 text-right">C</div>
+                              <div className="col-span-1"></div>
+                            </div>
+                          )}
                           
                           <div className="space-y-1">
                             <div className="grid grid-cols-12 gap-2 text-sm items-center group">
@@ -1184,7 +1295,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                       {/* Undo Button */}
                       <div className="flex justify-between mb-4">
                         <div>
-                          <h4 className="text-sm font-medium text-mobius-gray-900">Proposed Entries</h4>
+                          <h4 className="text-sm font-medium text-mobius-gray-900">Proposed Entries:</h4>
                         </div>
                         <div className="flex gap-2">
                           <Button 
@@ -1259,6 +1370,9 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                                       <SelectItem value="Sogo Computers Pvt Ltd">Sogo Computers Pvt Ltd</SelectItem>
                                       <SelectItem value="Clayworks Spaces Technologies Pvt Ltd">Clayworks Spaces Technologies Pvt Ltd</SelectItem>
                                       <SelectItem value="NSDL Database Management Ltd">NSDL Database Management Ltd</SelectItem>
+                                      <SelectItem value="Software Subscriptions">Software Subscriptions</SelectItem>
+                                      <SelectItem value="Brex Card">Brex Card</SelectItem>
+                                      <SelectItem value="Suspense Account">Suspense Account</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 ) : (
@@ -1687,13 +1801,13 @@ function getJournalEntryForTransaction(transaction: any) {
         ]
       };
 
-    case "13": // Bishop Wisecarver - RhythmsAI OKR Platform
+    case "13": // Bishop Wisecarver - SaaS Cloud Services
       return {
         ...baseEntry,
-        invoiceNumber: "RHYTHMS-BW-001",
+        invoiceNumber: "RHYTHMS-BISHOP-001",
         totalAmount: 7020,
         entryType: "SaaS Revenue",
-        narration: "Being the SaaS revenue from Bishop Wisecarver for RhythmsAI OKR Platform subscription - 10 month contract with 2-month termination right",
+        narration: "Being the SaaS revenue from Bishop Wisecarver for RhythmsAI OKR Platform - 65 Owner Users",
         entries: [
           { account: "Accounts Receivable", debit: 7020, credit: 0, confidence: 100 },
           { account: "Deferred Revenue", debit: 0, credit: 7020, confidence: 100 }
@@ -1766,6 +1880,164 @@ function getJournalEntryForTransaction(transaction: any) {
         ]
       };
 
+    // Credit Card transactions
+    case "28": // HubSpot Inc - Marketing Hub Starter & Sales Hub Professional
+      return {
+        ...baseEntry,
+        invoiceNumber: "HUBSPOT-614657704",
+        totalAmount: 2324.11,
+        entryType: "Software Subscriptions",
+        narration: "Being the quarterly subscription charges for HubSpot Marketing Hub Starter & Sales Hub Professional",
+        entries: [
+          { account: "Software Subscriptions", debit: 2324.11, credit: 0, confidence: 95 },
+          { account: "Suspense Account", debit: 0, credit: 2324.11, confidence: 100 }
+        ]
+      };
+
+    case "29": // HubSpot Inc - Duplicate
+      return {
+        ...baseEntry,
+        invoiceNumber: "HUBSPOT-614657704-DUP",
+        totalAmount: 2324.11,
+        entryType: "Software Subscriptions",
+        narration: "Being the quarterly subscription charges for HubSpot Marketing Hub Starter & Sales Hub Professional (Duplicate)",
+        entries: [
+          { account: "Software Subscriptions", debit: 2324.11, credit: 0, confidence: 90 },
+          { account: "Suspense Account", debit: 0, credit: 2324.11, confidence: 100 }
+        ]
+      };
+
+    case "30": // AgentHub Canada Inc - Gumloop Starter Plan
+      return {
+        ...baseEntry,
+        invoiceNumber: "AGENTHUB-6D330809-0003",
+        totalAmount: 97.00,
+        entryType: "Software Subscriptions",
+        narration: "Being the monthly subscription charges for Gumloop Starter Plan",
+        entries: [
+          { account: "Software Subscriptions", debit: 97.00, credit: 0, confidence: 92 },
+          { account: "Suspense Account", debit: 0, credit: 97.00, confidence: 100 }
+        ]
+      };
+
+    case "31": // Twitter Global LLC - X Premium Subscription
+      return {
+        ...baseEntry,
+        invoiceNumber: "TWITTER-7D7DB7C2-0007",
+        totalAmount: 716.30,
+        entryType: "Software Subscriptions",
+        narration: "Being the monthly subscription charges for X Premium",
+        entries: [
+          { account: "Software Subscriptions", debit: 716.30, credit: 0, confidence: 88 },
+          { account: "Suspense Account", debit: 0, credit: 716.30, confidence: 100 }
+        ]
+      };
+
+    case "32": // Pitch Software GmbH - Pitch Pro
+      return {
+        ...baseEntry,
+        invoiceNumber: "PITCH-9A31BB6E-0001",
+        totalAmount: 43.75,
+        entryType: "Software Subscriptions",
+        narration: "Being the monthly subscription charges for Pitch Pro (3 seats)",
+        entries: [
+          { account: "Software Subscriptions", debit: 43.75, credit: 0, confidence: 96 },
+          { account: "Suspense Account", debit: 0, credit: 43.75, confidence: 100 }
+        ]
+      };
+
+    case "33": // Calendly LLC - Teams Monthly
+      return {
+        ...baseEntry,
+        invoiceNumber: "CALENDLY-13904471-1",
+        totalAmount: 22.04,
+        entryType: "Software Subscriptions",
+        narration: "Being the monthly subscription charges for Calendly Teams",
+        entries: [
+          { account: "Software Subscriptions", debit: 22.04, credit: 0, confidence: 98 },
+          { account: "Suspense Account", debit: 0, credit: 22.04, confidence: 100 }
+        ]
+      };
+
+    case "34": // Typeform US LLC - Typeform Business
+      return {
+        ...baseEntry,
+        invoiceNumber: "TYPEFORM-USIN-2025-0114021",
+        totalAmount: 109.10,
+        entryType: "Software Subscriptions",
+        narration: "Being the monthly subscription charges for Typeform Business",
+        entries: [
+          { account: "Software Subscriptions", debit: 109.10, credit: 0, confidence: 97 },
+          { account: "Suspense Account", debit: 0, credit: 109.10, confidence: 100 }
+        ]
+      };
+
+    // Credit Card transactions without invoices (pending)
+    case "35": // Stripe Inc - Payment Processing
+      return {
+        ...baseEntry,
+        invoiceNumber: "PENDING-INVOICE",
+        totalAmount: 299.00,
+        entryType: "Payment Processing Fees",
+        narration: "Being the monthly payment processing charges from Stripe (Invoice pending)",
+        entries: [
+          { account: "Suspense Account", debit: 299.00, credit: 0, confidence: 85 },
+          { account: "Brex Card", debit: 0, credit: 299.00, confidence: 100 }
+        ]
+      };
+
+    case "36": // AWS - Cloud Infrastructure
+      return {
+        ...baseEntry,
+        invoiceNumber: "PENDING-INVOICE",
+        totalAmount: 156.78,
+        entryType: "Cloud Infrastructure",
+        narration: "Being the monthly cloud infrastructure charges from AWS (Invoice pending)",
+        entries: [
+          { account: "Suspense Account", debit: 156.78, credit: 0, confidence: 92 },
+          { account: "Brex Card", debit: 0, credit: 156.78, confidence: 100 }
+        ]
+      };
+
+    case "37": // Google Cloud - Compute Services
+      return {
+        ...baseEntry,
+        invoiceNumber: "PENDING-INVOICE",
+        totalAmount: 89.45,
+        entryType: "Cloud Infrastructure",
+        narration: "Being the monthly compute services charges from Google Cloud (Invoice pending)",
+        entries: [
+          { account: "Suspense Account", debit: 89.45, credit: 0, confidence: 88 },
+          { account: "Brex Card", debit: 0, credit: 89.45, confidence: 100 }
+        ]
+      };
+
+    case "38": // Zoom Video Communications - Pro Subscription
+      return {
+        ...baseEntry,
+        invoiceNumber: "PENDING-INVOICE",
+        totalAmount: 149.90,
+        entryType: "Software Subscriptions",
+        narration: "Being the monthly subscription charges from Zoom (Invoice pending)",
+        entries: [
+          { account: "Suspense Account", debit: 149.90, credit: 0, confidence: 90 },
+          { account: "Brex Card", debit: 0, credit: 149.90, confidence: 100 }
+        ]
+      };
+
+    case "39": // Slack Technologies - Standard Plan
+      return {
+        ...baseEntry,
+        invoiceNumber: "PENDING-INVOICE",
+        totalAmount: 67.50,
+        entryType: "Software Subscriptions",
+        narration: "Being the monthly subscription charges from Slack (Invoice pending)",
+        entries: [
+          { account: "Suspense Account", debit: 67.50, credit: 0, confidence: 87 },
+          { account: "Brex Card", debit: 0, credit: 67.50, confidence: 100 }
+        ]
+      };
+
     default:
       // Fallback for any other transactions
       return {
@@ -1789,6 +2061,8 @@ function getGLAccountCode(accountName: string) {
   switch (accountName) {
     case "Cash/Accounts Receivable":
       return "1001";
+    case "Accounts Receivable":
+      return "1002";
     case "Deferred Revenue":
       return "2001";
     case "SaaS Revenue":
@@ -1821,6 +2095,12 @@ function getGLAccountCode(accountName: string) {
       return "1022";
     case "NSDL Database Management Ltd":
       return "1023";
+    case "Software Subscriptions":
+      return "1024";
+    case "Brex Card":
+      return "1025";
+    case "Suspense Account":
+      return "1026";
     default:
       return "";
   }
@@ -1829,14 +2109,14 @@ function getGLAccountCode(accountName: string) {
 // Helper function to get total debit
 function getTotalDebit(journalEntry: any, transaction?: any) {
   const amount = journalEntry.entries.reduce((sum: number, entry: any) => sum + (entry.debit || 0), 0);
-  const currency = transaction?.type === 'contract' ? '$' : '₹';
+  const currency = (transaction?.type === 'contract' || transaction?.type === 'credit-card') ? '$' : '₹';
   return `${currency}${amount.toFixed(2)}`;
 }
 
 // Helper function to get total credit
 function getTotalCredit(journalEntry: any, transaction?: any) {
   const amount = journalEntry.entries.reduce((sum: number, entry: any) => sum + (entry.credit || 0), 0);
-  const currency = transaction?.type === 'contract' ? '$' : '₹';
+  const currency = (transaction?.type === 'contract' || transaction?.type === 'credit-card') ? '$' : '₹';
   return `${currency}${amount.toFixed(2)}`;
 }
 

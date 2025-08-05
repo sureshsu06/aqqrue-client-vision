@@ -7,6 +7,7 @@ import { InboxList, Transaction } from "./inbox/InboxList";
 import { DocumentPane } from "./inbox/DocumentPane";
 import { AnalysisPane } from "./inbox/AnalysisPane";
 import { useToast } from "@/hooks/use-toast";
+import { usePanelSizes } from "@/hooks/use-panel-sizes";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,9 +24,15 @@ import {
   ChevronDown,
   Undo2,
   Filter,
-  Upload
+  Upload,
+  GripVertical
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { 
+  Panel, 
+  PanelGroup, 
+  PanelResizeHandle 
+} from "react-resizable-panels";
 
 const mockTransactions: Transaction[] = [
   {
@@ -134,7 +141,7 @@ const mockTransactions: Transaction[] = [
     vendor: "Sogo Computers",
     amount: 480850,
     source: "email",
-    type: "bill",
+    type: "fixed-asset",
     status: "done",
     date: "2025-05-19",
     description: "Laptop Purchase",
@@ -149,7 +156,7 @@ const mockTransactions: Transaction[] = [
     vendor: "Sogo Computers",
     amount: 96170,
     source: "email",
-    type: "bill",
+    type: "fixed-asset",
     status: "unread",
     date: "2025-05-22",
     description: "Laptop Purchase",
@@ -164,7 +171,7 @@ const mockTransactions: Transaction[] = [
     vendor: "Sogo Computers",
     amount: 96170,
     source: "email",
-    type: "bill",
+    type: "fixed-asset",
     status: "review",
     date: "2025-05-22",
     description: "Laptop Purchase",
@@ -179,7 +186,7 @@ const mockTransactions: Transaction[] = [
     vendor: "Ozone Computer Services",
     amount: 16900,
     source: "email",
-    type: "bill",
+    type: "fixed-asset",
     status: "done",
     date: "2025-05-10",
     description: "Monitor LG",
@@ -317,18 +324,162 @@ const mockTransactions: Transaction[] = [
     confidence: 96,
     pdfFile: "contracts/Rhythms - Cloud Services Agreement - AlineOps.docx.pdf",
     documentUrl: "https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=800&h=1000&fit=crop",
-    contractStartDate: "2025-06-01",
+    contractStartDate: "2025-05-01",
     contractEndDate: "2026-05-31",
     billingCycle: "Annual",
     contractValue: 135000,
     contractTerm: "12 months"
+  },
+  // Credit Card transactions
+  // New Credit Card transactions from PDF invoices
+  {
+    id: "28",
+    vendor: "HubSpot Inc",
+    amount: 2324.11,
+    currency: "USD",
+    source: "brex",
+    type: "credit-card",
+    status: "unread",
+    date: "2025-04-30",
+    description: "Marketing Hub Starter & Sales Hub Professional - Quarterly Subscription",
+    client: "Rhythms",
+    confidence: 95,
+    pdfFile: "creditcard/Copy of HubSpot-INVOICE-614657704.0-1.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=1000&fit=crop",
+    isRecurring: true
+  },
+  {
+    id: "29",
+    vendor: "HubSpot Inc",
+    amount: 2324.11,
+    currency: "USD",
+    source: "brex",
+    type: "credit-card",
+    status: "review",
+    date: "2025-04-30",
+    description: "Marketing Hub Starter & Sales Hub Professional - Quarterly Subscription (Duplicate)",
+    client: "Rhythms",
+    confidence: 90,
+    pdfFile: "creditcard/Copy of HubSpot-INVOICE-614657704.0-2.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&h=1000&fit=crop",
+    isRecurring: true,
+    isDuplicate: true
+  },
+  {
+    id: "30",
+    vendor: "AgentHub Canada Inc",
+    amount: 97.00,
+    currency: "USD",
+    source: "brex",
+    type: "credit-card",
+    status: "unread",
+    date: "2025-05-19",
+    description: "Gumloop Starter Plan - Monthly Subscription",
+    client: "Rhythms",
+    confidence: 92,
+    pdfFile: "creditcard/Copy of Invoice-6D330809-0003.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=1000&fit=crop",
+    isRecurring: true
+  },
+  {
+    id: "31",
+    vendor: "Twitter Global LLC",
+    amount: 716.30,
+    currency: "USD",
+    source: "brex",
+    type: "credit-card",
+    status: "review",
+    date: "2025-05-30",
+    description: "X Premium Subscription - Monthly",
+    client: "Rhythms",
+    confidence: 88,
+    pdfFile: "creditcard/Copy of Invoice-7D7DB7C2-0007.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1483058712412-4245e9b90334?w=800&h=1000&fit=crop",
+    isRecurring: true
+  },
+  {
+    id: "32",
+    vendor: "Pitch Software GmbH",
+    amount: 43.75,
+    currency: "USD",
+    source: "brex",
+    type: "credit-card",
+    status: "done",
+    date: "2024-08-13",
+    description: "Pitch Pro - Monthly Subscription (3 seats)",
+    client: "Rhythms",
+    confidence: 96,
+    pdfFile: "creditcard/Copy of Invoice-9A31BB6E-0001.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1572044162444-ad60f128bdea?w=800&h=1000&fit=crop",
+    isRecurring: true
+  },
+  {
+    id: "33",
+    vendor: "Calendly LLC",
+    amount: 22.04,
+    currency: "USD",
+    source: "brex",
+    type: "credit-card",
+    status: "done",
+    date: "2025-05-14",
+    description: "Teams Monthly Subscription",
+    client: "Rhythms",
+    confidence: 98,
+    pdfFile: "creditcard/Copy of invoice_13904471-1.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1633114127408-af671c774b39?w=800&h=1000&fit=crop",
+    isRecurring: true
+  },
+  {
+    id: "34",
+    vendor: "Typeform US LLC",
+    amount: 109.10,
+    currency: "USD",
+    source: "brex",
+    type: "credit-card",
+    status: "done",
+    date: "2025-05-16",
+    description: "Typeform Business - Monthly Subscription",
+    client: "Rhythms",
+    confidence: 97,
+    pdfFile: "creditcard/Copy of invoice_USIN-2025-0114021.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=800&h=1000&fit=crop",
+    isRecurring: true
+  },
+  // Bank transactions
+  {
+    id: "26",
+    vendor: "Bank of America",
+    amount: 75000,
+    source: "drive",
+    type: "bank",
+    status: "done",
+    date: "2025-05-28",
+    description: "ACH Payment - Payroll Processing",
+    client: "Elire",
+    confidence: 99,
+    pdfFile: "bank/BOA_ACH_Payroll.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&h=1000&fit=crop"
+  },
+  {
+    id: "27",
+    vendor: "Wells Fargo",
+    amount: 25000,
+    source: "email",
+    type: "bank",
+    status: "unread",
+    date: "2025-05-29",
+    description: "Check Payment - Rent Deposit",
+    client: "Elire",
+    confidence: 91,
+    pdfFile: "bank/Wells_Fargo_Check_Payment.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=1000&fit=crop"
   }
 ];
 
 const filters = [
-  { id: "all", label: "All", count: 18, icon: Check },
-  { id: "bills", label: "Bills", count: 12, icon: FileText },
-  { id: "cards", label: "Credit Cards", count: 0, icon: CreditCard },
+  { id: "all", label: "All", count: 28, icon: Check },
+  { id: "bills", label: "Bills", count: 8, icon: FileText },
+  { id: "cards", label: "Credit Cards", count: 7, icon: CreditCard },
   { id: "contracts", label: "Contracts", count: 6, icon: FileText }
 ];
 
@@ -345,21 +496,37 @@ interface TransactionInboxProps {
 export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps) {
   const [selectedFilter, setSelectedFilter] = useState("bills");
   const [selectedStatus, setSelectedStatus] = useState("all");
-  const [selectedTab, setSelectedTab] = useState<"expenses" | "revenue">("expenses");
+  const [selectedTab, setSelectedTab] = useState<"expenses" | "revenue" | "fixed-assets" | "credit-card" | "bank">("expenses");
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [role, setRole] = useState("accountant");
   const [mode, setMode] = useState("review-all");
   const [confidenceThreshold, setConfidenceThreshold] = useState(95);
   const { toast } = useToast();
+  const { sizes, updateSizes, resetSizes } = usePanelSizes();
 
   const filteredTransactions = mockTransactions.filter(transaction => {
-    // Filter by tab (expenses/revenue) - this takes priority
+    // Filter by tab (expenses/revenue/fixed-assets/credit-card/bank) - this takes priority
     if (selectedTab === "expenses" && transaction.type !== "bill") {
       return false;
     }
     if (selectedTab === "revenue" && transaction.type !== "contract") {
       return false;
+    }
+    if (selectedTab === "fixed-assets" && transaction.type !== "fixed-asset") {
+      return false;
+    }
+    if (selectedTab === "credit-card" && transaction.type !== "credit-card") {
+      return false;
+    }
+    if (selectedTab === "bank" && transaction.type !== "bank") {
+      return false;
+    }
+    
+    // Special filtering for credit card transactions - only show those with invoices
+    if (selectedTab === "credit-card") {
+      // Only show credit card transactions that have invoices (pdfFile exists)
+      return transaction.type === "credit-card" && transaction.pdfFile;
     }
     
     // Filter by transaction type (only applies when not using tab filtering)
@@ -457,11 +624,12 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
         onConfidenceChange={() => {}}
         onFilterChange={setSelectedFilter}
         onStatusChange={setSelectedStatus}
+        onResetPanelSizes={resetSizes}
       />
 
-      {/* Revenue/Expenses Tabs Row */}
+      {/* Transaction Type Tabs Row */}
       <div className="flex items-center justify-between py-3 px-4 bg-white border-b border-mobius-gray-200 flex-shrink-0">
-        <div className="flex items-center">
+        <div className="flex items-center space-x-1">
           <Button 
             variant={selectedTab === "expenses" ? "default" : "ghost"}
             size="sm"
@@ -486,21 +654,43 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
           >
             Revenue
           </Button>
+          <Button 
+            variant={selectedTab === "fixed-assets" ? "default" : "ghost"}
+            size="sm"
+            className={`px-4 py-2 rounded-none border-b-2 ${
+              selectedTab === "fixed-assets" 
+                ? "border-mobius-blue bg-transparent text-mobius-blue hover:bg-mobius-blue/5" 
+                : "border-transparent text-mobius-gray-600 hover:text-mobius-gray-900"
+            }`}
+            onClick={() => setSelectedTab("fixed-assets")}
+          >
+            Fixed Assets
+          </Button>
+          <Button 
+            variant={selectedTab === "credit-card" ? "default" : "ghost"}
+            size="sm"
+            className={`px-4 py-2 rounded-none border-b-2 ${
+              selectedTab === "credit-card" 
+                ? "border-mobius-blue bg-transparent text-mobius-blue hover:bg-mobius-blue/5" 
+                : "border-transparent text-mobius-gray-600 hover:text-mobius-gray-900"
+            }`}
+            onClick={() => setSelectedTab("credit-card")}
+          >
+            Credit Card
+          </Button>
+          <Button 
+            variant={selectedTab === "bank" ? "default" : "ghost"}
+            size="sm"
+            className={`px-4 py-2 rounded-none border-b-2 ${
+              selectedTab === "bank" 
+                ? "border-mobius-blue bg-transparent text-mobius-blue hover:bg-mobius-blue/5" 
+                : "border-transparent text-mobius-gray-600 hover:text-mobius-gray-900"
+            }`}
+            onClick={() => setSelectedTab("bank")}
+          >
+            Bank
+          </Button>
         </div>
-
-        {/* Upload Button for Revenue tab */}
-        {selectedTab === "revenue" && (
-          <div className="flex items-center">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="h-8 px-3 text-sm"
-            >
-              <Upload className="w-4 h-4 mr-2" />
-              Upload Contract
-            </Button>
-          </div>
-        )}
 
         {/* Undo Button - positioned to the right */}
         <div className="flex items-center">
@@ -525,43 +715,77 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
 
       {/* Inbox with Reading Pane */}
       <div className="flex-1 flex min-h-0 overflow-hidden">
-        {/* Inbox List - Independent scrolling */}
-        <div className="w-1/5 flex flex-col min-h-0 border-r border-mobius-gray-100">
-          <div className="flex-1 overflow-y-auto">
-            <InboxList
-              transactions={filteredTransactions}
-              selectedTransaction={selectedTransaction}
-              selectedTransactions={selectedTransactions}
-              onTransactionSelect={handleTransactionSelect}
-              onTransactionToggle={handleTransactionToggle}
-              onQuickApprove={handleQuickApprove}
-              onQuickAssign={handleQuickAssign}
-            />
-          </div>
-        </div>
-        
-        {selectedTransaction && (
-          <>
-            {/* Document Pane - Independent scrolling */}
-            <div className="w-2/5 flex flex-col min-h-0 border-l border-mobius-gray-100">
+        <PanelGroup 
+          direction="horizontal" 
+          className="h-full"
+          onLayout={(sizes) => {
+            if (sizes.length >= 3) {
+              updateSizes({
+                inbox: sizes[0],
+                document: sizes[1],
+                creditCard: sizes[2]
+              });
+            }
+          }}
+        >
+          {/* Inbox List - Resizable */}
+          <Panel defaultSize={sizes.inbox} minSize={15} maxSize={40} className="min-h-0">
+            <div className="h-full flex flex-col border-r border-mobius-gray-100">
               <div className="flex-1 overflow-y-auto">
-                <DocumentPane transaction={selectedTransaction} />
-              </div>
-            </div>
-            
-            {/* Analysis Pane - Independent scrolling */}
-            <div className="w-2/5 flex flex-col min-h-0 border-l border-mobius-gray-100">
-              <div className="flex-1 overflow-y-auto">
-                <AnalysisPane 
-                  transaction={selectedTransaction}
-                  onApprove={handleApprove}
-                  onEdit={handleEdit}
-                  onSeeHow={handleSeeHow}
+                <InboxList
+                  transactions={filteredTransactions}
+                  selectedTransaction={selectedTransaction}
+                  selectedTransactions={selectedTransactions}
+                  onTransactionSelect={handleTransactionSelect}
+                  onTransactionToggle={handleTransactionToggle}
+                  onQuickApprove={handleQuickApprove}
+                  onQuickAssign={handleQuickAssign}
                 />
               </div>
             </div>
-          </>
-        )}
+          </Panel>
+
+          {selectedTransaction && (
+            <>
+              {/* Resize Handle */}
+              <PanelResizeHandle className="w-1 bg-mobius-gray-100 hover:bg-mobius-gray-200 transition-colors group">
+                <div className="flex items-center justify-center h-full">
+                  <GripVertical className="w-3 h-3 text-mobius-gray-400 group-hover:text-mobius-gray-600" />
+                </div>
+              </PanelResizeHandle>
+
+              {/* Document Pane - Resizable */}
+              <Panel defaultSize={sizes.document} minSize={25} maxSize={60} className="min-h-0">
+                <div className="h-full flex flex-col border-r border-mobius-gray-100">
+                  <div className="flex-1 overflow-y-auto">
+                    <DocumentPane transaction={selectedTransaction} />
+                  </div>
+                </div>
+              </Panel>
+
+              {/* Resize Handle */}
+              <PanelResizeHandle className="w-1 bg-mobius-gray-100 hover:bg-mobius-gray-200 transition-colors group">
+                <div className="flex items-center justify-center h-full">
+                  <GripVertical className="w-3 h-3 text-mobius-gray-400 group-hover:text-mobius-gray-600" />
+                </div>
+              </PanelResizeHandle>
+
+              {/* Analysis Pane - Resizable */}
+              <Panel defaultSize={sizes.creditCard} minSize={25} maxSize={60} className="min-h-0">
+                <div className="h-full flex flex-col">
+                  <div className="flex-1 overflow-y-auto">
+                    <AnalysisPane 
+                      transaction={selectedTransaction}
+                      onApprove={handleApprove}
+                      onEdit={handleEdit}
+                      onSeeHow={handleSeeHow}
+                    />
+                  </div>
+                </div>
+              </Panel>
+            </>
+          )}
+        </PanelGroup>
       </div>
     </div>
   );

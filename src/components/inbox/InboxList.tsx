@@ -22,8 +22,8 @@ export interface Transaction {
   vendor: string;
   amount: number;
   currency?: string;
-  source: "email" | "drive" | "brex" | "ramp";
-  type: "bill" | "card" | "contract";
+  source: "email" | "drive" | "brex" | "ramp" | "bank";
+  type: "bill" | "card" | "contract" | "fixed-asset" | "credit-card" | "bank";
   status: "unread" | "review" | "approved" | "done";
   date: string;
   description: string;
@@ -77,7 +77,61 @@ export function InboxList({
     return abbreviations[vendor] || vendor.substring(0, 8) + "...";
   };
 
-  const getSourceIcon = (source: string) => {
+  const getSourceIcon = (source: string, transactionType?: string) => {
+    // Use HubSpot logo for all revenue transactions
+    if (transactionType === "contract") {
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white border border-gray-200">
+                <img 
+                  src="/logos/hubspot-logo-png_seeklogo-506857.png" 
+                  alt="HubSpot"
+                  className="w-5 h-5 object-contain"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+                <FileText className="w-4 h-4 text-orange-600 hidden" />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>HubSpot</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    }
+
+    // Use Brex logo for all credit card transactions
+    if (transactionType === "credit-card") {
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white border border-gray-200">
+                <img 
+                  src="/logos/brex.png" 
+                  alt="Brex"
+                  className="w-5 h-5 object-contain"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+                <CreditCard className="w-4 h-4 text-purple-600 hidden" />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Brex</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    }
+
     switch (source) {
       case "email": 
         return (
@@ -135,7 +189,7 @@ export function InboxList({
               <TooltipTrigger asChild>
                 <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white border border-gray-200">
                   <img 
-                    src="/logos/sharepoint-logo.png" 
+                    src="/logos/brex.png" 
                     alt="Brex"
                     className="w-5 h-5 object-contain"
                     onError={(e) => {
@@ -176,6 +230,30 @@ export function InboxList({
             </Tooltip>
           </TooltipProvider>
         );
+      case "bank":
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white border border-gray-200">
+                  <img 
+                    src="/logos/bank-icon.png" 
+                    alt="Bank"
+                    className="w-5 h-5 object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                  <FileText className="w-4 h-4 text-green-600 hidden" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Bank</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
       default: 
         return (
           <TooltipProvider>
@@ -209,6 +287,7 @@ export function InboxList({
       case "drive": return "Google Drive";
       case "brex": return "Brex Card";
       case "ramp": return "Ramp Card";
+      case "bank": return "Bank";
       default: return "File";
     }
   };
@@ -321,7 +400,7 @@ export function InboxList({
                 <div className="absolute -top-1 -right-1 z-10">
                   {getStatusIcon(transaction.status)}
                 </div>
-                {getSourceIcon(transaction.source)}
+                {getSourceIcon(transaction.source, transaction.type)}
               </div>
 
               <div className="flex-1 min-w-0">
@@ -332,11 +411,16 @@ export function InboxList({
                       "text-sm font-medium truncate",
                       transaction.status === "unread" ? "text-mobius-gray-900 font-semibold" : "text-mobius-gray-700"
                     )}>
-                      {transaction.type === 'contract' ? '$' : '₹'}{transaction.amount.toLocaleString()}
+                      {(transaction.type === 'contract' || transaction.type === 'credit-card') ? '$' : '₹'}{transaction.amount.toLocaleString()}
                     </h3>
                     {transaction.isDuplicate && (
                       <Badge className="text-xs bg-amber-100 text-amber-800 border-amber-200">
                         Duplicate
+                      </Badge>
+                    )}
+                    {transaction.type === "credit-card" && !transaction.pdfFile && (
+                      <Badge className="text-xs bg-orange-100 text-orange-800 border-orange-200">
+                        No Invoice
                       </Badge>
                     )}
                   </div>

@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+import { usePanelSizes } from "@/hooks/use-panel-sizes";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,12 +24,19 @@ import {
   Filter,
   AlertTriangle,
   X,
-  Eye
+  Eye,
+  GripVertical
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { DocumentPane } from "@/components/inbox/DocumentPane";
-import { Transaction } from "@/components/inbox/InboxList";
+import { AnalysisPane } from "@/components/inbox/AnalysisPane";
+import { InboxList, Transaction } from "@/components/inbox/InboxList";
+import { 
+  Panel, 
+  PanelGroup, 
+  PanelResizeHandle 
+} from "react-resizable-panels";
 
 interface ExceptionTransaction extends Transaction {
   exceptionType: string;
@@ -53,6 +61,92 @@ const mockExceptionTransactions: ExceptionTransaction[] = [
     exceptionType: "duplicate",
     exceptionReason: "Duplicate invoice detected - same invoice number and amount as transaction #1",
     duplicateOf: "1"
+  },
+  // Credit Card transactions without invoices (pending) - moved to exceptions
+  {
+    id: "35",
+    vendor: "Stripe Inc",
+    amount: 299.00,
+    currency: "USD",
+    source: "brex",
+    type: "credit-card",
+    status: "unread",
+    date: "2025-05-31",
+    description: "Stripe Payment Processing - Monthly Fee",
+    client: "Rhythms",
+    confidence: 85,
+    documentUrl: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=1000&fit=crop",
+    isRecurring: true,
+    exceptionType: "no-invoice",
+    exceptionReason: "Credit card transaction processed but corresponding invoice not yet available"
+  },
+  {
+    id: "36",
+    vendor: "AWS",
+    amount: 156.78,
+    currency: "USD",
+    source: "brex",
+    type: "credit-card",
+    status: "unread",
+    date: "2025-05-30",
+    description: "Amazon Web Services - Cloud Infrastructure",
+    client: "Rhythms",
+    confidence: 92,
+    documentUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=1000&fit=crop",
+    isRecurring: true,
+    exceptionType: "no-invoice",
+    exceptionReason: "Credit card transaction processed but corresponding invoice not yet available"
+  },
+  {
+    id: "37",
+    vendor: "Google Cloud",
+    amount: 89.45,
+    currency: "USD",
+    source: "brex",
+    type: "credit-card",
+    status: "review",
+    date: "2025-05-29",
+    description: "Google Cloud Platform - Compute Services",
+    client: "Rhythms",
+    confidence: 88,
+    documentUrl: "https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=800&h=1000&fit=crop",
+    isRecurring: true,
+    exceptionType: "no-invoice",
+    exceptionReason: "Credit card transaction processed but corresponding invoice not yet available"
+  },
+  {
+    id: "38",
+    vendor: "Zoom Video Communications",
+    amount: 149.90,
+    currency: "USD",
+    source: "brex",
+    type: "credit-card",
+    status: "unread",
+    date: "2025-05-28",
+    description: "Zoom Pro - Monthly Subscription",
+    client: "Rhythms",
+    confidence: 90,
+    documentUrl: "https://images.unsplash.com/photo-1483058712412-4245e9b90334?w=800&h=1000&fit=crop",
+    isRecurring: true,
+    exceptionType: "no-invoice",
+    exceptionReason: "Credit card transaction processed but corresponding invoice not yet available"
+  },
+  {
+    id: "39",
+    vendor: "Slack Technologies",
+    amount: 67.50,
+    currency: "USD",
+    source: "brex",
+    type: "credit-card",
+    status: "review",
+    date: "2025-05-27",
+    description: "Slack Standard - Monthly Plan",
+    client: "Rhythms",
+    confidence: 87,
+    documentUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=1000&fit=crop",
+    isRecurring: true,
+    exceptionType: "no-invoice",
+    exceptionReason: "Credit card transaction processed but corresponding invoice not yet available"
   }
 ];
 
@@ -65,14 +159,24 @@ export function ExceptionsInbox({ onTransactionSelect }: ExceptionsInboxProps) {
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
   const [selectedTransaction, setSelectedTransaction] = useState<ExceptionTransaction | null>(null);
   const { toast } = useToast();
+  const { sizes, updateSizes, resetSizes } = usePanelSizes();
 
   const filteredTransactions = mockExceptionTransactions.filter(transaction => {
     if (selectedStatus === "all") return true;
     if (selectedStatus === "duplicate" && transaction.exceptionType === "duplicate") return true;
+    if (selectedStatus === "no-invoice" && transaction.exceptionType === "no-invoice") return true;
     return false;
   });
 
+  // Auto-select first transaction when component mounts or filters change
+  useEffect(() => {
+    if (filteredTransactions.length > 0 && !selectedTransaction) {
+      setSelectedTransaction(filteredTransactions[0]);
+    }
+  }, [filteredTransactions, selectedTransaction]);
+
   const duplicateCount = mockExceptionTransactions.filter(t => t.exceptionType === "duplicate").length;
+  const noInvoiceCount = mockExceptionTransactions.filter(t => t.exceptionType === "no-invoice").length;
   const totalCount = mockExceptionTransactions.length;
 
   const handleTransactionSelect = (transaction: ExceptionTransaction) => {
@@ -90,72 +194,50 @@ export function ExceptionsInbox({ onTransactionSelect }: ExceptionsInboxProps) {
     }
   };
 
-  const handleResolveException = (transactionId: string) => {
+  const handleQuickApprove = (transactionId: string) => {
     toast({
       title: "Exception resolved",
-      description: "Duplicate transaction removed from exceptions"
+      description: "Transaction approved and moved to main dashboard"
     });
   };
 
-  const handleKeepBoth = (transactionId: string) => {
+  const handleQuickAssign = (transactionId: string) => {
     toast({
-      title: "Exception resolved",
-      description: "Both transactions kept - marked as separate entries"
+      title: "Exception assigned",
+      description: "Assigned to Controller for review"
     });
   };
 
-  const getSourceIcon = (source: string) => {
-    switch (source) {
-      case "email":
-        return <Mail className="w-6 h-6 text-blue-500" />;
-      case "credit_card":
-        return <CreditCard className="w-6 h-6 text-green-500" />;
-      case "document":
-        return <FileText className="w-6 h-6 text-purple-500" />;
-      default:
-        return <FileText className="w-6 h-6 text-gray-500" />;
+  const handleApprove = () => {
+    if (selectedTransaction) {
+      toast({
+        title: "Exception resolved",
+        description: "Transaction approved and moved to main dashboard"
+      });
+      
+      // Auto-advance to next transaction
+      const currentIndex = filteredTransactions.findIndex(t => t.id === selectedTransaction.id);
+      if (currentIndex < filteredTransactions.length - 1) {
+        setSelectedTransaction(filteredTransactions[currentIndex + 1]);
+      } else {
+        setSelectedTransaction(null);
+      }
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "duplicate":
-        return (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex items-center justify-center w-4 h-4 rounded-full bg-red-100 border border-red-200">
-                  <X className="w-2.5 h-2.5 text-red-600" />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Duplicate detected</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        );
-      default:
-        return (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex items-center justify-center w-4 h-4 rounded-full bg-gray-100 border border-gray-200">
-                  <Clock className="w-2.5 h-2.5 text-gray-600" />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Exception pending</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        );
-    }
+  const handleEdit = () => {
+    onTransactionSelect(selectedTransaction!);
+  };
+
+  const handleSeeHow = () => {
+    onTransactionSelect(selectedTransaction!);
   };
 
   return (
-    <div className="h-full flex flex-col bg-mobius-gray-50">
+    <div className="h-full flex flex-col overflow-hidden">
+      
       {/* Header */}
-      <div className="bg-white border-b border-mobius-gray-100 p-4">
+      <div className="bg-white border-b border-mobius-gray-100 p-4 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-mobius-gray-900">Exceptions</h1>
@@ -171,6 +253,9 @@ export function ExceptionsInbox({ onTransactionSelect }: ExceptionsInboxProps) {
             <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
               {duplicateCount} Duplicates
             </Badge>
+            <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+              {noInvoiceCount} No Invoice
+            </Badge>
           </div>
         </div>
 
@@ -185,6 +270,7 @@ export function ExceptionsInbox({ onTransactionSelect }: ExceptionsInboxProps) {
             >
               <option value="all">All Exceptions</option>
               <option value="duplicate">Duplicates</option>
+              <option value="no-invoice">No Invoice</option>
             </select>
           </div>
           
@@ -192,193 +278,102 @@ export function ExceptionsInbox({ onTransactionSelect }: ExceptionsInboxProps) {
             <ArrowUpDown className="w-4 h-4 text-mobius-gray-500" />
             <span className="text-sm text-mobius-gray-500">Sort by: Date</span>
           </div>
+
+          {/* Undo Button */}
+          <div className="flex items-center ml-auto">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
+                  >
+                    <Undo2 className="w-4 h-4 text-mobius-gray-600" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Undo</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </div>
       </div>
 
       {/* Inbox with Reading Pane */}
-      <div className="flex-1 flex min-h-0">
-        <div className="w-1/5">
-          <Card className="flex-1 bg-white shadow-mobius-md">
-            <div className="divide-y divide-mobius-gray-100">
-              {filteredTransactions.map((transaction) => (
-                <div
-                  key={transaction.id}
-                  className={cn(
-                    "p-3 transition-colors cursor-pointer border-l-4 relative",
-                    transaction.exceptionType === "duplicate" ? "border-l-red-500 bg-red-50/30" : "border-l-transparent",
-                    selectedTransaction?.id === transaction.id ? "bg-mobius-blue/10" : "hover:bg-mobius-gray-50"
-                  )}
-                  onClick={() => handleTransactionSelect(transaction)}
-                >
-                  <div className="flex items-center space-x-3">
-                    <Checkbox 
-                      checked={selectedTransactions.includes(transaction.id)}
-                      onCheckedChange={(checked) => handleTransactionToggle(transaction.id, !!checked)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                    
-                    {/* Source Logo with Status Icon Above */}
-                    <div className="relative">
-                      {/* Status Icon - Positioned above the source logo */}
-                      <div className="absolute -top-1 -right-1 z-10">
-                        {getStatusIcon(transaction.status)}
-                      </div>
-                      {getSourceIcon(transaction.source)}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <h4 className="font-medium text-sm text-mobius-gray-900 truncate">
-                          {transaction.vendor}
-                        </h4>
-                        <Badge 
-                          variant="outline" 
-                          className={cn(
-                            "text-xs",
-                            transaction.exceptionType === "duplicate" 
-                              ? "bg-red-50 text-red-700 border-red-200"
-                              : "bg-orange-50 text-orange-700 border-orange-200"
-                          )}
-                        >
-                          {transaction.exceptionType}
-                        </Badge>
-                      </div>
-                      
-                      <p className="text-xs text-mobius-gray-500 mb-1">
-                        ₹{transaction.amount.toLocaleString()} • {new Date(transaction.date).toLocaleDateString()}
-                      </p>
-                      
-                      <p className="text-xs text-mobius-gray-600 truncate">
-                        {transaction.description}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+      <div className="flex-1 flex min-h-0 overflow-hidden">
+        <PanelGroup 
+          direction="horizontal" 
+          className="h-full"
+          onLayout={(sizes) => {
+            if (sizes.length >= 3) {
+              updateSizes({
+                inbox: sizes[0],
+                document: sizes[1],
+                creditCard: sizes[2]
+              });
+            }
+          }}
+        >
+          {/* Inbox List - Resizable */}
+          <Panel defaultSize={sizes.inbox} minSize={15} maxSize={40} className="min-h-0">
+            <div className="h-full flex flex-col border-r border-mobius-gray-100">
+              <div className="flex-1 overflow-y-auto">
+                <InboxList
+                  transactions={filteredTransactions}
+                  selectedTransaction={selectedTransaction}
+                  selectedTransactions={selectedTransactions}
+                  onTransactionSelect={handleTransactionSelect}
+                  onTransactionToggle={handleTransactionToggle}
+                  onQuickApprove={handleQuickApprove}
+                  onQuickAssign={handleQuickAssign}
+                />
+              </div>
             </div>
-          </Card>
-        </div>
-        
-        {selectedTransaction && (
-          <>
-            <DocumentPane transaction={selectedTransaction} />
-            <ExceptionPane 
-              transaction={selectedTransaction}
-              onResolve={handleResolveException}
-              onKeepBoth={handleKeepBoth}
-            />
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
+          </Panel>
 
-interface ExceptionPaneProps {
-  transaction: ExceptionTransaction;
-  onResolve: (transactionId: string) => void;
-  onKeepBoth: (transactionId: string) => void;
-}
+          {selectedTransaction && (
+            <>
+              {/* Resize Handle */}
+              <PanelResizeHandle className="w-1 bg-mobius-gray-100 hover:bg-mobius-gray-200 transition-colors group">
+                <div className="flex items-center justify-center h-full">
+                  <GripVertical className="w-3 h-3 text-mobius-gray-400 group-hover:text-mobius-gray-600" />
+                </div>
+              </PanelResizeHandle>
 
-function ExceptionPane({ transaction, onResolve, onKeepBoth }: ExceptionPaneProps) {
-  return (
-    <div className="flex-1 flex flex-col bg-white border-l border-mobius-gray-100">
-      {/* Header */}
-      <div className="p-4 border-b border-mobius-gray-100">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="font-semibold text-lg">{transaction.vendor}</h3>
-          <Badge 
-            variant="outline" 
-            className="bg-red-50 text-red-700 border-red-200"
-          >
-            {transaction.exceptionType}
-          </Badge>
-        </div>
-
-        <p className="text-sm text-mobius-gray-500">
-          ₹{transaction.amount.toLocaleString()} • {new Date(transaction.date).toLocaleDateString()}
-        </p>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 overflow-hidden">
-        <Tabs defaultValue="summary" className="h-full flex flex-col">
-          <TabsList className="grid grid-cols-1 w-[calc(100%-2rem)] mx-4 mt-4 mb-2">
-            <TabsTrigger value="summary">Summary</TabsTrigger>
-          </TabsList>
-
-          <div className="flex-1 overflow-y-auto px-4 pb-4">
-            <TabsContent value="summary" className="mt-0">
-              <Card className="p-4">
-                <div className="space-y-4">
-                  {/* Exception Details */}
-                  <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <div className="flex items-start space-x-3">
-                      <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
-                      <div>
-                        <h4 className="font-medium text-red-900">Duplicate Transaction Detected</h4>
-                        <p className="text-sm text-red-700 mt-1">
-                          This transaction appears to be a duplicate of transaction #{transaction.duplicateOf}
-                        </p>
-                        <p className="text-xs text-red-600 mt-2">
-                          Same vendor, invoice number, and amount detected
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Transaction Details */}
-                  <div className="space-y-3 text-sm">
-                    <div>
-                      <p className="text-mobius-gray-500">Exception Type:</p>
-                      <p className="font-medium capitalize">{transaction.exceptionType}</p>
-                    </div>
-                    <div>
-                      <p className="text-mobius-gray-500">Reason:</p>
-                      <p className="font-medium">{transaction.exceptionReason}</p>
-                    </div>
-                    <div>
-                      <p className="text-mobius-gray-500">Client:</p>
-                      <p className="font-medium">{transaction.client}</p>
-                    </div>
-                    <div>
-                      <p className="text-mobius-gray-500">Invoice #:</p>
-                      <p className="font-medium">{transaction.pdfFile.replace('.pdf', '')}</p>
-                    </div>
-                    <div>
-                      <p className="text-mobius-gray-500">Amount:</p>
-                      <p className="font-medium">₹{transaction.amount.toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <p className="text-mobius-gray-500">Date:</p>
-                      <p className="font-medium">{new Date(transaction.date).toLocaleDateString()}</p>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="space-y-2 pt-4 border-t border-mobius-gray-100">
-                    <Button 
-                      variant="outline" 
-                      className="w-full text-red-700 border-red-300 hover:bg-red-50"
-                      onClick={() => onResolve(transaction.id)}
-                    >
-                      <X className="w-4 h-4 mr-2" />
-                      Remove Duplicate
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="w-full"
-                      onClick={() => onKeepBoth(transaction.id)}
-                    >
-                      <Eye className="w-4 h-4 mr-2" />
-                      Keep Both Transactions
-                    </Button>
+              {/* Document Pane - Resizable */}
+              <Panel defaultSize={sizes.document} minSize={25} maxSize={60} className="min-h-0">
+                <div className="h-full flex flex-col border-r border-mobius-gray-100">
+                  <div className="flex-1 overflow-y-auto">
+                    <DocumentPane transaction={selectedTransaction} />
                   </div>
                 </div>
-              </Card>
-            </TabsContent>
-          </div>
-        </Tabs>
+              </Panel>
+
+              {/* Resize Handle */}
+              <PanelResizeHandle className="w-1 bg-mobius-gray-100 hover:bg-mobius-gray-200 transition-colors group">
+                <div className="flex items-center justify-center h-full">
+                  <GripVertical className="w-3 h-3 text-mobius-gray-400 group-hover:text-mobius-gray-600" />
+                </div>
+              </PanelResizeHandle>
+
+              {/* Analysis Pane - Resizable */}
+              <Panel defaultSize={sizes.creditCard} minSize={25} maxSize={60} className="min-h-0">
+                <div className="h-full flex flex-col">
+                  <div className="flex-1 overflow-y-auto">
+                    <AnalysisPane 
+                      transaction={selectedTransaction}
+                      onApprove={handleApprove}
+                      onEdit={handleEdit}
+                      onSeeHow={handleSeeHow}
+                    />
+                  </div>
+                </div>
+              </Panel>
+            </>
+          )}
+        </PanelGroup>
       </div>
     </div>
   );

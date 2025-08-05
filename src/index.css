@@ -12,6 +12,26 @@ html, body {
   /* Remove overflow: hidden to allow scrolling within components */
 }
 
+/* Resizable Panels Styles */
+[data-panel-resize-handle-id] {
+  background-color: hsl(var(--mobius-gray-100));
+  transition: background-color 0.2s ease;
+}
+
+[data-panel-resize-handle-id]:hover {
+  background-color: hsl(var(--mobius-gray-200));
+}
+
+[data-panel-resize-handle-id][data-resize-handle-active] {
+  background-color: hsl(var(--mobius-blue) / 0.2);
+}
+
+/* Ensure panels maintain proper height */
+[data-panel-id] {
+  height: 100%;
+  min-height: 0;
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
