@@ -19,8 +19,9 @@ import {
   ChevronRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Transaction } from "./InboxList";
+import { Transaction } from "@/types/Transaction";
 import { useState, useEffect } from "react";
+import { JournalEntryGenerator } from "@/lib/journalEntryGenerator";
 
 interface AnalysisPaneProps {
   transaction: Transaction;
@@ -40,14 +41,22 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
   const [isScheduleEditMode, setIsScheduleEditMode] = useState(false); // New state for schedule edit mode
   const [editedSchedule, setEditedSchedule] = useState<any[]>([]); // New state for edited schedule
   const [error, setError] = useState<string | null>(null); // Add error state
+  const [isLoading, setIsLoading] = useState(false); // Add loading state for transitions
 
   // Initialize journal entry data safely
   useEffect(() => {
+    const initializeJournalEntry = async () => {
     try {
       console.log('Initializing AnalysisPane for transaction:', transaction);
       setError(null); // Clear any previous errors
       
-      const entry = getJournalEntryForTransaction(transaction);
+        // Show loading state briefly
+        setIsLoading(true);
+        
+        // Add a small delay to show the loading state
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        const entry = JournalEntryGenerator.generateForTransaction(transaction);
       console.log('Generated journal entry:', entry);
       setJournalEntry(entry);
       
@@ -55,6 +64,8 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
       if (isEditMode && !editedJournalEntry) {
         setEditedJournalEntry(JSON.parse(JSON.stringify(entry)));
       }
+        
+        setIsLoading(false);
     } catch (error) {
       console.error('Error initializing journal entry:', error);
       setError(`Failed to load transaction data: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -71,7 +82,11 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
           { account: transaction.type === 'contract' ? "Deferred Revenue" : transaction.vendor, debit: 0, credit: transaction.amount || 0, confidence: 100 }
         ]
       });
+        setIsLoading(false);
     }
+    };
+
+    initializeJournalEntry();
   }, [transaction, isEditMode, editedJournalEntry]);
 
   // Initialize edited journal entry when entering edit mode
@@ -519,7 +534,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
       startDate = new Date("2025-07-01"); // Contract start date
     } else {
       // Default logic for other contracts
-      if (billingCycle === 'annual') {
+      if (billingCycle === 'Annual') {
         const termYears = parseInt(transaction.contractTerm.split(' ')[0]);
         totalMonths = termYears * 12;
       } else {
@@ -667,6 +682,12 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
           return `This monitor equipment transaction with ${transaction.vendor} has been classified as a capital expenditure (Capex) for monitor purchase. The transaction includes CGST and SGST at 9% each, with input credit available for capital goods. No TDS is applicable as this is a goods purchase. The journal entries ensure proper asset capitalization and compliance with Indian tax regulations.`;
         case "12":
           return `This office supplies transaction with ${transaction.vendor} has been classified as an operating expense (Opex) for office supplies and consumables. The transaction includes CGST and SGST at 9% each, with input credit available for office supplies. No TDS is applicable as this is a goods purchase below threshold. The journal entries ensure proper expense recognition and compliance with Indian tax regulations.`;
+        case "40":
+          return `This data services transaction with ${transaction.vendor} has been classified as an operating expense (Opex) for data processing and analytics services. The transaction includes CGST and SGST at 9% each, with input credit available for business services. TDS at 10% under Section 194J is applicable as this constitutes professional services for data processing. The journal entries ensure proper expense recognition and compliance with Indian tax regulations.`;
+        case "41":
+          return `This property commission transaction with ${transaction.vendor} has been classified as an operating expense (Opex) for real estate brokerage services. The transaction includes CGST and SGST at 9% each, with input credit available for business services. TDS at 5% under Section 194H is applicable as this constitutes commission or brokerage payment for property services. The journal entries ensure proper expense recognition and compliance with Indian tax regulations.`;
+        case "42":
+          return `This digital advertising transaction with ${transaction.vendor} has been classified as an operating expense (Opex) for marketing and promotional services. The transaction includes CGST and SGST at 9% each, with input credit available for business services. TDS at 10% under Section 194J is applicable as this constitutes professional services for digital marketing and advertising. The journal entries ensure proper expense recognition and compliance with Indian tax regulations.`;
         default:
           return `This ${transaction.type} transaction with ${transaction.vendor} has been analyzed for proper expense classification and tax treatment. The transaction has been categorized as either capital expenditure (Capex) or operating expense (Opex) based on the nature of the goods or services. GST/TDS implications have been evaluated and the appropriate input credits and withholding tax treatments have been applied. The journal entries ensure proper expense recognition and compliance with Indian tax regulations.`;
       }
@@ -724,17 +745,17 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
       </div>
 
       {/* Loading state */}
-      {!journalEntry && (
+      {(!journalEntry || isLoading) && (
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center text-mobius-gray-500">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-mobius-blue mx-auto mb-2"></div>
-            <p>Loading journal entry...</p>
+            <p>{isLoading ? "Loading transaction..." : "Loading journal entry..."}</p>
           </div>
         </div>
       )}
 
       {/* Error state */}
-      {error && (
+      {error && !isLoading && (
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center text-red-600 p-4">
             <AlertTriangle className="w-8 h-8 mx-auto mb-2" />
@@ -753,7 +774,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
       )}
 
       {/* Content - only render if journalEntry exists and no error */}
-      {journalEntry && !error && (
+      {journalEntry && !error && !isLoading && (
         <>
       {/* Tab Navigation - Above the fold */}
       <div className="px-4 py-3 bg-white">
@@ -1633,428 +1654,8 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
   );
 }
 
-// Function to generate transaction-specific journal entries
-function getJournalEntryForTransaction(transaction: any) {
-  const baseEntry = {
-    vendor: transaction.vendor,
-    amount: transaction.amount,
-    date: transaction.date,
-    client: transaction.client, // Use the actual transaction client
-    isRecurring: transaction.isRecurring,
-    isBillable: true,
-    costCenter: "US Operations",
-    location: "San Francisco HQ"
-  };
-
-  // Transaction-specific journal entries
-  switch (transaction.id) {
-    case "1": // JCSS & Associates LLP - ASO-I/109/25-26
-      return {
-        ...baseEntry,
-        invoiceNumber: "ASO-I/109/25-26",
-        totalAmount: 86400,
-        entryType: "Professional Fees",
-        narration: "Being the monthly professional charges for the month of May 2025 payable to JCSS & Associates LLP vide invoice no. ASO-I/109/25-26 dtd 26.05.2025",
-        entries: [
-          { account: "Professional Fees", debit: 80000, credit: 0, confidence: 95 },
-          { account: "Input CGST", debit: 7200, credit: 0, confidence: 100 },
-          { account: "Input SGST", debit: 7200, credit: 0, confidence: 100 },
-          { account: "TDS on Professional Charges", debit: 0, credit: 8000, confidence: 100 },
-          { account: "JCSS & Associates LLP", debit: 0, credit: 86400, confidence: 100 }
-        ]
-      };
-
-    case "2": // JCSS & Associates LLP - ASO-I/117/25-26
-      return {
-        ...baseEntry,
-        invoiceNumber: "ASO-I/117/25-26",
-        totalAmount: 64800,
-        entryType: "Professional Fees",
-        narration: "Being the Professional fee towards N-STP condonation of invoices payable to JCSS & Associates LLP vide invoice no. ASO-I/117/25-26 dtd 26.05.2025",
-        entries: [
-          { account: "Professional Fees", debit: 60000, credit: 0, confidence: 95 },
-          { account: "Input CGST", debit: 5400, credit: 0, confidence: 100 },
-          { account: "Input SGST", debit: 5400, credit: 0, confidence: 100 },
-          { account: "TDS on Professional Charges", debit: 0, credit: 6000, confidence: 100 },
-          { account: "JCSS & Associates LLP", debit: 0, credit: 64800, confidence: 100 }
-        ]
-      };
-
-    case "3": // NSDL Database Management Limited
-      return {
-        ...baseEntry,
-        invoiceNumber: "RTA/05/2526/4104",
-        totalAmount: 11800,
-        entryType: "Rates & Taxes",
-        narration: "Being the charges paid to NDML vide inv no. RTA/05/2526/4104 dtd 31.05.2025",
-        entries: [
-          { account: "Rates & Taxes", debit: 10000, credit: 0, confidence: 95 },
-          { account: "Input IGST", debit: 1800, credit: 0, confidence: 100 },
-          { account: "NSDL Database Management Ltd", debit: 0, credit: 11800, confidence: 100 }
-        ]
-      };
-
-    case "4": // Sogo Computers - Freight for Tanvi Arora
-      return {
-        ...baseEntry,
-        invoiceNumber: "SOGO-FREIGHT-001",
-        totalAmount: 5310,
-        entryType: "Freight and Postage",
-        narration: "Being the Freight charges for shipping a laptop to Tanvi Arora",
-        entries: [
-          { account: "Freight and Postage", debit: 4500, credit: 0, confidence: 95 },
-          { account: "Input CGST", debit: 405, credit: 0, confidence: 100 },
-          { account: "Input SGST", debit: 405, credit: 0, confidence: 100 },
-          { account: "Sogo Computers Pvt Ltd", debit: 0, credit: 5310, confidence: 100 }
-        ]
-      };
-
-    case "5": // Sogo Computers - Freight for Kamal Chandani
-      return {
-        ...baseEntry,
-        invoiceNumber: "SOGO-FREIGHT-002",
-        totalAmount: 5310,
-        entryType: "Freight and Postage",
-        narration: "Being the Freight charges for shipping a laptop to Kamal Chandani",
-        entries: [
-          { account: "Freight and Postage", debit: 4500, credit: 0, confidence: 95 },
-          { account: "Input CGST", debit: 405, credit: 0, confidence: 100 },
-          { account: "Input SGST", debit: 405, credit: 0, confidence: 100 },
-          { account: "Sogo Computers Pvt Ltd", debit: 0, credit: 5310, confidence: 100 }
-        ]
-      };
-
-    case "6": // Clayworks Spaces Technologies - Office space
-      return {
-        ...baseEntry,
-        invoiceNumber: "INV-25/26/0258",
-        totalAmount: 102660,
-        entryType: "Rent",
-        narration: "Being the charges for office space for May 2025",
-        entries: [
-          { account: "Rent", debit: 87000, credit: 0, confidence: 95 },
-          { account: "Input CGST", debit: 7830, credit: 0, confidence: 100 },
-          { account: "Input SGST", debit: 7830, credit: 0, confidence: 100 },
-          { account: "Clayworks Spaces Technologies Pvt Ltd", debit: 0, credit: 93960, confidence: 100 },
-          { account: "TDS on Rent", debit: 0, credit: 8700, confidence: 100 }
-        ]
-      };
-
-    case "7": // Clayworks Spaces Technologies - Car parking and two wheeler parking
-      return {
-        ...baseEntry,
-        invoiceNumber: "INV-25/26/0376",
-        totalAmount: 5251,
-        entryType: "Rent",
-        narration: "Being the charges for car parking and two wheeler parking for April 2025 vide invoice no. INV-25/26/0376 Dtd. 08.05.2025",
-        entries: [
-          { account: "Rent", debit: 4450, credit: 0, confidence: 95 },
-          { account: "Input CGST", debit: 400.50, credit: 0, confidence: 100 },
-          { account: "Input SGST", debit: 400.50, credit: 0, confidence: 100 },
-          { account: "Clayworks Spaces Technologies Pvt Ltd", debit: 0, credit: 4806, confidence: 100 },
-          { account: "TDS on Rent", debit: 0, credit: 445, confidence: 100 }
-        ]
-      };
-
-    case "8": // Mahat Labs Pvt Ltd - Dell laptops (5 Nos)
-      return {
-        ...baseEntry,
-        invoiceNumber: "Pcd/25-26/001143",
-        totalAmount: 480850,
-        entryType: "Computers",
-        narration: "Being Dell laptop (5 Nos) purchased from Sogo Computers Pvt Ltd vide bill no. Pcd/25-26/001143 dated 19-05-2025 amount Rs. 4,80,850.",
-        entries: [
-          { account: "Computers", debit: 407500, credit: 0, confidence: 95 },
-          { account: "Input CGST", debit: 36675, credit: 0, confidence: 100 },
-          { account: "Input SGST", debit: 36675, credit: 0, confidence: 100 },
-          { account: "Sogo Computers Pvt Ltd", debit: 0, credit: 480850, confidence: 100 }
-        ]
-      };
-
-    case "9": // Wonderslate - Laptop for Tanvi Arora
-      return {
-        ...baseEntry,
-        invoiceNumber: "Pcd/2526/00159",
-        totalAmount: 96170,
-        entryType: "Computers",
-        narration: "Being the purchase of laptop 1 Nos and shipped to Tanvi Arora",
-        entries: [
-          { account: "Computers", debit: 81500, credit: 0, confidence: 95 },
-          { account: "Input CGST", debit: 7335, credit: 0, confidence: 100 },
-          { account: "Input SGST", debit: 7335, credit: 0, confidence: 100 },
-          { account: "Sogo Computers Pvt Ltd", debit: 0, credit: 96170, confidence: 100 }
-        ]
-      };
-
-    case "10": // HEPL - Laptop for Kamal Chandani
-      return {
-        ...baseEntry,
-        invoiceNumber: "HEPL-LAPTOP-001",
-        totalAmount: 96170,
-        entryType: "Computers",
-        narration: "Being the purchase of laptop 1 Nos and shipped to Kamal Chandani",
-        entries: [
-          { account: "Computers", debit: 81500, credit: 0, confidence: 95 },
-          { account: "Input CGST", debit: 7335, credit: 0, confidence: 100 },
-          { account: "Input SGST", debit: 7335, credit: 0, confidence: 100 },
-          { account: "Sogo Computers Pvt Ltd", debit: 0, credit: 96170, confidence: 100 }
-        ]
-      };
-
-    case "13": // Bishop Wisecarver - SaaS Cloud Services
-      return {
-        ...baseEntry,
-        invoiceNumber: "RHYTHMS-BISHOP-001",
-        totalAmount: 7020,
-        entryType: "SaaS Revenue",
-        narration: "Being the SaaS revenue from Bishop Wisecarver for RhythmsAI OKR Platform - 65 Owner Users",
-        entries: [
-          { account: "Accounts Receivable", debit: 7020, credit: 0, confidence: 100 },
-          { account: "Deferred Revenue", debit: 0, credit: 7020, confidence: 100 }
-        ]
-      };
-
-    case "14": // MARKETview Technology - RhythmsAI OKR Platform
-      return {
-        ...baseEntry,
-        invoiceNumber: "RHYTHMS-MV-001",
-        totalAmount: 10000,
-        entryType: "SaaS Revenue",
-        narration: "Being the SaaS revenue from MARKETview Technology for RhythmsAI OKR Platform subscription - 38 month contract (Year 1 of 3)",
-        entries: [
-          { account: "Cash/Accounts Receivable", debit: 10000, credit: 0, confidence: 100 },
-          { account: "Deferred Revenue", debit: 0, credit: 7894.74, confidence: 100 },
-          { account: "Revenue", debit: 0, credit: 2105.26, confidence: 100 }
-        ]
-      };
-
-    case "15": // Sera - SaaS Cloud Services
-      return {
-        ...baseEntry,
-        invoiceNumber: "RHYTHMS-SERA-001",
-        totalAmount: 95000,
-        entryType: "SaaS Revenue",
-        narration: "Being the SaaS revenue from Sera for cloud services subscription",
-        entries: [
-          { account: "Cash/Accounts Receivable", debit: 95000, credit: 0, confidence: 100 },
-          { account: "Deferred Revenue", debit: 0, credit: 95000, confidence: 100 }
-        ]
-      };
-
-    case "16": // Clipper Media Acquisition I, LLC - SaaS Cloud Services
-      return {
-        ...baseEntry,
-        invoiceNumber: "RHYTHMS-CLIPPER-001",
-        totalAmount: 7999,
-        entryType: "SaaS Revenue",
-        narration: "Being the SaaS revenue from Clipper Media Acquisition I, LLC for RhythmsAI OKR Platform subscription - 11 month contract",
-        entries: [
-          { account: "Cash/Accounts Receivable", debit: 7999, credit: 0, confidence: 100 },
-          { account: "Deferred Revenue", debit: 0, credit: 7999, confidence: 100 }
-        ]
-      };
-
-    case "17": // Networkology - SaaS Cloud Services
-      return {
-        ...baseEntry,
-        invoiceNumber: "RHYTHMS-NET-001",
-        totalAmount: 110000,
-        entryType: "SaaS Revenue",
-        narration: "Being the SaaS revenue from Networkology for cloud services subscription",
-        entries: [
-          { account: "Cash/Accounts Receivable", debit: 110000, credit: 0, confidence: 100 },
-          { account: "Deferred Revenue", debit: 0, credit: 110000, confidence: 100 }
-        ]
-      };
-
-    case "18": // AlineOps - SaaS Cloud Services
-      return {
-        ...baseEntry,
-        invoiceNumber: "RHYTHMS-ALINE-001",
-        totalAmount: 135000,
-        entryType: "SaaS Revenue",
-        narration: "Being the SaaS revenue from AlineOps for cloud services subscription",
-        entries: [
-          { account: "Cash/Accounts Receivable", debit: 135000, credit: 0, confidence: 100 },
-          { account: "Deferred Revenue", debit: 0, credit: 135000, confidence: 100 }
-        ]
-      };
-
-    // Credit Card transactions
-    case "28": // HubSpot Inc - Marketing Hub Starter & Sales Hub Professional
-      return {
-        ...baseEntry,
-        invoiceNumber: "HUBSPOT-614657704",
-        totalAmount: 2324.11,
-        entryType: "Software Subscriptions",
-        narration: "Being the quarterly subscription charges for HubSpot Marketing Hub Starter & Sales Hub Professional",
-        entries: [
-          { account: "Software Subscriptions", debit: 2324.11, credit: 0, confidence: 95 },
-          { account: "Suspense Account", debit: 0, credit: 2324.11, confidence: 100 }
-        ]
-      };
-
-    case "29": // HubSpot Inc - Duplicate
-      return {
-        ...baseEntry,
-        invoiceNumber: "HUBSPOT-614657704-DUP",
-        totalAmount: 2324.11,
-        entryType: "Software Subscriptions",
-        narration: "Being the quarterly subscription charges for HubSpot Marketing Hub Starter & Sales Hub Professional (Duplicate)",
-        entries: [
-          { account: "Software Subscriptions", debit: 2324.11, credit: 0, confidence: 90 },
-          { account: "Suspense Account", debit: 0, credit: 2324.11, confidence: 100 }
-        ]
-      };
-
-    case "30": // AgentHub Canada Inc - Gumloop Starter Plan
-      return {
-        ...baseEntry,
-        invoiceNumber: "AGENTHUB-6D330809-0003",
-        totalAmount: 97.00,
-        entryType: "Software Subscriptions",
-        narration: "Being the monthly subscription charges for Gumloop Starter Plan",
-        entries: [
-          { account: "Software Subscriptions", debit: 97.00, credit: 0, confidence: 92 },
-          { account: "Suspense Account", debit: 0, credit: 97.00, confidence: 100 }
-        ]
-      };
-
-    case "31": // Twitter Global LLC - X Premium Subscription
-      return {
-        ...baseEntry,
-        invoiceNumber: "TWITTER-7D7DB7C2-0007",
-        totalAmount: 716.30,
-        entryType: "Software Subscriptions",
-        narration: "Being the monthly subscription charges for X Premium",
-        entries: [
-          { account: "Software Subscriptions", debit: 716.30, credit: 0, confidence: 88 },
-          { account: "Suspense Account", debit: 0, credit: 716.30, confidence: 100 }
-        ]
-      };
-
-    case "32": // Pitch Software GmbH - Pitch Pro
-      return {
-        ...baseEntry,
-        invoiceNumber: "PITCH-9A31BB6E-0001",
-        totalAmount: 43.75,
-        entryType: "Software Subscriptions",
-        narration: "Being the monthly subscription charges for Pitch Pro (3 seats)",
-        entries: [
-          { account: "Software Subscriptions", debit: 43.75, credit: 0, confidence: 96 },
-          { account: "Suspense Account", debit: 0, credit: 43.75, confidence: 100 }
-        ]
-      };
-
-    case "33": // Calendly LLC - Teams Monthly
-      return {
-        ...baseEntry,
-        invoiceNumber: "CALENDLY-13904471-1",
-        totalAmount: 22.04,
-        entryType: "Software Subscriptions",
-        narration: "Being the monthly subscription charges for Calendly Teams",
-        entries: [
-          { account: "Software Subscriptions", debit: 22.04, credit: 0, confidence: 98 },
-          { account: "Suspense Account", debit: 0, credit: 22.04, confidence: 100 }
-        ]
-      };
-
-    case "34": // Typeform US LLC - Typeform Business
-      return {
-        ...baseEntry,
-        invoiceNumber: "TYPEFORM-USIN-2025-0114021",
-        totalAmount: 109.10,
-        entryType: "Software Subscriptions",
-        narration: "Being the monthly subscription charges for Typeform Business",
-        entries: [
-          { account: "Software Subscriptions", debit: 109.10, credit: 0, confidence: 97 },
-          { account: "Suspense Account", debit: 0, credit: 109.10, confidence: 100 }
-        ]
-      };
-
-    // Credit Card transactions without invoices (pending)
-    case "35": // Stripe Inc - Payment Processing
-      return {
-        ...baseEntry,
-        invoiceNumber: "PENDING-INVOICE",
-        totalAmount: 299.00,
-        entryType: "Payment Processing Fees",
-        narration: "Being the monthly payment processing charges from Stripe (Invoice pending)",
-        entries: [
-          { account: "Suspense Account", debit: 299.00, credit: 0, confidence: 85 },
-          { account: "Brex Card", debit: 0, credit: 299.00, confidence: 100 }
-        ]
-      };
-
-    case "36": // AWS - Cloud Infrastructure
-      return {
-        ...baseEntry,
-        invoiceNumber: "PENDING-INVOICE",
-        totalAmount: 156.78,
-        entryType: "Cloud Infrastructure",
-        narration: "Being the monthly cloud infrastructure charges from AWS (Invoice pending)",
-        entries: [
-          { account: "Suspense Account", debit: 156.78, credit: 0, confidence: 92 },
-          { account: "Brex Card", debit: 0, credit: 156.78, confidence: 100 }
-        ]
-      };
-
-    case "37": // Google Cloud - Compute Services
-      return {
-        ...baseEntry,
-        invoiceNumber: "PENDING-INVOICE",
-        totalAmount: 89.45,
-        entryType: "Cloud Infrastructure",
-        narration: "Being the monthly compute services charges from Google Cloud (Invoice pending)",
-        entries: [
-          { account: "Suspense Account", debit: 89.45, credit: 0, confidence: 88 },
-          { account: "Brex Card", debit: 0, credit: 89.45, confidence: 100 }
-        ]
-      };
-
-    case "38": // Zoom Video Communications - Pro Subscription
-      return {
-        ...baseEntry,
-        invoiceNumber: "PENDING-INVOICE",
-        totalAmount: 149.90,
-        entryType: "Software Subscriptions",
-        narration: "Being the monthly subscription charges from Zoom (Invoice pending)",
-        entries: [
-          { account: "Suspense Account", debit: 149.90, credit: 0, confidence: 90 },
-          { account: "Brex Card", debit: 0, credit: 149.90, confidence: 100 }
-        ]
-      };
-
-    case "39": // Slack Technologies - Standard Plan
-      return {
-        ...baseEntry,
-        invoiceNumber: "PENDING-INVOICE",
-        totalAmount: 67.50,
-        entryType: "Software Subscriptions",
-        narration: "Being the monthly subscription charges from Slack (Invoice pending)",
-        entries: [
-          { account: "Suspense Account", debit: 67.50, credit: 0, confidence: 87 },
-          { account: "Brex Card", debit: 0, credit: 67.50, confidence: 100 }
-        ]
-      };
-
-    default:
-      // Fallback for any other transactions
-      return {
-        ...baseEntry,
-        invoiceNumber: "INV-2025-001",
-        totalAmount: transaction.amount,
-        entryType: "General Expense",
-        narration: `Being the expense payable to ${transaction.vendor}`,
-        entries: [
-          { account: "General Expense", debit: transaction.amount * 0.85, credit: 0, confidence: 95 },
-          { account: "Input CGST", debit: transaction.amount * 0.075, credit: 0, confidence: 100 },
-          { account: "Input SGST", debit: transaction.amount * 0.075, credit: 0, confidence: 100 },
-          { account: transaction.vendor, debit: 0, credit: transaction.amount, confidence: 100 }
-        ]
-      };
-  }
-}
+// Journal entries are now generated using the shared JournalEntryGenerator class
+// which includes all transaction types including TVS BILLS cases (40, 41, 42) with proper TDS handling
 
 // Helper function to get GL account code
 function getGLAccountCode(accountName: string) {
@@ -2067,6 +1668,8 @@ function getGLAccountCode(accountName: string) {
       return "2001";
     case "SaaS Revenue":
       return "4001";
+    case "Revenue":
+      return "4002";
     case "Professional Fees":
       return "1010";
     case "Rent":
@@ -2087,20 +1690,34 @@ function getGLAccountCode(accountName: string) {
       return "1018";
     case "TDS on Rent":
       return "1019";
-    case "JCSS & Associates LLP":
+    case "TDS on Commission":
       return "1020";
-    case "Sogo Computers Pvt Ltd":
+    case "Data Services":
       return "1021";
-    case "Clayworks Spaces Technologies Pvt Ltd":
+    case "Property Commission":
       return "1022";
-    case "NSDL Database Management Ltd":
+    case "Digital Advertising":
       return "1023";
+    case "JCSS & Associates LLP":
+      return "2001";
+    case "Sogo Computers Pvt Ltd":
+      return "2002";
+    case "Clayworks Spaces Technologies Pvt Ltd":
+      return "2003";
+    case "NSDL Database Management Ltd":
+      return "2004";
+    case "Billions United":
+      return "2005";
+    case "SEVENRAJ'S ESTATE AGENCY":
+      return "2006";
+    case "SN AY (Something New Around You)":
+      return "2007";
     case "Software Subscriptions":
-      return "1024";
+      return "3001";
     case "Brex Card":
-      return "1025";
+      return "3002";
     case "Suspense Account":
-      return "1026";
+      return "3003";
     default:
       return "";
   }
@@ -2122,9 +1739,7 @@ function getTotalCredit(journalEntry: any, transaction?: any) {
 
 // Helper function to check if journal entry is balanced
 function isBalanced(journalEntry: any) {
-  const totalDebit = journalEntry.entries.reduce((sum: number, entry: any) => sum + (entry.debit || 0), 0);
-  const totalCredit = journalEntry.entries.reduce((sum: number, entry: any) => sum + (entry.credit || 0), 0);
-  return Math.abs(totalDebit - totalCredit) < 0.01; // Allow for floating point inaccuracies
+  return JournalEntryGenerator.isBalanced(journalEntry);
 }
 
 // Helper function to get vendor balance

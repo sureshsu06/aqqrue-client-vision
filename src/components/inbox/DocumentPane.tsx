@@ -10,7 +10,7 @@ import {
   MessageSquare,
   Upload
 } from "lucide-react";
-import { Transaction } from "./InboxList";
+import { Transaction } from "@/types/Transaction";
 
 interface DocumentPaneProps {
   transaction: Transaction;

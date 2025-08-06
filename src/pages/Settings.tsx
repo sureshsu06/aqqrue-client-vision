@@ -882,7 +882,8 @@ const Settings = () => {
     { id: "all", name: "All Clients" },
     { id: "elire", name: "Elire" },
     { id: "mahat", name: "Mahat Labs" },
-    { id: "techcorp", name: "TechCorp" }
+    { id: "techcorp", name: "TechCorp" },
+    { id: "tvs", name: "TVS" }
   ];
 
   // Mock data for rule impact

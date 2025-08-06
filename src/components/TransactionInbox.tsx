@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { InboxHeader } from "./inbox/InboxHeader";
-import { InboxList, Transaction } from "./inbox/InboxList";
+import { InboxList } from "./inbox/InboxList";
+import { Transaction } from "@/types/Transaction";
 import { DocumentPane } from "./inbox/DocumentPane";
 import { AnalysisPane } from "./inbox/AnalysisPane";
 import { useToast } from "@/hooks/use-toast";
@@ -473,12 +474,58 @@ const mockTransactions: Transaction[] = [
     confidence: 91,
     pdfFile: "bank/Wells_Fargo_Check_Payment.pdf",
     documentUrl: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=1000&fit=crop"
+  },
+  // TVS Client Bills
+  {
+    id: "40",
+    vendor: "Billions United",
+    amount: 37760,
+    source: "email",
+    type: "bill",
+    status: "unread",
+    date: "2022-03-28",
+    description: "Data Services - Database",
+    client: "TVS",
+    confidence: 98,
+    pdfFile: "bills/Copy of 2A2-647.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=1000&fit=crop",
+    invoiceNumber: "BU/MAR/080/21-22"
+  },
+  {
+    id: "41",
+    vendor: "SEVENRAJ'S ESTATE AGENCY",
+    amount: 2478000,
+    source: "email",
+    type: "bill",
+    status: "review",
+    date: "2023-10-06",
+    description: "Property Commission - Sy.no.214, BBMP khata no.379",
+    client: "TVS",
+    confidence: 95,
+    pdfFile: "bills/Copy of SEVENRAJ'S ESTATES.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&h=1000&fit=crop",
+    invoiceNumber: "007/23-24"
+  },
+  {
+    id: "42",
+    vendor: "SN AY (Something New Around You)",
+    amount: 985300,
+    source: "email",
+    type: "bill",
+    status: "done",
+    date: "2024-03-01",
+    description: "Digital Advertising Boosting - March 2024",
+    client: "TVS",
+    confidence: 97,
+    pdfFile: "bills/Copy of SOMETHING NEW AROUND YOU-1.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=1000&fit=crop",
+    invoiceNumber: "01176"
   }
 ];
 
 const filters = [
-  { id: "all", label: "All", count: 28, icon: Check },
-  { id: "bills", label: "Bills", count: 8, icon: FileText },
+  { id: "all", label: "All", count: 31, icon: Check },
+  { id: "bills", label: "Bills", count: 11, icon: FileText },
   { id: "cards", label: "Credit Cards", count: 7, icon: CreditCard },
   { id: "contracts", label: "Contracts", count: 6, icon: FileText }
 ];
@@ -496,6 +543,7 @@ interface TransactionInboxProps {
 export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps) {
   const [selectedFilter, setSelectedFilter] = useState("bills");
   const [selectedStatus, setSelectedStatus] = useState("all");
+  const [selectedClient, setSelectedClient] = useState("all");
   const [selectedTab, setSelectedTab] = useState<"expenses" | "revenue" | "fixed-assets" | "credit-card" | "bank">("expenses");
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
@@ -506,6 +554,11 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
   const { sizes, updateSizes, resetSizes } = usePanelSizes();
 
   const filteredTransactions = mockTransactions.filter(transaction => {
+    // Filter by client
+    if (selectedClient !== "all" && transaction.client !== selectedClient) {
+      return false;
+    }
+    
     // Filter by tab (expenses/revenue/fixed-assets/credit-card/bank) - this takes priority
     if (selectedTab === "expenses" && transaction.type !== "bill") {
       return false;
@@ -619,11 +672,13 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
         confidenceThreshold={95}
         selectedFilter={selectedFilter}
         selectedStatus={selectedStatus}
+        selectedClient={selectedClient}
         onRoleChange={() => {}}
         onModeChange={() => {}}
         onConfidenceChange={() => {}}
         onFilterChange={setSelectedFilter}
         onStatusChange={setSelectedStatus}
+        onClientChange={setSelectedClient}
         onResetPanelSizes={resetSizes}
       />
 

@@ -16,30 +16,7 @@ import {
   Edit3,
   UserCheck
 } from "lucide-react";
-
-export interface Transaction {
-  id: string;
-  vendor: string;
-  amount: number;
-  currency?: string;
-  source: "email" | "drive" | "brex" | "ramp" | "bank";
-  type: "bill" | "card" | "contract" | "fixed-asset" | "credit-card" | "bank";
-  status: "unread" | "review" | "approved" | "done";
-  date: string;
-  description: string;
-  client: string;
-  confidence?: number;
-  isDuplicate?: boolean;
-  isRecurring?: boolean;
-  documentUrl?: string;
-  pdfFile?: string;
-  // Contract-specific fields
-  contractStartDate?: string;
-  contractEndDate?: string;
-  billingCycle?: string;
-  contractValue?: number;
-  contractTerm?: string;
-}
+import { Transaction } from "@/types/Transaction";
 
 interface InboxListProps {
   transactions: Transaction[];
@@ -71,7 +48,10 @@ export function InboxList({
       "Clayworks Spaces Pvt Ltd": "Clayworks...",
       "Ozone Computer Services": "Ozone...",
       "MGEcoduties": "MGE...",
-      "Clayworks Spaces Technologies Pvt Ltd": "Clayworks..."
+      "Clayworks Spaces Technologies Pvt Ltd": "Clayworks...",
+      "Billions United": "Billions...",
+      "SEVENRAJ'S ESTATE AGENCY": "Sevenraj...",
+      "SN AY (Something New Around You)": "SN AY..."
     };
     
     return abbreviations[vendor] || vendor.substring(0, 8) + "...";

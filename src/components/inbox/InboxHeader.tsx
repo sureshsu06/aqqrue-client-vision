@@ -19,11 +19,13 @@ interface InboxHeaderProps {
   confidenceThreshold: number;
   selectedFilter: string;
   selectedStatus: string;
+  selectedClient: string;
   onRoleChange: (role: string) => void;
   onModeChange: (mode: string) => void;
   onConfidenceChange: (threshold: number) => void;
   onFilterChange: (filter: string) => void;
   onStatusChange: (status: string) => void;
+  onClientChange: (client: string) => void;
   onResetPanelSizes?: () => void;
 }
 
@@ -36,11 +38,13 @@ export function InboxHeader({
   confidenceThreshold,
   selectedFilter,
   selectedStatus,
+  selectedClient,
   onRoleChange,
   onModeChange,
   onConfidenceChange,
   onFilterChange,
   onStatusChange,
+  onClientChange,
   onResetPanelSizes
 }: InboxHeaderProps) {
   const progressPercent = Math.round((doneCount / totalCount) * 100);
@@ -141,14 +145,14 @@ export function InboxHeader({
                   onClick={() => onFilterChange("bills")}
                 >
                   <FileText className="w-4 h-4" />
-                  <span>Bills (8)</span>
+                  <span>Bills (11)</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="flex items-center space-x-2"
                   onClick={() => onFilterChange("cards")}
                 >
                   <CreditCard className="w-4 h-4" />
-                  <span>Cards (0)</span>
+                  <span>Cards (7)</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="flex items-center space-x-2"
@@ -162,7 +166,7 @@ export function InboxHeader({
                   onClick={() => onFilterChange("all")}
                 >
                   <Filter className="w-4 h-4" />
-                  <span>All (24)</span>
+                  <span>All (31)</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -192,6 +196,48 @@ export function InboxHeader({
                   onClick={() => onStatusChange("unread")}
                 >
                   <span>Unread</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Client Filter Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 px-3 text-sm">
+                  {selectedClient === "all" ? "All Clients" : selectedClient}
+                  <ChevronDown className="w-3 h-3 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-40 bg-white border border-mobius-gray-200">
+                <DropdownMenuItem 
+                  className="flex items-center space-x-2"
+                  onClick={() => onClientChange("all")}
+                >
+                  <span>All Clients</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="flex items-center space-x-2"
+                  onClick={() => onClientChange("Elire")}
+                >
+                  <span>Elire</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="flex items-center space-x-2"
+                  onClick={() => onClientChange("Mahat")}
+                >
+                  <span>Mahat Labs</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="flex items-center space-x-2"
+                  onClick={() => onClientChange("Rhythms")}
+                >
+                  <span>Rhythms</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="flex items-center space-x-2"
+                  onClick={() => onClientChange("TVS")}
+                >
+                  <span>TVS</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
