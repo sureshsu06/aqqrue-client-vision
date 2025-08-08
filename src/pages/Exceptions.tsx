@@ -29,9 +29,10 @@ import {
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { Transaction } from "@/types/Transaction";
 import { DocumentPane } from "@/components/inbox/DocumentPane";
 import { AnalysisPane } from "@/components/inbox/AnalysisPane";
-import { InboxList, Transaction } from "@/components/inbox/InboxList";
+import { InboxList } from "@/components/inbox/InboxList";
 import { 
   Panel, 
   PanelGroup, 
@@ -236,51 +237,62 @@ export function ExceptionsInbox({ onTransactionSelect }: ExceptionsInboxProps) {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       
-      {/* Header */}
-      <div className="bg-white border-b border-mobius-gray-100 p-4 flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-mobius-gray-900">Exceptions</h1>
-            <p className="text-mobius-gray-500 mt-1 text-sm">
-              Review and resolve transaction exceptions
-            </p>
+      {/* Compact Header */}
+      <div className="border-b border-mobius-gray-200 bg-white">
+        <div className="flex items-center justify-between px-4 py-2">
+          <div className="flex items-center space-x-1">
+            {/* Filter Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded">
+                  <Filter className="w-4 h-4 text-mobius-gray-600" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                <DropdownMenuItem 
+                  onClick={() => setSelectedStatus("all")}
+                  className={selectedStatus === "all" ? "bg-mobius-gray-100" : ""}
+                >
+                  <span>All Exceptions</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setSelectedStatus("duplicate")}
+                  className={selectedStatus === "duplicate" ? "bg-mobius-gray-100" : ""}
+                >
+                  <span>Duplicates</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setSelectedStatus("no-invoice")}
+                  className={selectedStatus === "no-invoice" ? "bg-mobius-gray-100" : ""}
+                >
+                  <span>No Invoice</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <div className="w-px h-6 bg-mobius-gray-200 mx-2" />
+
+            {/* Exception Type Badges */}
+            <div className="flex items-center space-x-2">
+              <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 text-xs">
+                {totalCount} Exceptions
+              </Badge>
+              <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 text-xs">
+                {duplicateCount} Duplicates
+              </Badge>
+              <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs">
+                {noInvoiceCount} No Invoice
+              </Badge>
+            </div>
           </div>
-          
+
           <div className="flex items-center space-x-3">
-            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-              {totalCount} Exceptions
-            </Badge>
-            <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
-              {duplicateCount} Duplicates
-            </Badge>
-            <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-              {noInvoiceCount} No Invoice
-            </Badge>
-          </div>
-        </div>
+            {/* Progress indicator */}
+            <div className="flex items-center space-x-2 text-sm text-mobius-gray-600">
+              <span>{filteredTransactions.length} of {totalCount} shown</span>
+            </div>
 
-        {/* Filters */}
-        <div className="flex items-center space-x-4 mt-4">
-          <div className="flex items-center space-x-2">
-            <Filter className="w-4 h-4 text-mobius-gray-500" />
-            <select 
-              value={selectedStatus} 
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="text-sm border border-mobius-gray-200 rounded-md px-3 py-1"
-            >
-              <option value="all">All Exceptions</option>
-              <option value="duplicate">Duplicates</option>
-              <option value="no-invoice">No Invoice</option>
-            </select>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <ArrowUpDown className="w-4 h-4 text-mobius-gray-500" />
-            <span className="text-sm text-mobius-gray-500">Sort by: Date</span>
-          </div>
-
-          {/* Undo Button */}
-          <div className="flex items-center ml-auto">
+            {/* Undo Button */}
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -321,10 +333,10 @@ export function ExceptionsInbox({ onTransactionSelect }: ExceptionsInboxProps) {
             <div className="h-full flex flex-col border-r border-mobius-gray-100">
               <div className="flex-1 overflow-y-auto">
                 <InboxList
-                  transactions={filteredTransactions}
-                  selectedTransaction={selectedTransaction}
+                  transactions={filteredTransactions as Transaction[]}
+                  selectedTransaction={selectedTransaction as Transaction}
                   selectedTransactions={selectedTransactions}
-                  onTransactionSelect={handleTransactionSelect}
+                  onTransactionSelect={handleTransactionSelect as any}
                   onTransactionToggle={handleTransactionToggle}
                   onQuickApprove={handleQuickApprove}
                   onQuickAssign={handleQuickAssign}

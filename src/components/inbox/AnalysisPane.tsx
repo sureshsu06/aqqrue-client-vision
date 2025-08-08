@@ -16,12 +16,15 @@ import {
   Plus,
   UserCheck,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Undo2,
+  FileText
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Transaction } from "@/types/Transaction";
 import { useState, useEffect } from "react";
 import { JournalEntryGenerator } from "@/lib/journalEntryGenerator";
+import { toast } from "@/components/ui/use-toast";
 
 interface AnalysisPaneProps {
   transaction: Transaction;
@@ -42,6 +45,8 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
   const [editedSchedule, setEditedSchedule] = useState<any[]>([]); // New state for edited schedule
   const [error, setError] = useState<string | null>(null); // Add error state
   const [isLoading, setIsLoading] = useState(false); // Add loading state for transitions
+  const [showPdfViewer, setShowPdfViewer] = useState(false); // Add state for PDF viewer
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null); // Add state for PDF URL
 
   // Initialize journal entry data safely
   useEffect(() => {
@@ -59,11 +64,6 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
         const entry = JournalEntryGenerator.generateForTransaction(transaction);
       console.log('Generated journal entry:', entry);
       setJournalEntry(entry);
-      
-      // Initialize edited journal entry when in edit mode
-      if (isEditMode && !editedJournalEntry) {
-        setEditedJournalEntry(JSON.parse(JSON.stringify(entry)));
-      }
         
         setIsLoading(false);
     } catch (error) {
@@ -87,7 +87,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
     };
 
     initializeJournalEntry();
-  }, [transaction, isEditMode, editedJournalEntry]);
+  }, [transaction.id]); // Only reload when transaction ID changes
 
   // Initialize edited journal entry when entering edit mode
   const handleEditClick = () => {
@@ -694,6 +694,26 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
     }
   };
 
+  const handleShowAllPreviousBills = (vendorName: string) => {
+    // For demo purposes, we'll show the current bill's PDF
+    // In a real implementation, this would fetch all bills from the same vendor
+    // and merge them into a single PDF in descending order
+    
+    if (transaction.pdfFile) {
+      const pdfUrl = `/documents/${transaction.pdfFile}`;
+      
+      // Set the PDF URL and show the viewer inside the app
+      setPdfUrl(pdfUrl);
+      setShowPdfViewer(true);
+    } else {
+      toast({
+        title: "No PDF available",
+        description: `No PDF file available for this transaction from ${vendorName}`,
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <div className="bg-white flex flex-col h-full">
       {/* Header */}
@@ -707,19 +727,29 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
         
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-semibold text-lg">{transaction.vendor}</h3>
-          <Badge 
-            variant="outline" 
-            className={cn(
-              "text-xs",
-              confidence >= 95 
-                ? "bg-status-done/10 text-status-done border-status-done/20"
-                : confidence >= 85
-                ? "bg-blue-50 text-blue-700 border-blue-200"
-                : "bg-mobius-gray-50 text-mobius-gray-600 border-mobius-gray-200"
-            )}
-          >
-            {confidence}%
-          </Badge>
+          <div className="flex items-center space-x-2">
+            <Badge 
+              variant="outline" 
+              className={cn(
+                "text-xs",
+                confidence >= 95 
+                  ? "bg-status-done/10 text-status-done border-status-done/20"
+                  : confidence >= 85
+                  ? "bg-blue-50 text-blue-700 border-blue-200"
+                  : "bg-mobius-gray-50 text-mobius-gray-600 border-mobius-gray-200"
+              )}
+            >
+              {confidence}%
+            </Badge>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-6 w-6 p-0 hover:bg-mobius-gray-100 rounded"
+              title="Undo"
+            >
+              <Undo2 className="w-3 h-3 text-mobius-gray-600" />
+            </Button>
+          </div>
         </div>
 
         {transaction.isDuplicate && (
@@ -812,21 +842,47 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
           <div className="p-2">
             <div className="space-y-4">
               <div className="space-y-3 text-sm">
-                <div>
-                  <p className="text-mobius-gray-500">Client:</p>
-                  <p className="font-medium">{journalEntry.client}</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-mobius-gray-500">Client:</p>
+                    <p className="font-medium">{journalEntry.client}</p>
+                  </div>
+                  {transaction.type === 'bill' && (
+                    <div>
+                      <p className="text-mobius-gray-500">Payment Status:</p>
+                      <p className="font-medium">Pending</p>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <p className="text-mobius-gray-500">Invoice #:</p>
-                  <p className="font-medium">{journalEntry.invoiceNumber} 
-                    {journalEntry.isBillable && (
-                      <Badge variant="outline" className="ml-2 text-xs">Billable ✓</Badge>
-                    )}
-                  </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-mobius-gray-500">Invoice #:</p>
+                    <p className="font-medium">{journalEntry.invoiceNumber}</p>
+                  </div>
+                  {transaction.type === 'bill' && (
+                    <div>
+                      <p className="text-mobius-gray-500">Reconciled Against:</p>
+                      <p className="font-medium">PAY-{transaction.id.padStart(6, '0')}</p>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <p className="text-mobius-gray-500">Currency:</p>
-                  <p className="font-medium">{(transaction.type === 'contract' || transaction.type === 'credit-card') ? 'US Dollar ($)' : 'Indian Rupee (₹)'}</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-mobius-gray-500">Currency:</p>
+                    <p className="font-medium">{(transaction.type === 'contract' || transaction.type === 'credit-card') ? 'US Dollar ($)' : 'Indian Rupee (₹)'}</p>
+                  </div>
+                  {transaction.type === 'bill' && (
+                    <div>
+                      <p className="text-mobius-gray-500">Previous Bills:</p>
+                      <button 
+                        onClick={() => handleShowAllPreviousBills(transaction.vendor)}
+                        title="Show All Previous Bills"
+                        className="text-mobius-gray-500 hover:text-mobius-gray-700 transition-colors"
+                      >
+                        <FileText className="w-5 h-5" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1561,6 +1617,48 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                       </div>
                     </div>
                   </div>
+
+                  {/* Activity Trail */}
+                  <div className="p-3">
+                    <h4 className="text-sm font-medium text-mobius-gray-900 mb-3">Activity Trail</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
+                        <div className="flex-1">
+                          <p className="text-sm text-mobius-gray-900">
+                            <span className="font-medium">Transaction Posted</span> • Posted to QuickBooks • JE# QB-000192 • by Controller • 2 hours ago
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center space-x-3">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
+                        <div className="flex-1">
+                          <p className="text-sm text-mobius-gray-900">
+                            <span className="font-medium">Journal Entry Edited</span> • Updated account classification and amounts • by joy@mobius.ai • 3 hours ago
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center space-x-3">
+                        <div className="w-2 h-2 bg-amber-500 rounded-full flex-shrink-0"></div>
+                        <div className="flex-1">
+                          <p className="text-sm text-mobius-gray-900">
+                            <span className="font-medium">Transaction Assigned</span> • Assigned to Controller for review • by accounting@mobius.ai • 4 hours ago
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center space-x-3">
+                        <div className="w-2 h-2 bg-mobius-gray-400 rounded-full flex-shrink-0"></div>
+                        <div className="flex-1">
+                          <p className="text-sm text-mobius-gray-900">
+                            <span className="font-medium">Transaction Created</span> • Automatically processed from email • by system • 5 hours ago
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 /* Ledger Tab Content */
@@ -1572,43 +1670,72 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                     </Badge>
                   </div>
                   
-                  {/* Current Balance */}
-                  <div className="bg-mobius-gray-50 p-3 rounded-lg">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-mobius-gray-600">Current Balance</span>
-                      <span className="text-lg font-semibold text-mobius-gray-900">
-                        ₹{getVendorBalance(transaction.vendor).toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Past Journal Entries */}
+                  {/* Past Journal Entries Table */}
                   <div className="space-y-3">
                     <h5 className="text-sm font-medium text-mobius-gray-700">Past Journal Entries</h5>
-                    <div className="space-y-2">
-                      {getPastJournalEntries(transaction.vendor).map((entry, index) => (
-                        <div key={index} className="border border-mobius-gray-200 rounded-lg p-3">
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <p className="text-sm font-medium text-mobius-gray-900">{entry.invoiceNumber}</p>
-                              <p className="text-xs text-mobius-gray-500">{new Date(entry.date).toLocaleDateString()}</p>
-                            </div>
-                            <Badge variant="outline" className="text-xs">
-                              {entry.status}
-                            </Badge>
-                          </div>
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <span className="text-mobius-gray-500">Amount:</span>
-                              <span className="ml-2 font-medium">₹{entry.amount.toLocaleString()}</span>
-                            </div>
-                            <div>
-                              <span className="text-mobius-gray-500">Type:</span>
-                              <span className="ml-2 font-medium">{entry.type}</span>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                    <div className="border border-mobius-gray-200 rounded-lg overflow-hidden">
+                      <table className="w-full">
+                        <thead className="bg-mobius-gray-50">
+                          <tr>
+                            <th className="text-left p-3 text-xs font-medium text-mobius-gray-600 uppercase tracking-wide">Date</th>
+                            <th className="text-left p-3 text-xs font-medium text-mobius-gray-600 uppercase tracking-wide">Reference</th>
+                            <th className="text-left p-3 text-xs font-medium text-mobius-gray-600 uppercase tracking-wide">Type</th>
+                            <th className="text-right p-3 text-xs font-medium text-mobius-gray-600 uppercase tracking-wide">Debit</th>
+                            <th className="text-right p-3 text-xs font-medium text-mobius-gray-600 uppercase tracking-wide">Credit</th>
+                            <th className="text-center p-3 text-xs font-medium text-mobius-gray-600 uppercase tracking-wide">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-mobius-gray-200">
+                          {getPastJournalEntries(transaction.vendor)
+                            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()) // Sort in ascending order
+                            .map((entry, index) => (
+                            <tr key={index} className="hover:bg-mobius-gray-50">
+                              <td className="p-3 text-sm text-mobius-gray-900">
+                                {new Date(entry.date).toLocaleDateString()}
+                              </td>
+                              <td className="p-3 text-sm font-medium text-mobius-gray-900">
+                                {entry.invoiceNumber}
+                              </td>
+                              <td className="p-3 text-sm text-mobius-gray-700">
+                                {entry.type}
+                              </td>
+                              <td className="p-3 text-sm text-right font-medium">
+                                {entry.type === "Payment" ? `₹${Math.abs(entry.amount).toLocaleString()}` : ''}
+                              </td>
+                              <td className="p-3 text-sm text-right font-medium">
+                                {entry.type !== "Payment" ? `₹${Math.abs(entry.amount).toLocaleString()}` : ''}
+                              </td>
+                              <td className="p-3 text-center">
+                                <Badge 
+                                  variant="outline" 
+                                  className={cn(
+                                    "text-xs",
+                                    entry.status === "Approved" ? "bg-green-50 text-green-700 border-green-200" :
+                                    entry.status === "Paid" ? "bg-blue-50 text-blue-700 border-blue-200" :
+                                    "bg-mobius-gray-50 text-mobius-gray-600 border-mobius-gray-200"
+                                  )}
+                                >
+                                  {entry.status}
+                                </Badge>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                        <tfoot className="bg-mobius-gray-50 border-t border-mobius-gray-200">
+                          <tr>
+                            <td colSpan={3} className="p-3 text-sm font-medium text-mobius-gray-900">
+                              Current Balance
+                            </td>
+                            <td className="p-3 text-sm text-right font-semibold text-mobius-gray-900">
+                              {getVendorBalance(transaction.vendor) < 0 ? `₹${Math.abs(getVendorBalance(transaction.vendor)).toLocaleString()}` : ''}
+                            </td>
+                            <td className="p-3 text-sm text-right font-semibold text-mobius-gray-900">
+                              {getVendorBalance(transaction.vendor) > 0 ? `₹${getVendorBalance(transaction.vendor).toLocaleString()}` : ''}
+                            </td>
+                            <td className="p-3"></td>
+                          </tr>
+                        </tfoot>
+                      </table>
                     </div>
                   </div>
                 </div>
@@ -1649,6 +1776,32 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
             )}
         </div>
         </>
+      )}
+
+      {/* PDF Viewer Modal */}
+      {showPdfViewer && pdfUrl && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-11/12 h-5/6 flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="text-lg font-semibold">Previous Bills - {transaction.vendor}</h3>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setShowPdfViewer(false)}
+                className="h-8 w-8 p-0"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="flex-1 p-4">
+              <iframe
+                src={pdfUrl}
+                className="w-full h-full border-0"
+                title="Previous Bills PDF"
+              />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

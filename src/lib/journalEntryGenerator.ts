@@ -40,6 +40,22 @@ export class JournalEntryGenerator {
    * Gets transaction-specific journal entry data
    */
   private static getTransactionSpecificEntry(transaction: Transaction): Partial<JournalEntry> | null {
+    // Handle US credit card transactions (no GST)
+    if (transaction.currency === "USD" && transaction.type === "credit-card") {
+      return {
+        invoiceNumber: transaction.pdfFile ? `CC-${transaction.id}` : "PENDING",
+        totalAmount: transaction.amount,
+        entryType: "US Credit Card Expense",
+        narration: `Being the ${transaction.description} charged to Brex card`,
+        entries: [
+          { account: "US Operating Expenses", debit: transaction.amount, credit: 0, confidence: 95 },
+          { account: "Credit Card Suspense Account", debit: 0, credit: transaction.amount, confidence: 100 }
+        ],
+        costCenter: "US Operations",
+        location: "San Francisco HQ"
+      };
+    }
+
     switch (transaction.id) {
       case "1": // JCSS & Associates LLP - ASO-I/109/25-26
         return {
@@ -185,19 +201,19 @@ export class JournalEntryGenerator {
         };
 
       // SaaS Contract transactions
-      case "13": // Bishop Wisecarver - SaaS Cloud Services
+      case "27": // Bishop Wisecarver - SaaS Cloud Services
         return {
           invoiceNumber: "RHYTHMS-BISHOP-001",
           totalAmount: 7020,
           entryType: "SaaS Revenue",
           narration: "Being the SaaS revenue from Bishop Wisecarver for RhythmsAI OKR Platform - 65 Owner Users",
           entries: [
-            { account: "Accounts Receivable", debit: 7020, credit: 0, confidence: 100 },
+            { account: "Cash/Accounts Receivable", debit: 7020, credit: 0, confidence: 100 },
             { account: "Deferred Revenue", debit: 0, credit: 7020, confidence: 100 }
           ]
         };
 
-      case "14": // MARKETview Technology - RhythmsAI OKR Platform
+      case "28": // MARKETview Technology - RhythmsAI OKR Platform
         return {
           invoiceNumber: "RHYTHMS-MV-001",
           totalAmount: 10000,
@@ -210,7 +226,7 @@ export class JournalEntryGenerator {
           ]
         };
 
-      case "15": // Sera - SaaS Cloud Services
+      case "29": // Sera - SaaS Cloud Services
         return {
           invoiceNumber: "RHYTHMS-SERA-001",
           totalAmount: 95000,
@@ -222,7 +238,7 @@ export class JournalEntryGenerator {
           ]
         };
 
-      case "16": // Clipper Media Acquisition I, LLC - SaaS Cloud Services
+      case "30": // Clipper Media Acquisition I, LLC - SaaS Cloud Services
         return {
           invoiceNumber: "RHYTHMS-CLIPPER-001",
           totalAmount: 7999,
@@ -234,7 +250,7 @@ export class JournalEntryGenerator {
           ]
         };
 
-      case "17": // Networkology - SaaS Cloud Services
+      case "31": // Networkology - SaaS Cloud Services
         return {
           invoiceNumber: "RHYTHMS-NET-001",
           totalAmount: 110000,
@@ -246,7 +262,7 @@ export class JournalEntryGenerator {
           ]
         };
 
-      case "18": // AlineOps - SaaS Cloud Services
+      case "32": // AlineOps - SaaS Cloud Services
         return {
           invoiceNumber: "RHYTHMS-ALINE-001",
           totalAmount: 135000,

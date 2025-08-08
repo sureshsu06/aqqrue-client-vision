@@ -9,6 +9,7 @@ import { DocumentPane } from "./inbox/DocumentPane";
 import { AnalysisPane } from "./inbox/AnalysisPane";
 import { useToast } from "@/hooks/use-toast";
 import { usePanelSizes } from "@/hooks/use-panel-sizes";
+import { useClientContext } from "./Layout";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,6 +37,7 @@ import {
 } from "react-resizable-panels";
 
 const mockTransactions: Transaction[] = [
+  // Bills from /public/documents/bills
   {
     id: "1",
     vendor: "JCSS & Associates LLP",
@@ -210,9 +212,231 @@ const mockTransactions: Transaction[] = [
     pdfFile: "bills/Mahat Labs Pvt Ltd_Invoice_309_29.05.2025.pdf",
     documentUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=1000&fit=crop"
   },
-  // Contract transactions for Revenue tab
   {
     id: "13",
+    vendor: "Billions United",
+    amount: 37760,
+    source: "email",
+    type: "bill",
+    status: "unread",
+    date: "2022-03-28",
+    description: "Data Services - Database",
+    client: "TVS",
+    confidence: 98,
+    pdfFile: "bills/Copy of 2A2-647.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=1000&fit=crop",
+    invoiceNumber: "BU/MAR/080/21-22"
+  },
+  {
+    id: "14",
+    vendor: "SEVENRAJ'S ESTATE AGENCY",
+    amount: 2478000,
+    source: "email",
+    type: "bill",
+    status: "review",
+    date: "2023-10-06",
+    description: "Property Commission - Sy.no.214, BBMP khata no.379",
+    client: "TVS",
+    confidence: 95,
+    pdfFile: "bills/Copy of SEVENRAJ'S ESTATES.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&h=1000&fit=crop",
+    invoiceNumber: "007/23-24"
+  },
+  {
+    id: "15",
+    vendor: "SN AY (Something New Around You)",
+    amount: 985300,
+    source: "email",
+    type: "bill",
+    status: "done",
+    date: "2024-03-01",
+    description: "Digital Advertising Boosting - March 2024",
+    client: "TVS",
+    confidence: 97,
+    pdfFile: "bills/Copy of SOMETHING NEW AROUND YOU-1.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=1000&fit=crop",
+    invoiceNumber: "01176"
+  },
+  {
+    id: "16",
+    vendor: "Unknown Vendor",
+    amount: 15000,
+    source: "email",
+    type: "bill",
+    status: "unread",
+    date: "2025-05-25",
+    description: "Invoice",
+    client: "Unknown",
+    confidence: 85,
+    pdfFile: "bills/220525I049900411.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=1000&fit=crop"
+  },
+  // Credit Card transactions from /public/documents/creditcard
+  {
+    id: "17",
+    vendor: "HubSpot Inc",
+    amount: 2324.11,
+    currency: "USD",
+    source: "brex",
+    type: "credit-card",
+    status: "unread",
+    date: "2025-04-30",
+    description: "Marketing Hub Starter & Sales Hub Professional - Quarterly Subscription",
+    client: "Rhythms",
+    confidence: 95,
+    pdfFile: "creditcard/Copy of HubSpot-INVOICE-614657704.0-1.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=1000&fit=crop",
+    isRecurring: true
+  },
+  {
+    id: "18",
+    vendor: "HubSpot Inc",
+    amount: 2324.11,
+    currency: "USD",
+    source: "brex",
+    type: "credit-card",
+    status: "unread",
+    date: "2025-04-30",
+    description: "Marketing Hub Starter & Sales Hub Professional - Quarterly Subscription (Duplicate)",
+    client: "Rhythms",
+    confidence: 90,
+    pdfFile: "creditcard/Copy of HubSpot-INVOICE-614657704.0-2.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&h=1000&fit=crop",
+    isRecurring: true,
+    isDuplicate: true
+  },
+  {
+    id: "19",
+    vendor: "AgentHub Canada Inc",
+    amount: 97.00,
+    currency: "USD",
+    source: "brex",
+    type: "credit-card",
+    status: "unread",
+    date: "2025-05-19",
+    description: "Gumloop Starter Plan - Monthly Subscription",
+    client: "Rhythms",
+    confidence: 90,
+    pdfFile: "creditcard/Copy of Invoice-6D330809-0003.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=1000&fit=crop",
+    isRecurring: true
+  },
+  {
+    id: "20",
+    vendor: "Twitter Global LLC",
+    amount: 716.30,
+    currency: "USD",
+    source: "brex",
+    type: "credit-card",
+    status: "review",
+    date: "2025-05-30",
+    description: "X Premium Subscription - Monthly",
+    client: "Rhythms",
+    confidence: 88,
+    pdfFile: "creditcard/Copy of Invoice-7D7DB7C2-0007.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1483058712412-4245e9b90334?w=800&h=1000&fit=crop",
+    isRecurring: true
+  },
+  {
+    id: "21",
+    vendor: "Pitch Software GmbH",
+    amount: 43.75,
+    currency: "USD",
+    source: "brex",
+    type: "credit-card",
+    status: "done",
+    date: "2024-08-13",
+    description: "Pitch Pro - Monthly Subscription (3 seats)",
+    client: "Rhythms",
+    confidence: 96,
+    pdfFile: "creditcard/Copy of Invoice-9A31BB6E-0001.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1572044162444-ad60f128bdea?w=800&h=1000&fit=crop",
+    isRecurring: true
+  },
+  {
+    id: "22",
+    vendor: "Calendly LLC",
+    amount: 22.04,
+    currency: "USD",
+    source: "brex",
+    type: "credit-card",
+    status: "done",
+    date: "2025-05-14",
+    description: "Teams Monthly Subscription",
+    client: "Rhythms",
+    confidence: 98,
+    pdfFile: "creditcard/Copy of invoice_13904471-1.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1633114127408-af671c774b39?w=800&h=1000&fit=crop",
+    isRecurring: true
+  },
+  {
+    id: "23",
+    vendor: "Typeform US LLC",
+    amount: 109.10,
+    currency: "USD",
+    source: "brex",
+    type: "credit-card",
+    status: "done",
+    date: "2025-05-16",
+    description: "Typeform Business - Monthly Subscription",
+    client: "Rhythms",
+    confidence: 97,
+    pdfFile: "creditcard/Copy of invoice_USIN-2025-0114021.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=800&h=1000&fit=crop",
+    isRecurring: true
+  },
+  // Credit Card transactions WITHOUT invoices (these go to Exceptions tab)
+  {
+    id: "24",
+    vendor: "AWS",
+    amount: 156.78,
+    currency: "USD",
+    source: "brex",
+    type: "credit-card",
+    status: "unread",
+    date: "2025-05-30",
+    description: "Cloud Infrastructure - Monthly Charges",
+    client: "Rhythms",
+    confidence: 92,
+    // No pdfFile - this transaction goes to Exceptions tab
+    documentUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=1000&fit=crop",
+    isRecurring: true
+  },
+  {
+    id: "25",
+    vendor: "Stripe Inc",
+    amount: 299.00,
+    currency: "USD",
+    source: "brex",
+    type: "credit-card",
+    status: "unread",
+    date: "2025-05-29",
+    description: "Payment Processing Fees - Monthly",
+    client: "Rhythms",
+    confidence: 85,
+    // No pdfFile - this transaction goes to Exceptions tab
+    documentUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&h=1000&fit=crop",
+    isRecurring: true
+  },
+  {
+    id: "26",
+    vendor: "Google Cloud",
+    amount: 89.45,
+    currency: "USD",
+    source: "brex",
+    type: "credit-card",
+    status: "review",
+    date: "2025-05-28",
+    description: "Compute Services - Monthly Charges",
+    client: "Rhythms",
+    confidence: 88,
+    // No pdfFile - this transaction goes to Exceptions tab
+    documentUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=1000&fit=crop",
+    isRecurring: true
+  },
+  // Revenue Contracts from /public/documents/contracts
+  {
+    id: "27",
     vendor: "Bishop Wisecarver",
     amount: 7020,
     currency: "USD",
@@ -232,7 +456,7 @@ const mockTransactions: Transaction[] = [
     contractTerm: "10 months"
   },
   {
-    id: "14",
+    id: "28",
     vendor: "MARKETview Technology, LLC",
     amount: 10000,
     currency: "USD",
@@ -252,7 +476,7 @@ const mockTransactions: Transaction[] = [
     contractTerm: "38 months"
   },
   {
-    id: "15",
+    id: "29",
     vendor: "Sera",
     amount: 95000,
     currency: "USD",
@@ -272,7 +496,7 @@ const mockTransactions: Transaction[] = [
     contractTerm: "12 months"
   },
   {
-    id: "16",
+    id: "30",
     vendor: "Clipper Media Acquisition I, LLC",
     amount: 7999,
     currency: "USD",
@@ -292,7 +516,7 @@ const mockTransactions: Transaction[] = [
     contractTerm: "11 months"
   },
   {
-    id: "17",
+    id: "31",
     vendor: "Networkology",
     amount: 110000,
     currency: "USD",
@@ -312,7 +536,7 @@ const mockTransactions: Transaction[] = [
     contractTerm: "12 months"
   },
   {
-    id: "18",
+    id: "32",
     vendor: "AlineOps",
     amount: 135000,
     currency: "USD",
@@ -330,210 +554,20 @@ const mockTransactions: Transaction[] = [
     billingCycle: "Annual",
     contractValue: 135000,
     contractTerm: "12 months"
-  },
-  // Credit Card transactions
-  // New Credit Card transactions from PDF invoices
-  {
-    id: "28",
-    vendor: "HubSpot Inc",
-    amount: 2324.11,
-    currency: "USD",
-    source: "brex",
-    type: "credit-card",
-    status: "unread",
-    date: "2025-04-30",
-    description: "Marketing Hub Starter & Sales Hub Professional - Quarterly Subscription",
-    client: "Rhythms",
-    confidence: 95,
-    pdfFile: "creditcard/Copy of HubSpot-INVOICE-614657704.0-1.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=1000&fit=crop",
-    isRecurring: true
-  },
-  {
-    id: "29",
-    vendor: "HubSpot Inc",
-    amount: 2324.11,
-    currency: "USD",
-    source: "brex",
-    type: "credit-card",
-    status: "review",
-    date: "2025-04-30",
-    description: "Marketing Hub Starter & Sales Hub Professional - Quarterly Subscription (Duplicate)",
-    client: "Rhythms",
-    confidence: 90,
-    pdfFile: "creditcard/Copy of HubSpot-INVOICE-614657704.0-2.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&h=1000&fit=crop",
-    isRecurring: true,
-    isDuplicate: true
-  },
-  {
-    id: "30",
-    vendor: "AgentHub Canada Inc",
-    amount: 97.00,
-    currency: "USD",
-    source: "brex",
-    type: "credit-card",
-    status: "unread",
-    date: "2025-05-19",
-    description: "Gumloop Starter Plan - Monthly Subscription",
-    client: "Rhythms",
-    confidence: 92,
-    pdfFile: "creditcard/Copy of Invoice-6D330809-0003.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=1000&fit=crop",
-    isRecurring: true
-  },
-  {
-    id: "31",
-    vendor: "Twitter Global LLC",
-    amount: 716.30,
-    currency: "USD",
-    source: "brex",
-    type: "credit-card",
-    status: "review",
-    date: "2025-05-30",
-    description: "X Premium Subscription - Monthly",
-    client: "Rhythms",
-    confidence: 88,
-    pdfFile: "creditcard/Copy of Invoice-7D7DB7C2-0007.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1483058712412-4245e9b90334?w=800&h=1000&fit=crop",
-    isRecurring: true
-  },
-  {
-    id: "32",
-    vendor: "Pitch Software GmbH",
-    amount: 43.75,
-    currency: "USD",
-    source: "brex",
-    type: "credit-card",
-    status: "done",
-    date: "2024-08-13",
-    description: "Pitch Pro - Monthly Subscription (3 seats)",
-    client: "Rhythms",
-    confidence: 96,
-    pdfFile: "creditcard/Copy of Invoice-9A31BB6E-0001.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1572044162444-ad60f128bdea?w=800&h=1000&fit=crop",
-    isRecurring: true
-  },
-  {
-    id: "33",
-    vendor: "Calendly LLC",
-    amount: 22.04,
-    currency: "USD",
-    source: "brex",
-    type: "credit-card",
-    status: "done",
-    date: "2025-05-14",
-    description: "Teams Monthly Subscription",
-    client: "Rhythms",
-    confidence: 98,
-    pdfFile: "creditcard/Copy of invoice_13904471-1.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1633114127408-af671c774b39?w=800&h=1000&fit=crop",
-    isRecurring: true
-  },
-  {
-    id: "34",
-    vendor: "Typeform US LLC",
-    amount: 109.10,
-    currency: "USD",
-    source: "brex",
-    type: "credit-card",
-    status: "done",
-    date: "2025-05-16",
-    description: "Typeform Business - Monthly Subscription",
-    client: "Rhythms",
-    confidence: 97,
-    pdfFile: "creditcard/Copy of invoice_USIN-2025-0114021.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=800&h=1000&fit=crop",
-    isRecurring: true
-  },
-  // Bank transactions
-  {
-    id: "26",
-    vendor: "Bank of America",
-    amount: 75000,
-    source: "drive",
-    type: "bank",
-    status: "done",
-    date: "2025-05-28",
-    description: "ACH Payment - Payroll Processing",
-    client: "Elire",
-    confidence: 99,
-    pdfFile: "bank/BOA_ACH_Payroll.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&h=1000&fit=crop"
-  },
-  {
-    id: "27",
-    vendor: "Wells Fargo",
-    amount: 25000,
-    source: "email",
-    type: "bank",
-    status: "unread",
-    date: "2025-05-29",
-    description: "Check Payment - Rent Deposit",
-    client: "Elire",
-    confidence: 91,
-    pdfFile: "bank/Wells_Fargo_Check_Payment.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=1000&fit=crop"
-  },
-  // TVS Client Bills
-  {
-    id: "40",
-    vendor: "Billions United",
-    amount: 37760,
-    source: "email",
-    type: "bill",
-    status: "unread",
-    date: "2022-03-28",
-    description: "Data Services - Database",
-    client: "TVS",
-    confidence: 98,
-    pdfFile: "bills/Copy of 2A2-647.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=1000&fit=crop",
-    invoiceNumber: "BU/MAR/080/21-22"
-  },
-  {
-    id: "41",
-    vendor: "SEVENRAJ'S ESTATE AGENCY",
-    amount: 2478000,
-    source: "email",
-    type: "bill",
-    status: "review",
-    date: "2023-10-06",
-    description: "Property Commission - Sy.no.214, BBMP khata no.379",
-    client: "TVS",
-    confidence: 95,
-    pdfFile: "bills/Copy of SEVENRAJ'S ESTATES.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&h=1000&fit=crop",
-    invoiceNumber: "007/23-24"
-  },
-  {
-    id: "42",
-    vendor: "SN AY (Something New Around You)",
-    amount: 985300,
-    source: "email",
-    type: "bill",
-    status: "done",
-    date: "2024-03-01",
-    description: "Digital Advertising Boosting - March 2024",
-    client: "TVS",
-    confidence: 97,
-    pdfFile: "bills/Copy of SOMETHING NEW AROUND YOU-1.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=1000&fit=crop",
-    invoiceNumber: "01176"
   }
 ];
 
 const filters = [
-  { id: "all", label: "All", count: 31, icon: Check },
-  { id: "bills", label: "Bills", count: 11, icon: FileText },
-  { id: "cards", label: "Credit Cards", count: 7, icon: CreditCard },
+  { id: "all", label: "All", count: 32, icon: Check },
+  { id: "bills", label: "Bills", count: 16, icon: FileText },
+  { id: "cards", label: "Credit Cards", count: 10, icon: CreditCard },
   { id: "contracts", label: "Contracts", count: 6, icon: FileText }
 ];
 
 const statusFilters = [
-  { id: "unread", label: "Unread", count: 7, icon: Mail },
-  { id: "today", label: "Today", count: 3, icon: Clock },
-  { id: "week", label: "This Week", count: 5, icon: Clock }
+  { id: "unread", label: "Unread", count: 6, icon: Mail },
+  { id: "today", label: "Today", count: 2, icon: Clock },
+  { id: "week", label: "This Week", count: 4, icon: Clock }
 ];
 
 interface TransactionInboxProps {
@@ -543,19 +577,17 @@ interface TransactionInboxProps {
 export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps) {
   const [selectedFilter, setSelectedFilter] = useState("bills");
   const [selectedStatus, setSelectedStatus] = useState("all");
-  const [selectedClient, setSelectedClient] = useState("all");
+  const [selectedStatusOption, setSelectedStatusOption] = useState("All");
   const [selectedTab, setSelectedTab] = useState<"expenses" | "revenue" | "fixed-assets" | "credit-card" | "bank">("expenses");
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
-  const [role, setRole] = useState("accountant");
-  const [mode, setMode] = useState("review-all");
-  const [confidenceThreshold, setConfidenceThreshold] = useState(95);
   const { toast } = useToast();
   const { sizes, updateSizes, resetSizes } = usePanelSizes();
+  const { selectedClient, setSelectedClient } = useClientContext();
 
   const filteredTransactions = mockTransactions.filter(transaction => {
     // Filter by client
-    if (selectedClient !== "all" && transaction.client !== selectedClient) {
+    if (selectedClient !== "All Clients" && transaction.client !== selectedClient) {
       return false;
     }
     
@@ -579,6 +611,7 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
     // Special filtering for credit card transactions - only show those with invoices
     if (selectedTab === "credit-card") {
       // Only show credit card transactions that have invoices (pdfFile exists)
+      // Credit card transactions WITHOUT invoices go to Exceptions tab
       return transaction.type === "credit-card" && transaction.pdfFile;
     }
     
@@ -665,21 +698,14 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
       {/* Add the InboxHeader component */}
       <InboxHeader
         unreadCount={unreadCount}
-        totalCount={filteredTransactions.length}
+        totalCount={totalCount}
         doneCount={doneCount}
-        role="accountant"
-        mode="review-all"
-        confidenceThreshold={95}
         selectedFilter={selectedFilter}
         selectedStatus={selectedStatus}
-        selectedClient={selectedClient}
-        onRoleChange={() => {}}
-        onModeChange={() => {}}
-        onConfidenceChange={() => {}}
+        selectedStatusOption={selectedStatusOption}
         onFilterChange={setSelectedFilter}
         onStatusChange={setSelectedStatus}
-        onClientChange={setSelectedClient}
-        onResetPanelSizes={resetSizes}
+        onStatusOptionChange={setSelectedStatusOption}
       />
 
       {/* Transaction Type Tabs Row */}
@@ -747,24 +773,79 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
           </Button>
         </div>
 
-        {/* Undo Button - positioned to the right */}
-        <div className="flex items-center">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
-                >
-                  <Undo2 className="w-4 h-4 text-mobius-gray-600" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Undo</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+        {/* Client Filter and Undo Button - positioned to the right */}
+        <div className="flex items-center space-x-3">
+          {/* Client Dropdown - Hidden */}
+          {/* <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 px-3 text-sm">
+                {selectedClient === "All Clients" ? "All Clients" : selectedClient}
+                <ChevronDown className="w-4 h-4 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48 z-50">
+              <DropdownMenuItem 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log("Setting client to: all");
+                  setSelectedClient("All Clients");
+                }}
+                className={selectedClient === "All Clients" ? "bg-mobius-gray-100" : ""}
+              >
+                <span>All Clients</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log("Setting client to: Elire");
+                  setSelectedClient("Elire");
+                }}
+                className={selectedClient === "Elire" ? "bg-mobius-gray-100" : ""}
+              >
+                <span>Elire</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log("Setting client to: Mahat");
+                  setSelectedClient("Mahat");
+                }}
+                className={selectedClient === "Mahat" ? "bg-mobius-gray-100" : ""}
+              >
+                <span>Mahat</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log("Setting client to: Rhythms");
+                  setSelectedClient("Rhythms");
+                }}
+                className={selectedClient === "Rhythms" ? "bg-mobius-gray-100" : ""}
+              >
+                <span>Rhythms</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log("Setting client to: TVS");
+                  setSelectedClient("TVS");
+                }}
+                className={selectedClient === "TVS" ? "bg-mobius-gray-100" : ""}
+              >
+                <span>TVS</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  console.log("Setting client to: Unknown");
+                  setSelectedClient("Unknown");
+                }}
+                className={selectedClient === "Unknown" ? "bg-mobius-gray-100" : ""}
+              >
+                <span>Unknown</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu> */}
         </div>
       </div>
 

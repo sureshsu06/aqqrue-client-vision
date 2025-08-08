@@ -275,6 +275,7 @@ export function InboxList({
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "done": 
+      case "approved":
         return (
           <TooltipProvider>
             <Tooltip>
@@ -284,22 +285,7 @@ export function InboxList({
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Posted to QuickBooks</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        );
-      case "approved": 
-        return (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex items-center justify-center w-4 h-4 rounded-full bg-blue-100 border border-blue-200">
-                  <CheckCircle2 className="w-2.5 h-2.5 text-blue-600" />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Approved - Ready to post</p>
+                <p>Status: Posted</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -314,7 +300,7 @@ export function InboxList({
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Pending review</p>
+                <p>Status: In Progress</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -329,7 +315,7 @@ export function InboxList({
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                <p>New transaction</p>
+                <p>Status: Unread</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -344,7 +330,7 @@ export function InboxList({
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Pending</p>
+                <p>Status: In Progress</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -431,13 +417,20 @@ export function InboxList({
                 </div>
                 
                 {/* Second line: Vendor + Description */}
-                <div className="mt-1">
-                  <p className={cn(
-                    "text-sm truncate",
+                <div className="mt-1 flex items-center space-x-2">
+                  <span className={cn(
+                    "text-sm truncate flex-shrink-0",
                     transaction.status === "unread" ? "text-mobius-gray-600" : "text-mobius-gray-500"
                   )}>
-                    {getAbbreviatedVendor(transaction.vendor)} • {transaction.description}
-                  </p>
+                    {getAbbreviatedVendor(transaction.vendor)}
+                  </span>
+                  <span className="text-mobius-gray-400">•</span>
+                  <span className={cn(
+                    "text-sm truncate flex-1 min-w-0",
+                    transaction.status === "unread" ? "text-mobius-gray-600" : "text-mobius-gray-500"
+                  )}>
+                    {transaction.description}
+                  </span>
                 </div>
 
                 {/* Third line: Client and Date */}

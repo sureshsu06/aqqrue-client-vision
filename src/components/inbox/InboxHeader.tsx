@@ -8,44 +8,30 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Filter, Archive, UserCheck, MailOpen, Undo2, Upload, Plus, ArrowUpDown, FileText, CreditCard, ChevronDown, GripVertical } from "lucide-react";
+import { Filter, Upload, Plus } from "lucide-react";
 
 interface InboxHeaderProps {
   unreadCount: number;
   totalCount: number;
   doneCount: number;
-  role: string;
-  mode: string;
-  confidenceThreshold: number;
   selectedFilter: string;
   selectedStatus: string;
-  selectedClient: string;
-  onRoleChange: (role: string) => void;
-  onModeChange: (mode: string) => void;
-  onConfidenceChange: (threshold: number) => void;
+  selectedStatusOption: string;
   onFilterChange: (filter: string) => void;
   onStatusChange: (status: string) => void;
-  onClientChange: (client: string) => void;
-  onResetPanelSizes?: () => void;
+  onStatusOptionChange: (statusOption: string) => void;
 }
 
 export function InboxHeader({ 
   unreadCount, 
   totalCount, 
   doneCount, 
-  role, 
-  mode, 
-  confidenceThreshold,
   selectedFilter,
   selectedStatus,
-  selectedClient,
-  onRoleChange,
-  onModeChange,
-  onConfidenceChange,
+  selectedStatusOption,
   onFilterChange,
   onStatusChange,
-  onClientChange,
-  onResetPanelSizes
+  onStatusOptionChange
 }: InboxHeaderProps) {
   const progressPercent = Math.round((doneCount / totalCount) * 100);
 
@@ -54,52 +40,44 @@ export function InboxHeader({
       {/* Single toolbar with everything */}
       <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center space-x-1">
+          {/* Status Selection Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded">
+                <Filter className="w-4 h-4 text-mobius-gray-600" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-48">
+              <DropdownMenuItem 
+                onClick={() => onStatusOptionChange("All")}
+                className={selectedStatusOption === "All" ? "bg-mobius-gray-100" : ""}
+              >
+                <span>All</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => onStatusOptionChange("Unread")}
+                className={selectedStatusOption === "Unread" ? "bg-mobius-gray-100" : ""}
+              >
+                <span>Unread</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => onStatusOptionChange("Posted")}
+                className={selectedStatusOption === "Posted" ? "bg-mobius-gray-100" : ""}
+              >
+                <span>Posted</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => onStatusOptionChange("In Progress")}
+                className={selectedStatusOption === "In Progress" ? "bg-mobius-gray-100" : ""}
+              >
+                <span>In Progress</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <div className="w-px h-6 bg-mobius-gray-200 mx-2" />
+
           <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
-                >
-                  <Archive className="w-4 h-4 text-mobius-gray-600" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Archive</p>
-              </TooltipContent>
-            </Tooltip>
-            
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
-                >
-                  <UserCheck className="w-4 h-4 text-mobius-gray-600" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Assign</p>
-              </TooltipContent>
-            </Tooltip>
-            
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
-                >
-                  <MailOpen className="w-4 h-4 text-mobius-gray-600" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Mark Unread</p>
-              </TooltipContent>
-            </Tooltip>
-            
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button 
@@ -126,187 +104,24 @@ export function InboxHeader({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Add Task</p>
+                <p>Add Transaction</p>
               </TooltipContent>
             </Tooltip>
-
-            <div className="h-4 w-px bg-mobius-gray-300 mx-2" />
-            
-            {/* Bills Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0 justify-center bg-white rounded">
-                  <Filter className="w-4 h-4 text-mobius-gray-600" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-40 bg-white border border-mobius-gray-200">
-                <DropdownMenuItem 
-                  className="flex items-center space-x-2"
-                  onClick={() => onFilterChange("bills")}
-                >
-                  <FileText className="w-4 h-4" />
-                  <span>Bills (11)</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="flex items-center space-x-2"
-                  onClick={() => onFilterChange("cards")}
-                >
-                  <CreditCard className="w-4 h-4" />
-                  <span>Cards (7)</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="flex items-center space-x-2"
-                  onClick={() => onFilterChange("contracts")}
-                >
-                  <FileText className="w-4 h-4" />
-                  <span>Contracts (6)</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="flex items-center space-x-2"
-                  onClick={() => onFilterChange("all")}
-                >
-                  <Filter className="w-4 h-4" />
-                  <span>All (31)</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Date Sort Icon */}
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-              <ArrowUpDown className="w-4 h-4 text-mobius-gray-600" />
-            </Button>
-
-            {/* Status Filter Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 px-3 text-sm">
-                  {selectedStatus === "all" ? "All" : "Unread"}
-                  <ChevronDown className="w-3 h-3 ml-1" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-32 bg-white border border-mobius-gray-200">
-                <DropdownMenuItem 
-                  className="flex items-center space-x-2"
-                  onClick={() => onStatusChange("all")}
-                >
-                  <span>All</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="flex items-center space-x-2"
-                  onClick={() => onStatusChange("unread")}
-                >
-                  <span>Unread</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Client Filter Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 px-3 text-sm">
-                  {selectedClient === "all" ? "All Clients" : selectedClient}
-                  <ChevronDown className="w-3 h-3 ml-1" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-40 bg-white border border-mobius-gray-200">
-                <DropdownMenuItem 
-                  className="flex items-center space-x-2"
-                  onClick={() => onClientChange("all")}
-                >
-                  <span>All Clients</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="flex items-center space-x-2"
-                  onClick={() => onClientChange("Elire")}
-                >
-                  <span>Elire</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="flex items-center space-x-2"
-                  onClick={() => onClientChange("Mahat")}
-                >
-                  <span>Mahat Labs</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="flex items-center space-x-2"
-                  onClick={() => onClientChange("Rhythms")}
-                >
-                  <span>Rhythms</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="flex items-center space-x-2"
-                  onClick={() => onClientChange("TVS")}
-                >
-                  <span>TVS</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </TooltipProvider>
         </div>
 
         <div className="flex items-center space-x-3">
-          {/* Role Switcher */}
-          <Select value={role} onValueChange={onRoleChange}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="accountant">Accountant</SelectItem>
-              <SelectItem value="controller">Controller</SelectItem>
-              <SelectItem value="partner">Partner</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* Mode Switch */}
-          <Select value={mode} onValueChange={onModeChange}>
-            <SelectTrigger className="w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="review-all">Review All</SelectItem>
-              <SelectItem value="auto-post">Auto-post high confidence</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* Confidence Threshold */}
-          {mode === "auto-post" && (
-            <div className="flex items-center space-x-2">
-              <Select value={confidenceThreshold.toString()} onValueChange={(value) => onConfidenceChange(Number(value))}>
-                <SelectTrigger className="w-16">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="90">90%</SelectItem>
-                  <SelectItem value="95">95%</SelectItem>
-                  <SelectItem value="99">99%</SelectItem>
-                </SelectContent>
-              </Select>
-              <Badge variant="outline" className="bg-status-done/10 text-status-done text-xs">
-                Auto-posting ≥{confidenceThreshold}%
-              </Badge>
+          {/* Progress indicator */}
+          <div className="flex items-center space-x-2 text-sm text-mobius-gray-600">
+            <span>{doneCount} of {totalCount} done</span>
+            <div className="w-16 h-2 bg-mobius-gray-200 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-status-done rounded-full transition-all duration-300"
+                style={{ width: `${progressPercent}%` }}
+              />
             </div>
-          )}
-
-          {/* Reset Panel Sizes Button */}
-          {onResetPanelSizes && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
-                    onClick={onResetPanelSizes}
-                  >
-                    <GripVertical className="w-4 h-4 text-mobius-gray-600" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Reset panel sizes</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
+            <span>{progressPercent}%</span>
+          </div>
         </div>
       </div>
     </div>

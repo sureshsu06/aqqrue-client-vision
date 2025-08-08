@@ -1,17 +1,20 @@
-import { ReactNode } from "react";
+import React, { ReactNode, useState, createContext, useContext } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { 
   LayoutDashboard, 
+  AlertTriangle, 
+  BarChart3, 
+  Building, 
+  ClipboardList, 
   Settings, 
-  Bell,
+  Search, 
+  Bell, 
   User,
-  Search,
-  AlertTriangle,
-  BarChart3,
-  Building,
-  ClipboardList
+  BookOpen,
+  Calendar,
+  HardDrive
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -20,12 +23,29 @@ interface LayoutProps {
   children: ReactNode;
 }
 
+// Create context for selected client
+interface ClientContextType {
+  selectedClient: string;
+  setSelectedClient: (client: string) => void;
+}
+
+const ClientContext = createContext<ClientContextType | undefined>(undefined);
+
+export const useClientContext = () => {
+  const context = useContext(ClientContext);
+  if (!context) {
+    throw new Error('useClientContext must be used within a ClientProvider');
+  }
+  return context;
+};
+
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Exceptions", href: "/exceptions", icon: AlertTriangle },
+  { name: "Ledger", href: "/ledger", icon: BookOpen },
+  { name: "Schedules", href: "/schedules", icon: Calendar },
+  { name: "Fixed Asset Register", href: "/fixed-assets", icon: HardDrive },
   { name: "Reporting", href: "/reporting", icon: BarChart3 },
-  { name: "Fixed Asset Register", href: "/fixed-assets", icon: Building },
-  { name: "Prepaid Schedules", href: "/prepaid-schedules", icon: ClipboardList },
 ];
 
 const bottomNavigation = [
@@ -36,13 +56,19 @@ const clients = [
   "All Clients",
   "Elire", 
   "Mahat",
-  "HEPL",
-  "Wonderslate",
+  "TVS",
   "Rhythms"
 ];
 
 export function Layout({ children }: LayoutProps) {
   const location = useLocation();
+  const [selectedClient, setSelectedClient] = useState("All Clients");
+
+  const handleClientClick = (client: string) => {
+    setSelectedClient(client);
+    // You can add additional logic here to communicate with child components
+    console.log("Selected client:", client);
+  };
 
   return (
     <div className="h-screen bg-mobius-gray-50 flex overflow-hidden">
@@ -118,13 +144,14 @@ export function Layout({ children }: LayoutProps) {
                 {clients.map((client) => (
                   <Badge 
                     key={client}
-                    variant={client === "All Clients" ? "default" : "outline"}
+                    variant={selectedClient === client ? "default" : "outline"}
                     className={cn(
-                      "cursor-pointer",
-                      client === "All Clients" 
+                      "cursor-pointer transition-colors",
+                      selectedClient === client 
                         ? "bg-primary text-primary-foreground hover:bg-primary/90" 
                         : "hover:bg-mobius-gray-50"
                     )}
+                    onClick={() => handleClientClick(client)}
                   >
                     {client}
                   </Badge>
@@ -152,7 +179,9 @@ export function Layout({ children }: LayoutProps) {
 
         {/* Page Content */}
         <main className="flex-1 overflow-hidden">
-          {children}
+          <ClientContext.Provider value={{ selectedClient, setSelectedClient }}>
+            {children}
+          </ClientContext.Provider>
         </main>
       </div>
     </div>
