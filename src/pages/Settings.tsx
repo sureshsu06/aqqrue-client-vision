@@ -324,25 +324,25 @@ const Settings = () => {
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header - Fixed */}
       <div className="flex-shrink-0 p-6 border-b border-mobius-gray-200 bg-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-mobius-gray-900">Settings</h1>
-            <p className="text-mobius-gray-500 mt-1">
-              Manage your chart of accounts and automation preferences
-            </p>
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            <Badge variant="outline" className="bg-status-done/10 text-status-done">
-              {suggestions.length} Account Suggestions
-            </Badge>
-            <Badge variant="outline" className="bg-mobius-blue/10 text-mobius-blue">
-              {connectedCount} Integrations Connected
-            </Badge>
-            <Button variant="outline" size="sm">
-              <SettingsIcon className="w-4 h-4 mr-2" />
-              Export Settings
-            </Button>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-mobius-gray-900">Settings</h1>
+          <p className="text-mobius-gray-500 mt-1">
+            Manage your chart of accounts and automation preferences
+          </p>
+        </div>
+        
+        <div className="flex items-center space-x-3">
+          <Badge variant="outline" className="bg-status-done/10 text-status-done">
+            {suggestions.length} Account Suggestions
+          </Badge>
+          <Badge variant="outline" className="bg-mobius-blue/10 text-mobius-blue">
+            {connectedCount} Integrations Connected
+          </Badge>
+          <Button variant="outline" size="sm">
+            <SettingsIcon className="w-4 h-4 mr-2" />
+            Export Settings
+          </Button>
           </div>
         </div>
       </div>
@@ -350,456 +350,456 @@ const Settings = () => {
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-6 space-y-6">
-          <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="accounts">Chart of Accounts</TabsTrigger>
-              <TabsTrigger value="integrations">Integrations</TabsTrigger>
-              <TabsTrigger value="automation">Automation</TabsTrigger>
-              <TabsTrigger value="policies">Policies</TabsTrigger>
-            </TabsList>
+      <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="accounts">Chart of Accounts</TabsTrigger>
+          <TabsTrigger value="integrations">Integrations</TabsTrigger>
+          <TabsTrigger value="automation">Automation</TabsTrigger>
+          <TabsTrigger value="policies">Policies</TabsTrigger>
+        </TabsList>
 
-            <TabsContent value="accounts" className="space-y-6">
-              {/* Suggestions */}
-              <Card className="p-6">
-                <h3 className="font-semibold text-mobius-gray-900 mb-4 flex items-center">
-                  <TrendingUp className="w-5 h-5 mr-2" />
-                  Mobius Recommendations
-                </h3>
-                <div className="space-y-4">
-                  {suggestions.map((suggestion, index) => (
-                    <div key={index} className="p-4 border border-mobius-gray-100 rounded-lg">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start space-x-3">
-                          <div className={`p-2 rounded-full ${
-                            suggestion.type === "improvement" ? "bg-mobius-blue/10" :
-                            suggestion.type === "compliance" ? "bg-status-review/10" :
-                            "bg-status-done/10"
-                          }`}>
-                            {suggestion.type === "improvement" ? 
-                              <TrendingUp className="w-4 h-4 text-mobius-blue" /> :
-                              suggestion.type === "compliance" ?
-                              <Shield className="w-4 h-4 text-status-review" /> :
-                              <Zap className="w-4 h-4 text-status-done" />
-                            }
+        <TabsContent value="accounts" className="space-y-6">
+          {/* Suggestions */}
+          <Card className="p-6">
+            <h3 className="font-semibold text-mobius-gray-900 mb-4 flex items-center">
+              <TrendingUp className="w-5 h-5 mr-2" />
+              Mobius Recommendations
+            </h3>
+            <div className="space-y-4">
+              {suggestions.map((suggestion, index) => (
+                <div key={index} className="p-4 border border-mobius-gray-100 rounded-lg">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start space-x-3">
+                      <div className={`p-2 rounded-full ${
+                        suggestion.type === "improvement" ? "bg-mobius-blue/10" :
+                        suggestion.type === "compliance" ? "bg-status-review/10" :
+                        "bg-status-done/10"
+                      }`}>
+                        {suggestion.type === "improvement" ? 
+                          <TrendingUp className="w-4 h-4 text-mobius-blue" /> :
+                          suggestion.type === "compliance" ?
+                          <Shield className="w-4 h-4 text-status-review" /> :
+                          <Zap className="w-4 h-4 text-status-done" />
+                        }
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-mobius-gray-900">{suggestion.title}</h4>
+                        <p className="text-sm text-mobius-gray-500 mt-1">{suggestion.description}</p>
+                        <p className="text-xs text-status-done mt-2">{suggestion.impact}</p>
+                        {suggestion.accounts && (
+                          <div className="flex space-x-2 mt-2">
+                            {suggestion.accounts.map((account, i) => (
+                              <Badge key={i} variant="outline" className="text-xs">
+                                {account}
+                              </Badge>
+                            ))}
                           </div>
-                          <div className="flex-1">
-                            <h4 className="font-medium text-mobius-gray-900">{suggestion.title}</h4>
-                            <p className="text-sm text-mobius-gray-500 mt-1">{suggestion.description}</p>
-                            <p className="text-xs text-status-done mt-2">{suggestion.impact}</p>
-                            {suggestion.accounts && (
-                              <div className="flex space-x-2 mt-2">
-                                {suggestion.accounts.map((account, i) => (
-                                  <Badge key={i} variant="outline" className="text-xs">
-                                    {account}
-                                  </Badge>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex space-x-2">
-                          <Button variant="outline" size="sm">Ignore</Button>
-                          <Button size="sm">Apply</Button>
-                        </div>
+                        )}
                       </div>
                     </div>
-                  ))}
-                </div>
-              </Card>
-
-              {/* Chart of Accounts */}
-              <Card className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="font-semibold text-mobius-gray-900">Chart of Accounts</h3>
-                  <Button size="sm">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Account
-                  </Button>
-                </div>
-
-                <div className="space-y-2">
-                  {Object.entries(groupedAccounts).map(([category, accounts]) => (
-                    <div key={category} className="border border-mobius-gray-200 rounded-lg overflow-hidden">
-                      {/* Category Header */}
-                      <div className="bg-mobius-gray-50 p-3 border-b border-mobius-gray-200">
-                        <Button
-                          variant="ghost"
-                          className="w-full justify-start p-0 h-auto font-semibold text-mobius-gray-900"
-                          onClick={() => toggleCategory(category)}
-                        >
-                          <div className="flex items-center space-x-3">
-                            {collapsedCategories.includes(category) ? (
-                              <ChevronRight className="w-5 h-5" />
-                            ) : (
-                              <ChevronDown className="w-5 h-5" />
-                            )}
-                            <span className="text-sm">{category}</span>
-                            <Badge variant="outline" className="ml-auto">
-                              {accounts.length} accounts
-                        </Badge>
-                        </div>
-                        </Button>
-                      </div>
-                      
-                      {/* Category Content */}
-                      {!collapsedCategories.includes(category) && (
-                        <div className="divide-y divide-mobius-gray-100">
-                          {accounts.map(account => renderAccount(account))}
-                        </div>
-                      )}
+                    <div className="flex space-x-2">
+                      <Button variant="outline" size="sm">Ignore</Button>
+                      <Button size="sm">Apply</Button>
                     </div>
-                  ))}
+                  </div>
                 </div>
-              </Card>
-            </TabsContent>
+              ))}
+            </div>
+          </Card>
 
-            <TabsContent value="automation" className="space-y-6">
-              {/* Automation Level */}
-              <Card className="p-6">
-                <h3 className="font-semibold text-mobius-gray-900 mb-4">Automation Level</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-medium text-mobius-gray-900">Auto-approval Threshold</h4>
-                      <p className="text-sm text-mobius-gray-500">Minimum confidence score for automatic posting</p>
+          {/* Chart of Accounts */}
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-semibold text-mobius-gray-900">Chart of Accounts</h3>
+              <Button size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Account
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              {Object.entries(groupedAccounts).map(([category, accounts]) => (
+                <div key={category} className="border border-mobius-gray-200 rounded-lg overflow-hidden">
+                  {/* Category Header */}
+                  <div className="bg-mobius-gray-50 p-3 border-b border-mobius-gray-200">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start p-0 h-auto font-semibold text-mobius-gray-900"
+                      onClick={() => toggleCategory(category)}
+                    >
+                      <div className="flex items-center space-x-3">
+                        {collapsedCategories.includes(category) ? (
+                          <ChevronRight className="w-5 h-5" />
+                        ) : (
+                          <ChevronDown className="w-5 h-5" />
+                        )}
+                        <span className="text-sm">{category}</span>
+                        <Badge variant="outline" className="ml-auto">
+                          {accounts.length} accounts
+                    </Badge>
                     </div>
+                    </Button>
+                  </div>
+                  
+                  {/* Category Content */}
+                  {!collapsedCategories.includes(category) && (
+                    <div className="divide-y divide-mobius-gray-100">
+                      {accounts.map(account => renderAccount(account))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="automation" className="space-y-6">
+          {/* Automation Level */}
+          <Card className="p-6">
+            <h3 className="font-semibold text-mobius-gray-900 mb-4">Automation Level</h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium text-mobius-gray-900">Auto-approval Threshold</h4>
+                  <p className="text-sm text-mobius-gray-500">Minimum confidence score for automatic posting</p>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <span className="text-sm font-medium">{autoApproveThreshold}%</span>
+                  <input 
+                    type="range"
+                    min="80"
+                    max="99"
+                    value={autoApproveThreshold}
+                    onChange={(e) => setAutoApproveThreshold(Number(e.target.value))}
+                    className="w-24"
+                  />
+                </div>
+              </div>
+              
+              <div className="p-4 bg-mobius-gray-50 rounded-lg">
+                <p className="text-sm text-mobius-gray-600">
+                  Current setting: Entries with {autoApproveThreshold}%+ confidence will be automatically posted. 
+                  Lower confidence entries will require manual review.
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          {/* Automation Settings */}
+          <Card className="p-6">
+            <h3 className="font-semibold text-mobius-gray-900 mb-4">Automation Rules</h3>
+            <div className="space-y-4">
+              {automationSettings.map((setting, index) => (
+                <div key={index}>
+                  <div className="flex items-center justify-between py-3">
                     <div className="flex items-center space-x-3">
-                      <span className="text-sm font-medium">{autoApproveThreshold}%</span>
-                      <input 
-                        type="range"
-                        min="80"
-                        max="99"
-                        value={autoApproveThreshold}
-                        onChange={(e) => setAutoApproveThreshold(Number(e.target.value))}
-                        className="w-24"
-                      />
+                      <Switch checked={setting.enabled} />
+                      <div>
+                        <h4 className="font-medium text-mobius-gray-900">{setting.name}</h4>
+                        <p className="text-sm text-mobius-gray-500">{setting.description}</p>
+                      </div>
+                    </div>
+                    <Badge 
+                      variant="outline" 
+                      className={`${
+                        setting.riskLevel === "low" 
+                          ? "bg-status-done/10 text-status-done border-status-done/20"
+                          : "bg-status-review/10 text-status-review border-status-review/20"
+                      }`}
+                    >
+                      {setting.riskLevel} risk
+                    </Badge>
+                  </div>
+                  {index < automationSettings.length - 1 && <Separator />}
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Performance Impact */}
+          <Card className="p-6">
+            <h3 className="font-semibold text-mobius-gray-900 mb-4">Performance Impact</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center p-4 bg-mobius-gray-50 rounded-lg">
+                <p className="text-2xl font-bold text-mobius-blue">95%</p>
+                <p className="text-sm text-mobius-gray-500">Automation Rate</p>
+              </div>
+              <div className="text-center p-4 bg-mobius-gray-50 rounded-lg">
+                <p className="text-2xl font-bold text-status-done">12hrs</p>
+                <p className="text-sm text-mobius-gray-500">Weekly Time Saved</p>
+              </div>
+              <div className="text-center p-4 bg-mobius-gray-50 rounded-lg">
+                <p className="text-2xl font-bold text-mobius-orange">99.8%</p>
+                <p className="text-sm text-mobius-gray-500">Accuracy Rate</p>
+              </div>
+            </div>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="integrations" className="space-y-6">
+          {/* Integration Suggestions */}
+          {integrationSuggestions.length > 0 && (
+            <Card className="p-6">
+              <h3 className="font-semibold text-mobius-gray-900 mb-4">Integration Recommendations</h3>
+              <div className="space-y-4">
+                {integrationSuggestions.map((suggestion, index) => (
+                  <div key={index} className="flex items-center justify-between p-4 bg-mobius-gray-50 rounded-lg">
+                    <div className="flex items-start space-x-3">
+                      <AlertTriangle className={`w-5 h-5 mt-0.5 ${
+                        suggestion.priority === "high" ? "text-mobius-orange" : "text-status-pending"
+                      }`} />
+                      <div>
+                        <h4 className="font-medium text-mobius-gray-900">{suggestion.title}</h4>
+                        <p className="text-sm text-mobius-gray-500 mt-1">{suggestion.description}</p>
+                        <p className="text-xs text-status-done mt-1">
+                          Estimated savings: {suggestion.estimatedSavings}
+                        </p>
+                      </div>
+                    </div>
+                    <Button size="sm">Enable</Button>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+
+          {/* Core Integrations */}
+          <Card className="p-6">
+            <h3 className="font-semibold text-mobius-gray-900 mb-4">Core Integrations</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {integrations.filter(i => i.isCore).map((integration) => (
+                <div key={integration.name} className="p-4 border border-mobius-gray-100 rounded-lg hover:shadow-mobius-md transition-shadow">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-2xl">{integration.icon}</span>
+                      <div>
+                        <h4 className="font-medium text-mobius-gray-900">{integration.name}</h4>
+                        <p className="text-xs text-mobius-gray-500">{integration.description}</p>
+                      </div>
+                    </div>
+                    <Switch 
+                      checked={integration.status === "connected"} 
+                      disabled={integration.status === "connected"}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      {integration.status === "connected" ? (
+                        <CheckCircle2 className="w-4 h-4 text-status-done" />
+                      ) : (
+                        <div className="w-4 h-4 rounded-full border-2 border-mobius-gray-300" />
+                      )}
+                      <span className={`text-sm ${
+                        integration.status === "connected" ? "text-status-done" : "text-mobius-gray-500"
+                      }`}>
+                        {integration.status === "connected" ? "Connected" : "Available"}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      {integration.lastSync && (
+                        <span className="text-xs text-mobius-gray-500">{integration.lastSync}</span>
+                      )}
+                      <Button variant="ghost" size="sm">
+                        <SettingsIcon className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Available Integrations */}
+          <Card className="p-6">
+            <h3 className="font-semibold text-mobius-gray-900 mb-4">Available Integrations</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {integrations.filter(i => !i.isCore).map((integration) => (
+                <div key={integration.name} className="p-4 border border-mobius-gray-100 rounded-lg hover:shadow-mobius-md transition-shadow">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-2xl">{integration.icon}</span>
+                      <div>
+                        <h4 className="font-medium text-mobius-gray-900">{integration.name}</h4>
+                        <p className="text-xs text-mobius-gray-500">{integration.description}</p>
+                      </div>
                     </div>
                   </div>
                   
-                  <div className="p-4 bg-mobius-gray-50 rounded-lg">
-                    <p className="text-sm text-mobius-gray-600">
-                      Current setting: Entries with {autoApproveThreshold}%+ confidence will be automatically posted. 
-                      Lower confidence entries will require manual review.
-                    </p>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Automation Settings */}
-              <Card className="p-6">
-                <h3 className="font-semibold text-mobius-gray-900 mb-4">Automation Rules</h3>
-                <div className="space-y-4">
-                  {automationSettings.map((setting, index) => (
-                    <div key={index}>
-                      <div className="flex items-center justify-between py-3">
-                        <div className="flex items-center space-x-3">
-                          <Switch checked={setting.enabled} />
-                          <div>
-                            <h4 className="font-medium text-mobius-gray-900">{setting.name}</h4>
-                            <p className="text-sm text-mobius-gray-500">{setting.description}</p>
-                          </div>
-                        </div>
-                        <Badge 
-                          variant="outline" 
-                          className={`${
-                            setting.riskLevel === "low" 
-                              ? "bg-status-done/10 text-status-done border-status-done/20"
-                              : "bg-status-review/10 text-status-review border-status-review/20"
-                          }`}
-                        >
-                          {setting.riskLevel} risk
-                        </Badge>
-                      </div>
-                      {index < automationSettings.length - 1 && <Separator />}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      {integration.status === "connected" ? (
+                        <CheckCircle2 className="w-4 h-4 text-status-done" />
+                      ) : (
+                        <div className="w-4 h-4 rounded-full border-2 border-mobius-gray-300" />
+                      )}
+                      <span className={`text-sm ${
+                        integration.status === "connected" ? "text-status-done" : "text-mobius-gray-500"
+                      }`}>
+                        {integration.status === "connected" ? "Connected" : "Available"}
+                      </span>
                     </div>
-                  ))}
-                </div>
-              </Card>
-
-              {/* Performance Impact */}
-              <Card className="p-6">
-                <h3 className="font-semibold text-mobius-gray-900 mb-4">Performance Impact</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-mobius-gray-50 rounded-lg">
-                    <p className="text-2xl font-bold text-mobius-blue">95%</p>
-                    <p className="text-sm text-mobius-gray-500">Automation Rate</p>
-                  </div>
-                  <div className="text-center p-4 bg-mobius-gray-50 rounded-lg">
-                    <p className="text-2xl font-bold text-status-done">12hrs</p>
-                    <p className="text-sm text-mobius-gray-500">Weekly Time Saved</p>
-                  </div>
-                  <div className="text-center p-4 bg-mobius-gray-50 rounded-lg">
-                    <p className="text-2xl font-bold text-mobius-orange">99.8%</p>
-                    <p className="text-sm text-mobius-gray-500">Accuracy Rate</p>
+                    
+                    <div className="flex items-center space-x-2">
+                      {integration.lastSync && (
+                        <span className="text-xs text-mobius-gray-500">{integration.lastSync}</span>
+                      )}
+                      {integration.status === "connected" ? (
+                        <Button variant="ghost" size="sm">
+                          <SettingsIcon className="w-4 h-4" />
+                        </Button>
+                      ) : (
+                        <Button size="sm" variant="outline">
+                          Connect
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </Card>
-            </TabsContent>
+              ))}
+            </div>
+          </Card>
+        </TabsContent>
 
-            <TabsContent value="integrations" className="space-y-6">
-              {/* Integration Suggestions */}
-              {integrationSuggestions.length > 0 && (
-                <Card className="p-6">
-                  <h3 className="font-semibold text-mobius-gray-900 mb-4">Integration Recommendations</h3>
-                  <div className="space-y-4">
-                    {integrationSuggestions.map((suggestion, index) => (
-                      <div key={index} className="flex items-center justify-between p-4 bg-mobius-gray-50 rounded-lg">
-                        <div className="flex items-start space-x-3">
-                          <AlertTriangle className={`w-5 h-5 mt-0.5 ${
-                            suggestion.priority === "high" ? "text-mobius-orange" : "text-status-pending"
-                          }`} />
-                          <div>
-                            <h4 className="font-medium text-mobius-gray-900">{suggestion.title}</h4>
-                            <p className="text-sm text-mobius-gray-500 mt-1">{suggestion.description}</p>
-                            <p className="text-xs text-status-done mt-1">
-                              Estimated savings: {suggestion.estimatedSavings}
-                            </p>
-                          </div>
-                        </div>
-                        <Button size="sm">Enable</Button>
-                      </div>
+        <TabsContent value="policies" className="space-y-6">
+          {/* Client Selection */}
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-mobius-gray-900">Accounting Policies</h3>
+              <div className="flex items-center space-x-3">
+                <Users className="w-4 h-4 text-mobius-gray-500" />
+                <Select value={selectedClient} onValueChange={setSelectedClient}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Select client" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clients.map((client) => (
+                      <SelectItem key={client.id} value={client.id}>
+                        {client.name}
+                      </SelectItem>
                     ))}
-                  </div>
-                </Card>
-              )}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
 
-              {/* Core Integrations */}
-              <Card className="p-6">
-                <h3 className="font-semibold text-mobius-gray-900 mb-4">Core Integrations</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {integrations.filter(i => i.isCore).map((integration) => (
-                    <div key={integration.name} className="p-4 border border-mobius-gray-100 rounded-lg hover:shadow-mobius-md transition-shadow">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center space-x-3">
-                          <span className="text-2xl">{integration.icon}</span>
-                          <div>
-                            <h4 className="font-medium text-mobius-gray-900">{integration.name}</h4>
-                            <p className="text-xs text-mobius-gray-500">{integration.description}</p>
-                          </div>
-                        </div>
-                        <Switch 
-                          checked={integration.status === "connected"} 
-                          disabled={integration.status === "connected"}
-                        />
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          {integration.status === "connected" ? (
-                            <CheckCircle2 className="w-4 h-4 text-status-done" />
-                          ) : (
-                            <div className="w-4 h-4 rounded-full border-2 border-mobius-gray-300" />
-                          )}
-                          <span className={`text-sm ${
-                            integration.status === "connected" ? "text-status-done" : "text-mobius-gray-500"
-                          }`}>
-                            {integration.status === "connected" ? "Connected" : "Available"}
-                          </span>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          {integration.lastSync && (
-                            <span className="text-xs text-mobius-gray-500">{integration.lastSync}</span>
-                          )}
-                          <Button variant="ghost" size="sm">
-                            <SettingsIcon className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-
-              {/* Available Integrations */}
-              <Card className="p-6">
-                <h3 className="font-semibold text-mobius-gray-900 mb-4">Available Integrations</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {integrations.filter(i => !i.isCore).map((integration) => (
-                    <div key={integration.name} className="p-4 border border-mobius-gray-100 rounded-lg hover:shadow-mobius-md transition-shadow">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center space-x-3">
-                          <span className="text-2xl">{integration.icon}</span>
-                          <div>
-                            <h4 className="font-medium text-mobius-gray-900">{integration.name}</h4>
-                            <p className="text-xs text-mobius-gray-500">{integration.description}</p>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          {integration.status === "connected" ? (
-                            <CheckCircle2 className="w-4 h-4 text-status-done" />
-                          ) : (
-                            <div className="w-4 h-4 rounded-full border-2 border-mobius-gray-300" />
-                          )}
-                          <span className={`text-sm ${
-                            integration.status === "connected" ? "text-status-done" : "text-mobius-gray-500"
-                          }`}>
-                            {integration.status === "connected" ? "Connected" : "Available"}
-                          </span>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2">
-                          {integration.lastSync && (
-                            <span className="text-xs text-mobius-gray-500">{integration.lastSync}</span>
-                          )}
-                          {integration.status === "connected" ? (
-                            <Button variant="ghost" size="sm">
-                              <SettingsIcon className="w-4 h-4" />
-                            </Button>
-                          ) : (
-                            <Button size="sm" variant="outline">
-                              Connect
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="policies" className="space-y-6">
-              {/* Client Selection */}
-              <Card className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-mobius-gray-900">Accounting Policies</h3>
-                  <div className="flex items-center space-x-3">
-                    <Users className="w-4 h-4 text-mobius-gray-500" />
-                    <Select value={selectedClient} onValueChange={setSelectedClient}>
-                      <SelectTrigger className="w-48">
-                        <SelectValue placeholder="Select client" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {clients.map((client) => (
-                          <SelectItem key={client.id} value={client.id}>
-                            {client.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+            {/* Rule Impact Preview */}
+            {selectedClient !== "all" && (
+              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-start space-x-3">
+                  <Target className="w-5 h-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-blue-900">Rule Change Impact</h4>
+                    <p className="text-sm text-blue-700 mt-1">
+                      Changes to policies will affect <strong>23 pending transactions</strong> for {clients.find(c => c.id === selectedClient)?.name}.
+                    </p>
+                    <p className="text-xs text-blue-600 mt-2">
+                      Review impact before saving changes
+                    </p>
                   </div>
                 </div>
+              </div>
+            )}
 
-                {/* Rule Impact Preview */}
-                {selectedClient !== "all" && (
-                  <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div className="flex items-start space-x-3">
-                      <Target className="w-5 h-5 text-blue-600 mt-0.5" />
-                      <div>
-                        <h4 className="font-medium text-blue-900">Rule Change Impact</h4>
-                        <p className="text-sm text-blue-700 mt-1">
-                          Changes to policies will affect <strong>23 pending transactions</strong> for {clients.find(c => c.id === selectedClient)?.name}.
-                        </p>
-                        <p className="text-xs text-blue-600 mt-2">
-                          Review impact before saving changes
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="space-y-6">
-                  {/* Recon Tolerance Rule */}
-                  <div>
-                    <h4 className="font-medium text-mobius-gray-900 mb-2">Reconciliation Tolerance</h4>
-                    <p className="text-sm text-mobius-gray-500 mb-3">
-                      Auto-match payments to invoices within variance tolerance
-                    </p>
-                    <div className="flex items-center space-x-3">
-                      <span className="text-sm">₹</span>
-                      <input 
-                        type="number" 
-                        value={reconTolerance}
-                        onChange={(e) => setReconTolerance(Number(e.target.value))}
-                        className="px-3 py-2 border border-mobius-gray-100 rounded-lg text-sm w-32"
-                      />
-                      <span className="text-sm text-mobius-gray-500">variance</span>
-                    </div>
-                    <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        <CheckCircle2 className="w-4 h-4 text-green-600" />
-                        <span className="text-sm text-green-700">
-                          This change will affect {getRuleImpact("recon-tolerance").affectedTransactions} pending transactions
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div>
-                    <h4 className="font-medium text-mobius-gray-900 mb-2">Prepaid Expenses</h4>
-                    <p className="text-sm text-mobius-gray-500 mb-3">
-                      How should prepaid expenses be handled?
-                    </p>
-                    <div className="space-y-2">
-                      <label className="flex items-center space-x-2">
-                        <input type="radio" name="prepaid" defaultChecked className="text-primary" />
-                        <span className="text-sm">Create amortization schedule for amounts &gt; $1,000</span>
-                      </label>
-                      <label className="flex items-center space-x-2">
-                        <input type="radio" name="prepaid" className="text-primary" />
-                        <span className="text-sm">Expense immediately regardless of amount</span>
-                      </label>
-                      <label className="flex items-center space-x-2">
-                        <input type="radio" name="prepaid" className="text-primary" />
-                        <span className="text-sm">Always create prepaid asset</span>
-                      </label>
-                    </div>
-                    <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        <AlertTriangle className="w-4 h-4 text-amber-600" />
-                        <span className="text-sm text-amber-700">
-                          This change will affect {getRuleImpact("prepaid-threshold").affectedTransactions} pending transactions
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div>
-                    <h4 className="font-medium text-mobius-gray-900 mb-2">Revenue Recognition</h4>
-                    <p className="text-sm text-mobius-gray-500 mb-3">
-                      When should revenue be recognized?
-                    </p>
-                    <div className="space-y-2">
-                      <label className="flex items-center space-x-2">
-                        <input type="radio" name="revenue" defaultChecked className="text-primary" />
-                        <span className="text-sm">When payment is received (Cash basis)</span>
-                      </label>
-                      <label className="flex items-center space-x-2">
-                        <input type="radio" name="revenue" className="text-primary" />
-                        <span className="text-sm">When service is delivered (Accrual basis)</span>
-                      </label>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div>
-                    <h4 className="font-medium text-mobius-gray-900 mb-2">Capitalization Threshold</h4>
-                    <p className="text-sm text-mobius-gray-500 mb-3">
-                      Minimum amount for capitalizing fixed assets
-                    </p>
-                    <div className="flex items-center space-x-3">
-                      <span className="text-sm">$</span>
-                      <input 
-                        type="number" 
-                        defaultValue="5000"
-                        className="px-3 py-2 border border-mobius-gray-100 rounded-lg text-sm w-32"
-                      />
-                      <span className="text-sm text-mobius-gray-500">or more</span>
-                    </div>
+            <div className="space-y-6">
+              {/* Recon Tolerance Rule */}
+              <div>
+                <h4 className="font-medium text-mobius-gray-900 mb-2">Reconciliation Tolerance</h4>
+                <p className="text-sm text-mobius-gray-500 mb-3">
+                  Auto-match payments to invoices within variance tolerance
+                </p>
+                <div className="flex items-center space-x-3">
+                  <span className="text-sm">₹</span>
+                  <input 
+                    type="number" 
+                    value={reconTolerance}
+                    onChange={(e) => setReconTolerance(Number(e.target.value))}
+                    className="px-3 py-2 border border-mobius-gray-100 rounded-lg text-sm w-32"
+                  />
+                  <span className="text-sm text-mobius-gray-500">variance</span>
+                </div>
+                <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-600" />
+                    <span className="text-sm text-green-700">
+                      This change will affect {getRuleImpact("recon-tolerance").affectedTransactions} pending transactions
+                    </span>
                   </div>
                 </div>
-              </Card>
-            </TabsContent>
-          </Tabs>
+              </div>
+
+              <Separator />
+
+              <div>
+                <h4 className="font-medium text-mobius-gray-900 mb-2">Prepaid Expenses</h4>
+                <p className="text-sm text-mobius-gray-500 mb-3">
+                  How should prepaid expenses be handled?
+                </p>
+                <div className="space-y-2">
+                  <label className="flex items-center space-x-2">
+                    <input type="radio" name="prepaid" defaultChecked className="text-primary" />
+                    <span className="text-sm">Create amortization schedule for amounts &gt; $1,000</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input type="radio" name="prepaid" className="text-primary" />
+                    <span className="text-sm">Expense immediately regardless of amount</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input type="radio" name="prepaid" className="text-primary" />
+                    <span className="text-sm">Always create prepaid asset</span>
+                  </label>
+                </div>
+                <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <AlertTriangle className="w-4 h-4 text-amber-600" />
+                    <span className="text-sm text-amber-700">
+                      This change will affect {getRuleImpact("prepaid-threshold").affectedTransactions} pending transactions
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div>
+                <h4 className="font-medium text-mobius-gray-900 mb-2">Revenue Recognition</h4>
+                <p className="text-sm text-mobius-gray-500 mb-3">
+                  When should revenue be recognized?
+                </p>
+                <div className="space-y-2">
+                  <label className="flex items-center space-x-2">
+                    <input type="radio" name="revenue" defaultChecked className="text-primary" />
+                    <span className="text-sm">When payment is received (Cash basis)</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input type="radio" name="revenue" className="text-primary" />
+                    <span className="text-sm">When service is delivered (Accrual basis)</span>
+                  </label>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div>
+                <h4 className="font-medium text-mobius-gray-900 mb-2">Capitalization Threshold</h4>
+                <p className="text-sm text-mobius-gray-500 mb-3">
+                  Minimum amount for capitalizing fixed assets
+                </p>
+                <div className="flex items-center space-x-3">
+                  <span className="text-sm">$</span>
+                  <input 
+                    type="number" 
+                    defaultValue="5000"
+                    className="px-3 py-2 border border-mobius-gray-100 rounded-lg text-sm w-32"
+                  />
+                  <span className="text-sm text-mobius-gray-500">or more</span>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </TabsContent>
+      </Tabs>
         </div>
       </div>
     </div>

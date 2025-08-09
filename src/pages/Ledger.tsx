@@ -191,19 +191,25 @@ export default function Ledger() {
                     <div className="grid grid-cols-9 gap-4 text-sm font-medium text-gray-700">
                       <div>GL Code</div>
                       <div className="col-span-2">Description</div>
-                      <div className="text-right">Debits</div>
-                      <div className="text-right">Credits</div>
-                      <div className="text-right">Debits</div>
-                      <div className="text-right">Credits</div>
-                      <div className="text-right">Debits</div>
-                      <div className="text-right">Credits</div>
+                      <div className="col-span-2">
+                        <div className="text-center">Movement</div>
+                      </div>
+                      <div className="col-span-2">
+                        <div className="text-center">Month ending Apr-25</div>
+                      </div>
+                      <div className="col-span-2">
+                        <div className="text-center">Month ending Mar-25</div>
+                      </div>
                     </div>
                     <div className="grid grid-cols-9 gap-4 text-xs text-gray-500 mt-1">
                       <div></div>
                       <div className="col-span-2"></div>
-                      <div className="col-span-2 text-center">Movement</div>
-                      <div className="col-span-2 text-center">Month ending Apr-25</div>
-                      <div className="col-span-2 text-center">Month ending Mar-25</div>
+                      <div className="text-right">Debits</div>
+                      <div className="text-right">Credits</div>
+                      <div className="text-right">Debits</div>
+                      <div className="text-right">Credits</div>
+                      <div className="text-right">Debits</div>
+                      <div className="text-right">Credits</div>
                     </div>
                   </div>
                   

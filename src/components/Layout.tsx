@@ -14,7 +14,8 @@ import {
   User,
   BookOpen,
   Calendar,
-  HardDrive
+  HardDrive,
+  Menu
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -44,7 +45,7 @@ const navigation = [
   { name: "Exceptions", href: "/exceptions", icon: AlertTriangle },
   { name: "Ledger", href: "/ledger", icon: BookOpen },
   { name: "Schedules", href: "/schedules", icon: Calendar },
-  { name: "Fixed Asset Register", href: "/fixed-assets", icon: HardDrive },
+  { name: "Fixed Assets", href: "/fixed-assets", icon: HardDrive },
   { name: "Reporting", href: "/reporting", icon: BarChart3 },
 ];
 
@@ -63,6 +64,11 @@ const clients = [
 export function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const [selectedClient, setSelectedClient] = useState("All Clients");
+  const [isExpanded, setIsExpanded] = useState(() => {
+    // Get the expanded state from localStorage, default to false
+    const saved = localStorage.getItem('sidebarExpanded');
+    return saved ? JSON.parse(saved) : false;
+  });
 
   const handleClientClick = (client: string) => {
     setSelectedClient(client);
@@ -70,38 +76,60 @@ export function Layout({ children }: LayoutProps) {
     console.log("Selected client:", client);
   };
 
+  const handleSidebarToggle = (expanded: boolean) => {
+    setIsExpanded(expanded);
+    // Save the expanded state to localStorage
+    localStorage.setItem('sidebarExpanded', JSON.stringify(expanded));
+  };
+
   return (
     <div className="h-screen bg-mobius-gray-50 flex overflow-hidden">
       {/* Left Ribbon */}
-      <div className="w-16 h-screen bg-white border-r border-mobius-gray-100 flex flex-col items-center sticky top-0">
-        {/* Logo */}
-        <div className="p-4 border-b border-mobius-gray-100">
-          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-            <img 
-              src="/mobius-logo.png" 
-              alt="Mobius"
-              className="w-6 h-6 object-contain"
-            />
+      <div className={cn(
+        "h-screen bg-white border-r border-mobius-gray-100 flex flex-col items-center sticky top-0 transition-all duration-300",
+        isExpanded ? "w-48" : "w-16"
+      )}>
+        {/* Hamburger Menu Button - Now at top where logo was */}
+        <div className="p-4 w-full">
+          <div className="flex items-center justify-start">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-12 h-12 p-0 flex items-center justify-center"
+              onClick={() => handleSidebarToggle(!isExpanded)}
+              title={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
+            >
+              <Menu className="w-8 h-8" />
+            </Button>
           </div>
         </div>
 
         {/* Main Navigation */}
-        <nav className="flex-1 p-2">
+        <nav className="flex-1 p-2 w-full">
           <div className="space-y-2">
             {navigation.map((item) => (
               <Link key={item.name} to={item.href}>
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size={isExpanded ? "default" : "sm"}
                   className={cn(
-                    "w-12 h-12 p-0 flex items-center justify-center",
+                    "w-full flex items-center transition-all duration-200",
+                    isExpanded 
+                      ? "h-12 px-4 justify-start space-x-3" 
+                      : "h-12 w-12 p-0 justify-center",
                     location.pathname === item.href 
                       ? "bg-primary text-primary-foreground" 
                       : "text-mobius-gray-500 hover:text-mobius-gray-900 hover:bg-mobius-gray-50"
                   )}
-                  title={item.name}
+                  title={!isExpanded ? item.name : undefined}
                 >
-                  <item.icon className="w-8 h-8" />
+                  <item.icon className={cn(
+                    "transition-all duration-200",
+                    isExpanded ? "w-5 h-5" : "w-8 h-8"
+                  )} />
+                  {isExpanded && (
+                    <span className="font-medium">{item.name}</span>
+                  )}
                 </Button>
               </Link>
             ))}
@@ -109,22 +137,31 @@ export function Layout({ children }: LayoutProps) {
         </nav>
 
         {/* Bottom Navigation */}
-        <div className="p-2 border-t border-mobius-gray-100">
+        <div className="p-2 border-t border-mobius-gray-100 w-full">
           <div className="space-y-2">
             {bottomNavigation.map((item) => (
               <Link key={item.name} to={item.href}>
                 <Button
                   variant={location.pathname === item.href ? "default" : "ghost"}
-                  size="sm"
+                  size={isExpanded ? "default" : "sm"}
                   className={cn(
-                    "w-12 h-12 p-0 flex items-center justify-center",
+                    "w-full flex items-center transition-all duration-200",
+                    isExpanded 
+                      ? "h-12 px-4 justify-start space-x-3" 
+                      : "h-12 w-12 p-0 justify-center",
                     location.pathname === item.href 
                       ? "bg-primary text-primary-foreground" 
                       : "text-mobius-gray-500 hover:text-mobius-gray-900 hover:bg-mobius-gray-50"
                   )}
-                  title={item.name}
+                  title={!isExpanded ? item.name : undefined}
                 >
-                  <item.icon className="w-5 h-5" />
+                  <item.icon className={cn(
+                    "transition-all duration-200",
+                    isExpanded ? "w-5 h-5" : "h-5 w-5"
+                  )} />
+                  {isExpanded && (
+                    <span className="font-medium">{item.name}</span>
+                  )}
                 </Button>
               </Link>
             ))}
@@ -137,25 +174,39 @@ export function Layout({ children }: LayoutProps) {
         {/* Top Header */}
         <header className="bg-white border-b border-mobius-gray-100 px-6 py-4 flex-shrink-0">
           <div className="flex items-center justify-between">
-            {/* Client Pills */}
-            <div className="flex items-center space-x-2">
-              <span className="text-sm font-medium text-mobius-gray-500 mr-2">Clients:</span>
-              <div className="flex space-x-2">
-                {clients.map((client) => (
-                  <Badge 
-                    key={client}
-                    variant={selectedClient === client ? "default" : "outline"}
-                    className={cn(
-                      "cursor-pointer transition-colors",
-                      selectedClient === client 
-                        ? "bg-primary text-primary-foreground hover:bg-primary/90" 
-                        : "hover:bg-mobius-gray-50"
-                    )}
-                    onClick={() => handleClientClick(client)}
-                  >
-                    {client}
-                  </Badge>
-                ))}
+            {/* Logo and Client Pills */}
+            <div className="flex items-center space-x-6">
+              {/* Logo */}
+              <div className="flex items-center">
+                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+                  <img 
+                    src="/mobius-logo.png" 
+                    alt="Mobius"
+                    className="w-6 h-6 object-contain"
+                  />
+                </div>
+              </div>
+              
+              {/* Client Pills */}
+              <div className="flex items-center space-x-2">
+                <span className="text-sm font-medium text-mobius-gray-500 mr-2">Clients:</span>
+                <div className="flex space-x-2">
+                  {clients.map((client) => (
+                    <Badge 
+                      key={client}
+                      variant={selectedClient === client ? "default" : "outline"}
+                      className={cn(
+                        "cursor-pointer transition-colors",
+                        selectedClient === client 
+                          ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                          : "hover:bg-mobius-gray-50"
+                      )}
+                      onClick={() => handleClientClick(client)}
+                    >
+                      {client}
+                    </Badge>
+                  ))}
+                </div>
               </div>
             </div>
 
