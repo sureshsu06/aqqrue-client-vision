@@ -139,7 +139,7 @@ const columnConfig = [
   { key: 'comment', label: 'Comment', visible: false, width: 'w-48' },
   { key: 'qty', label: 'Qty', visible: false, width: 'w-16' },
   { key: 'lifeMonths', label: 'Life (months)', visible: false, width: 'w-24' },
-  { key: 'installationDate', label: 'Date of Installation', visible: false, width: 'w-32' },
+  { key: 'installationDate', label: 'Installation Date', visible: false, width: 'w-32' },
   { key: 'grossBlock', label: 'Gross Block', visible: true, width: 'w-32' },
   { key: 'monthlyDepreciation', label: 'Depreciation', visible: true, width: 'w-40' },
   { key: 'dec24', label: 'Dec-24', visible: false, width: 'w-20' },
@@ -336,16 +336,7 @@ export default function FixedAssets() {
               >
                 Transactions
               </div>
-              <div 
-                className={`pb-1 text-sm cursor-pointer transition-colors ${
-                  activeHeaderTab === "depreciation-schedule" 
-                    ? "text-blue-600 border-b-2 border-blue-600" 
-                    : "text-gray-600 hover:text-gray-800"
-                }`}
-                onClick={() => setActiveHeaderTab("depreciation-schedule")}
-              >
-                Depreciation Schedule
-              </div>
+
             </div>
           </div>
 
@@ -640,9 +631,22 @@ export default function FixedAssets() {
                       <h3 className="text-lg font-semibold text-mobius-gray-900">
                         {selectedAsset.particulars}
                       </h3>
-                      <Badge variant="outline" className="text-xs">
-                        {selectedAsset.billNo}
-                      </Badge>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant="outline" className="text-xs">
+                          {selectedAsset.billNo}
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                          onClick={() => setSelectedAsset(null)}
+                          title="Close Asset Details"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </Button>
+                      </div>
                     </div>
 
                     <div className="space-y-4">
@@ -708,7 +712,7 @@ export default function FixedAssets() {
 
                       {/* Depreciation Schedule Section */}
                       <div className="border-t border-mobius-gray-200 pt-4">
-                        <h4 className="text-sm font-medium text-mobius-gray-900 mb-3">Monthly Scheduled Entries:</h4>
+                        <h4 className="text-sm font-medium text-mobius-gray-900 mb-3">Depreciation Schedule:</h4>
                         
                         {/* Summary Stats */}
                         <div className="bg-mobius-gray-50 rounded-lg p-3 mb-4">
@@ -726,6 +730,184 @@ export default function FixedAssets() {
                               </p>
                             </div>
                           </div>
+                        </div>
+
+                        {/* Depreciation Schedule Table */}
+                        <div className="mt-4">
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-sm border border-gray-200 rounded-lg">
+                              <thead className="bg-gray-50">
+                                <tr>
+                                  <th className="px-4 py-3 text-left font-medium text-mobius-gray-500 uppercase tracking-wide text-xs w-24">Period</th>
+                                  <th className="px-4 py-3 text-right font-medium text-mobius-gray-500 uppercase tracking-wide text-xs">Monthly Dep</th>
+                                  <th className="px-4 py-3 text-right font-medium text-mobius-gray-500 uppercase text-xs">Accumulated</th>
+                                  <th className="px-4 py-3 text-right font-medium text-mobius-gray-500 uppercase text-xs">WDV</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {(() => {
+                                  const schedule = [];
+                                  let accumulatedDep = 0;
+                                  let currentWDV = selectedAsset.grossBlock;
+                                  
+                                  // Generate schedule for the asset's life
+                                  for (let month = 1; month <= selectedAsset.lifeMonths; month++) {
+                                    const monthlyDep = selectedAsset.monthlyDepreciation;
+                                    accumulatedDep += monthlyDep;
+                                    currentWDV = selectedAsset.grossBlock - accumulatedDep;
+                                    
+                                    // Show all months if expanded, otherwise only first 12
+                                    if (month <= 12 || selectedAsset.showFullSchedule) {
+                                      schedule.push({
+                                        month,
+                                        monthlyDep,
+                                        accumulatedDep,
+                                        wdv: currentWDV
+                                      });
+                                    }
+                                  }
+                                  
+                                  return schedule.map((row, index) => (
+                                    <tr key={row.month} className="border-b border-gray-100">
+                                      <td className="px-4 py-3 text-left text-mobius-gray-500 w-24">
+                                        Month {row.month}
+                                      </td>
+                                      <td className="px-4 py-3 text-right text-mobius-gray-500">
+                                        {selectedAsset.isDepreciationEditMode ? (
+                                          <Input
+                                            type="number"
+                                            value={row.monthlyDep}
+                                            onChange={(e) => {
+                                              const newValue = parseFloat(e.target.value) || 0;
+                                              // Update the monthly depreciation for this month
+                                              const updatedAsset = { ...selectedAsset };
+                                              updatedAsset.monthlyDepreciation = newValue;
+                                              setSelectedAsset(updatedAsset);
+                                            }}
+                                            className="h-8 text-sm text-right border-gray-200 w-24 ml-auto"
+                                          />
+                                        ) : (
+                                          <span className="font-medium text-mobius-gray-900">₹{row.monthlyDep.toLocaleString()}</span>
+                                        )}
+                                      </td>
+                                      <td className="px-4 py-3 text-right text-mobius-gray-500">
+                                        <span className="font-medium text-mobius-gray-900">₹{row.accumulatedDep.toLocaleString()}</span>
+                                      </td>
+                                      <td className="px-4 py-3 text-right text-mobius-gray-500">
+                                        <span className="font-medium text-mobius-gray-900">₹{Math.max(0, row.wdv).toLocaleString()}</span>
+                                      </td>
+                                    </tr>
+                                  ));
+                                })()}
+                              </tbody>
+                            </table>
+                            
+                            {/* Expandable dots for assets with more than 12 months */}
+                            {selectedAsset.lifeMonths > 12 && !selectedAsset.showFullSchedule && (
+                              <div className="mt-3 flex justify-between items-center">
+                                <button
+                                  onClick={() => setSelectedAsset({...selectedAsset, showFullSchedule: true})}
+                                  className="text-gray-600 hover:text-gray-800 font-medium text-sm flex items-center py-2 px-3 hover:bg-gray-50 rounded transition-colors"
+                                >
+                                  <span className="text-lg">•••</span>
+                                  <span className="ml-2">Show all {selectedAsset.lifeMonths} months</span>
+                                </button>
+                                
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 px-3 text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+                                  onClick={() => setSelectedAsset({...selectedAsset, isDepreciationEditMode: !selectedAsset.isDepreciationEditMode})}
+                                  title="Edit Depreciation Schedule"
+                                >
+                                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                  </svg>
+                                  Edit
+                                </Button>
+                              </div>
+                            )}
+                            
+                            {/* Collapse button when showing full schedule */}
+                            {selectedAsset.lifeMonths > 12 && selectedAsset.showFullSchedule && (
+                              <div className="mt-3 flex justify-between items-center">
+                                <button
+                                  onClick={() => setSelectedAsset({...selectedAsset, showFullSchedule: false})}
+                                  className="text-gray-600 hover:text-gray-800 font-medium text-sm flex items-center py-2 px-3 hover:bg-gray-50 rounded transition-colors"
+                                >
+                                  <span className="text-lg">•••</span>
+                                  <span className="ml-2">Show less</span>
+                                </button>
+                                
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 px-3 text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+                                  onClick={() => setSelectedAsset({...selectedAsset, isDepreciationEditMode: !selectedAsset.isDepreciationEditMode})}
+                                  title="Edit Depreciation Schedule"
+                                >
+                                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                  </svg>
+                                  Edit
+                                </Button>
+                              </div>
+                            )}
+                            
+                            {/* Edit button for assets with 12 months or less */}
+                            {selectedAsset.lifeMonths <= 12 && (
+                              <div className="mt-3 flex justify-end">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 px-3 text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+                                  onClick={() => setSelectedAsset({...selectedAsset, isDepreciationEditMode: !selectedAsset.isDepreciationEditMode})}
+                                  title="Edit Depreciation Schedule"
+                                >
+                                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                  </svg>
+                                  Edit
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Save/Cancel Buttons - below the table when in edit mode */}
+                          {selectedAsset.isDepreciationEditMode && (
+                            <div className="flex justify-end mt-3 space-x-2">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-8 px-3 text-gray-600 hover:text-gray-800"
+                                onClick={() => {
+                                  // Save changes - for now just close edit mode
+                                  setSelectedAsset({...selectedAsset, isDepreciationEditMode: false});
+                                }}
+                                title="Save Changes"
+                              >
+                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                Save
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-8 px-3 text-gray-600 hover:text-gray-800"
+                                onClick={() => {
+                                  // Cancel changes - reset to original values
+                                  setSelectedAsset({...selectedAsset, isDepreciationEditMode: false});
+                                }}
+                                title="Cancel"
+                              >
+                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                Cancel
+                              </Button>
+                            </div>
+                          )}
                         </div>
 
                         {/* Journal Entry Table */}

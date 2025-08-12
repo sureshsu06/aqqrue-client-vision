@@ -3,7 +3,7 @@ export interface Transaction {
   vendor: string;
   amount: number;
   date: string;
-  type: 'invoice' | 'contract' | 'credit-card' | 'bill' | 'fixed-asset' | 'bank';
+  type: 'invoice' | 'contract' | 'credit-card' | 'bill' | 'fixed-asset' | 'payment' | 'receipt';
   client: string;
   currency?: 'USD' | 'INR';
   confidence?: number;

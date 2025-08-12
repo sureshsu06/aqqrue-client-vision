@@ -27,7 +27,8 @@ import {
   Undo2,
   Filter,
   Upload,
-  GripVertical
+  GripVertical,
+  Plus
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { 
@@ -35,6 +36,7 @@ import {
   PanelGroup, 
   PanelResizeHandle 
 } from "react-resizable-panels";
+import { ManualEntryModal } from "./ManualEntryModal";
 
 const mockTransactions: Transaction[] = [
   // Bills from /public/documents/bills
@@ -554,14 +556,209 @@ const mockTransactions: Transaction[] = [
     billingCycle: "Annual",
     contractValue: 135000,
     contractTerm: "12 months"
+  },
+  // Payment transactions
+  {
+    id: "33",
+    vendor: "CLAYWORKS SPACES T PVT LTD",
+    amount: -6156,
+    currency: "INR",
+    source: "bank",
+    type: "payment",
+    status: "done",
+    date: "2025-04-07",
+    description: "Payment for Clayworks Invoice 5016",
+    client: "Elire",
+    confidence: 95,
+    pdfFile: "payments/payment_clayworks_inv_5016.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=1000&fit=crop",
+    invoiceNumber: "INV-5016"
+  },
+  {
+    id: "34",
+    vendor: "CLAYWORKS SPACES T PVT LTD",
+    amount: -93960,
+    currency: "INR",
+    source: "bank",
+    type: "payment",
+    status: "done",
+    date: "2025-04-07",
+    description: "Payment for Clayworks Invoice 25 26 0078",
+    client: "Elire",
+    confidence: 95,
+    pdfFile: "payments/payment_clayworks_inv_0078.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&h=1000&fit=crop",
+    invoiceNumber: "INV-25-26-0078"
+  },
+  {
+    id: "35",
+    vendor: "EPFO",
+    amount: -177278,
+    currency: "INR",
+    source: "bank",
+    type: "payment",
+    status: "done",
+    date: "2025-04-10",
+    description: "EPFO Contribution",
+    client: "Elire",
+    confidence: 95,
+    pdfFile: "payments/payment_epfo_contribution.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=1000&fit=crop",
+    invoiceNumber: "EPFO-APR-2025"
+  },
+  {
+    id: "36",
+    vendor: "CBDT",
+    amount: -9765,
+    currency: "INR",
+    source: "bank",
+    type: "payment",
+    status: "done",
+    date: "2025-04-21",
+    description: "TDS on Rent",
+    client: "Elire",
+    confidence: 98,
+    pdfFile: "payments/payment_cbdt_tds_rent.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=800&h=1000&fit=crop",
+    invoiceNumber: "CBDT-RENT-APR-2025"
+  },
+  {
+    id: "37",
+    vendor: "CBDT",
+    amount: -10500,
+    currency: "INR",
+    source: "bank",
+    type: "payment",
+    status: "done",
+    date: "2025-04-21",
+    description: "TDS on Professional Charges",
+    client: "Elire",
+    confidence: 98,
+    pdfFile: "payments/payment_cbdt_tds_professional.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&h=1000&fit=crop",
+    invoiceNumber: "CBDT-PROF-APR-2025"
+  },
+  {
+    id: "38",
+    vendor: "CBDT",
+    amount: -152160,
+    currency: "INR",
+    source: "bank",
+    type: "payment",
+    status: "done",
+    date: "2025-04-21",
+    description: "TDS on Salary",
+    client: "Elire",
+    confidence: 98,
+    pdfFile: "payments/payment_cbdt_tds_salary.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=1000&fit=crop",
+    invoiceNumber: "CBDT-SALARY-APR-2025"
+  },
+  {
+    id: "39",
+    vendor: "Incoming Wire Transfer",
+    amount: 1635925.2,
+    currency: "INR",
+    source: "bank",
+    type: "receipt",
+    status: "done",
+    date: "2025-04-25",
+    description: "Incoming Wire Transfer (USD 19201.0 @ 85.2)",
+    client: "Elire",
+    confidence: 99,
+    pdfFile: "receipts/receipt_wire_transfer_usd.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=1000&fit=crop",
+    invoiceNumber: "WIRE-USD-APR-2025"
+  },
+  {
+    id: "40",
+    vendor: "CGST",
+    amount: -552.23,
+    currency: "INR",
+    source: "bank",
+    type: "payment",
+    status: "done",
+    date: "2025-04-25",
+    description: "CGST Payment",
+    client: "Elire",
+    confidence: 95,
+    pdfFile: "payments/payment_cgst.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1572044162444-ad60f128bdea?w=800&h=1000&fit=crop",
+    invoiceNumber: "CGST-APR-2025"
+  },
+  {
+    id: "41",
+    vendor: "SGST",
+    amount: -552.23,
+    currency: "INR",
+    source: "bank",
+    type: "payment",
+    status: "done",
+    date: "2025-04-25",
+    description: "SGST Payment",
+    client: "Elire",
+    confidence: 95,
+    pdfFile: "payments/payment_sgst.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1633114127408-af671c774b39?w=800&h=1000&fit=crop",
+    invoiceNumber: "SGST-APR-2025"
+  },
+  {
+    id: "42",
+    vendor: "BHARAT R",
+    amount: -386799,
+    currency: "INR",
+    source: "bank",
+    type: "payment",
+    status: "done",
+    date: "2025-04-30",
+    description: "Salary Payment - April 2025 (Bharat R)",
+    client: "Elire",
+    confidence: 97,
+    pdfFile: "payments/payment_salary_bharat.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=800&h=1000&fit=crop",
+    invoiceNumber: "SALARY-BHARAT-APR-2025"
+  },
+  {
+    id: "43",
+    vendor: "AMIT KUMAR MISHRA",
+    amount: -253950,
+    currency: "INR",
+    source: "bank",
+    type: "payment",
+    status: "done",
+    date: "2025-04-30",
+    description: "RTGS Payment to Amit Kumar Mishra",
+    client: "Elire",
+    confidence: 97,
+    pdfFile: "payments/payment_rtgs_amit.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1483058712412-4245e9b90334?w=800&h=1000&fit=crop",
+    invoiceNumber: "RTGS-AMIT-APR-2025"
+  },
+  {
+    id: "44",
+    vendor: "DEVASANKAR SATHANI",
+    amount: -219422,
+    currency: "INR",
+    source: "bank",
+    type: "payment",
+    status: "done",
+    date: "2025-04-30",
+    description: "RTGS Payment to Devasankar Sathani",
+    client: "Elire",
+    confidence: 97,
+    pdfFile: "payments/payment_rtgs_devasankar.pdf",
+    documentUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=1000&fit=crop",
+    invoiceNumber: "RTGS-DEVASANKAR-APR-2025"
   }
 ];
 
 const filters = [
-  { id: "all", label: "All", count: 32, icon: Check },
+  { id: "all", label: "All", count: 38, icon: Check },
   { id: "bills", label: "Bills", count: 16, icon: FileText },
   { id: "cards", label: "Credit Cards", count: 10, icon: CreditCard },
-  { id: "contracts", label: "Contracts", count: 6, icon: FileText }
+  { id: "contracts", label: "Contracts", count: 6, icon: FileText },
+  { id: "payments", label: "Payments", count: 3, icon: FileText },
+  { id: "receipts", label: "Receipts", count: 3, icon: FileText }
 ];
 
 const statusFilters = [
@@ -578,9 +775,10 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
   const [selectedFilter, setSelectedFilter] = useState("bills");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedStatusOption, setSelectedStatusOption] = useState("All");
-  const [selectedTab, setSelectedTab] = useState<"expenses" | "revenue" | "fixed-assets" | "credit-card" | "bank">("expenses");
+  const [selectedTab, setSelectedTab] = useState<"expenses" | "revenue" | "fixed-assets" | "credit-card" | "payments" | "receipts">("expenses");
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [showManualEntryModal, setShowManualEntryModal] = useState(false);
   const { toast } = useToast();
   const { sizes, updateSizes, resetSizes } = usePanelSizes();
   const { selectedClient, setSelectedClient } = useClientContext();
@@ -591,7 +789,7 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
       return false;
     }
     
-    // Filter by tab (expenses/revenue/fixed-assets/credit-card/bank) - this takes priority
+    // Filter by tab (expenses/revenue/fixed-assets/credit-card/payments/receipts) - this takes priority
     if (selectedTab === "expenses" && transaction.type !== "bill") {
       return false;
     }
@@ -604,7 +802,10 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
     if (selectedTab === "credit-card" && transaction.type !== "credit-card") {
       return false;
     }
-    if (selectedTab === "bank" && transaction.type !== "bank") {
+    if (selectedTab === "payments" && transaction.type !== "payment") {
+      return false;
+    }
+    if (selectedTab === "receipts" && transaction.type !== "receipt") {
       return false;
     }
     
@@ -692,6 +893,18 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
     onTransactionSelect(selectedTransaction!);
   };
 
+  const handleSelectAllVisible = () => {
+    const allVisibleSelected = filteredTransactions.length > 0 && selectedTransactions.length === filteredTransactions.length;
+    
+    if (allVisibleSelected) {
+      // If all are selected, unselect all visible
+      setSelectedTransactions([]);
+    } else {
+      // If not all are selected, select all visible
+      setSelectedTransactions(filteredTransactions.map(t => t.id));
+    }
+  };
+
   return (
     <div className="h-full flex flex-col overflow-hidden">
       
@@ -706,6 +919,8 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
         onFilterChange={setSelectedFilter}
         onStatusChange={setSelectedStatus}
         onStatusOptionChange={setSelectedStatusOption}
+        onSelectAllVisible={handleSelectAllVisible}
+        allVisibleSelected={filteredTransactions.length > 0 && selectedTransactions.length === filteredTransactions.length}
       />
 
       {/* Transaction Type Tabs Row */}
@@ -760,21 +975,44 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
             Credit Card
           </Button>
           <Button 
-            variant={selectedTab === "bank" ? "default" : "ghost"}
+            variant={selectedTab === "payments" ? "default" : "ghost"}
             size="sm"
             className={`px-4 py-2 rounded-none border-b-2 ${
-              selectedTab === "bank" 
+              selectedTab === "payments" 
                 ? "border-mobius-blue bg-transparent text-mobius-blue hover:bg-mobius-blue/5" 
                 : "border-transparent text-mobius-gray-600 hover:text-mobius-gray-900"
             }`}
-            onClick={() => setSelectedTab("bank")}
+            onClick={() => setSelectedTab("payments")}
           >
-            Bank
+            Payments
+          </Button>
+          <Button 
+            variant={selectedTab === "receipts" ? "default" : "ghost"}
+            size="sm"
+            className={`px-4 py-2 rounded-none border-b-2 ${
+              selectedTab === "receipts" 
+                ? "border-mobius-blue bg-transparent text-mobius-blue hover:bg-mobius-blue/5" 
+                : "border-transparent text-mobius-gray-600 hover:text-mobius-gray-900"
+            }`}
+            onClick={() => setSelectedTab("receipts")}
+          >
+            Receipts
           </Button>
         </div>
 
         {/* Client Filter and Undo Button - positioned to the right */}
         <div className="flex items-center space-x-3">
+          {/* Add Manually Button */}
+          <Button 
+            variant="ghost"
+            size="sm"
+            className="h-8 px-3 text-sm text-mobius-gray-600 hover:text-mobius-gray-900 hover:bg-mobius-gray-100"
+            onClick={() => setShowManualEntryModal(true)}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add JE Manually
+          </Button>
+          
           {/* Client Dropdown - Hidden */}
           {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -797,7 +1035,7 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
               <DropdownMenuItem 
                 onClick={(e) => {
                   e.stopPropagation();
-                  console.log("Setting client to: Elire");
+                  console.log("Setting client to: elire");
                   setSelectedClient("Elire");
                 }}
                 className={selectedClient === "Elire" ? "bg-mobius-gray-100" : ""}
@@ -807,7 +1045,7 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
               <DropdownMenuItem 
                 onClick={(e) => {
                   e.stopPropagation();
-                  console.log("Setting client to: Mahat");
+                  console.log("Setting client to: mahat");
                   setSelectedClient("Mahat");
                 }}
                 className={selectedClient === "Mahat" ? "bg-mobius-gray-100" : ""}
@@ -817,17 +1055,7 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
               <DropdownMenuItem 
                 onClick={(e) => {
                   e.stopPropagation();
-                  console.log("Setting client to: Rhythms");
-                  setSelectedClient("Rhythms");
-                }}
-                className={selectedClient === "Rhythms" ? "bg-mobius-gray-100" : ""}
-              >
-                <span>Rhythms</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  console.log("Setting client to: TVS");
+                  console.log("Setting client to: tvs");
                   setSelectedClient("TVS");
                 }}
                 className={selectedClient === "TVS" ? "bg-mobius-gray-100" : ""}
@@ -837,12 +1065,12 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
               <DropdownMenuItem 
                 onClick={(e) => {
                   e.stopPropagation();
-                  console.log("Setting client to: Unknown");
-                  setSelectedClient("Unknown");
+                  console.log("Setting client to: rhythms");
+                  setSelectedClient("Rhythms");
                 }}
-                className={selectedClient === "Unknown" ? "bg-mobius-gray-100" : ""}
+                className={selectedClient === "Rhythms" ? "bg-mobius-gray-100" : ""}
               >
-                <span>Unknown</span>
+                <span>Rhythms</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu> */}
@@ -923,6 +1151,23 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
           )}
         </PanelGroup>
       </div>
+
+      {/* Manual Entry Modal */}
+      {showManualEntryModal && (
+        <ManualEntryModal
+          isOpen={showManualEntryModal}
+          onClose={() => setShowManualEntryModal(false)}
+          onSave={(entry) => {
+            // Handle saving the manual entry
+            console.log("Saving manual entry:", entry);
+            toast({
+              title: "Manual entry added",
+              description: "Entry has been added to the system"
+            });
+            setShowManualEntryModal(false);
+          }}
+        />
+      )}
     </div>
   );
 }

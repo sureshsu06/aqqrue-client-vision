@@ -18,13 +18,16 @@ import {
   ChevronDown,
   ChevronRight,
   Undo2,
-  FileText
+  FileText,
+  ExternalLink
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Transaction } from "@/types/Transaction";
 import { useState, useEffect } from "react";
 import { JournalEntryGenerator } from "@/lib/journalEntryGenerator";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import { PAST_JOURNAL_ENTRIES } from '../../lib/constants';
+import { getGLAccountCode } from '../../lib/GLaccount';
 
 interface AnalysisPaneProps {
   transaction: Transaction;
@@ -34,6 +37,7 @@ interface AnalysisPaneProps {
 }
 
 export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: AnalysisPaneProps) {
+  const { toast } = useToast();
   const confidence = transaction.confidence || 95;
   const [isEditMode, setIsEditMode] = useState(false); // Default to view mode
   const [editedJournalEntry, setEditedJournalEntry] = useState<any>(null);
@@ -469,6 +473,43 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
     onSeeHow();
   };
 
+  const handleInvoiceClick = async (invoiceNumber: string, vendorName: string) => {
+    // Show loading toast immediately
+    toast({
+      title: "Loading invoice...",
+      description: `Fetching details for ${invoiceNumber}`,
+    });
+    
+    // Simulate a small delay to show the loading state
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // In a real implementation, this would fetch the original bill/transaction
+    // For now, we'll show a toast with the invoice details
+    toast({
+      title: "Invoice Details",
+      description: `Invoice ${invoiceNumber} from ${vendorName}`,
+    });
+    
+    // TODO: Implement navigation to the original transaction or PDF viewer
+    // This could involve:
+    // 1. Fetching the transaction by invoice number
+    // 2. Opening a PDF viewer if the transaction has a PDF
+    // 3. Navigating to the transaction details page
+    // 4. Opening a modal with transaction details
+    console.log(`Clicked on invoice: ${invoiceNumber} from ${vendorName}`);
+    
+    // Example of what could be implemented:
+    // const transaction = await fetchTransactionByInvoiceNumber(invoiceNumber);
+    // if (transaction.pdfFile) {
+    //   setPdfUrl(`/documents/${transaction.pdfFile}`);
+    //   setShowPdfViewer(true);
+    // } else {
+    //   // Show transaction details in a modal
+    //   setSelectedTransaction(transaction);
+    //   setShowTransactionModal(true);
+    // }
+  };
+
   // Handle schedule edit mode
   const handleScheduleEditClick = () => {
     console.log("Edit schedule clicked");
@@ -873,14 +914,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                   </div>
                   {transaction.type === 'bill' && (
                     <div>
-                      <p className="text-mobius-gray-500">Previous Bills:</p>
-                      <button 
-                        onClick={() => handleShowAllPreviousBills(transaction.vendor)}
-                        title="Show All Previous Bills"
-                        className="text-mobius-gray-500 hover:text-mobius-gray-700 transition-colors"
-                      >
-                        <FileText className="w-5 h-5" />
-                      </button>
+
                     </div>
                   )}
                 </div>
@@ -1689,12 +1723,18 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                           {getPastJournalEntries(transaction.vendor)
                             .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()) // Sort in ascending order
                             .map((entry, index) => (
-                            <tr key={index} className="hover:bg-mobius-gray-50">
+                            <tr key={index} className="hover:bg-mobius-gray-50 hover:border-l-2 hover:border-l-mobius-blue/30 transition-all duration-200">
                               <td className="p-3 text-sm text-mobius-gray-900">
                                 {new Date(entry.date).toLocaleDateString()}
                               </td>
                               <td className="p-3 text-sm font-medium text-mobius-gray-900">
-                                {entry.invoiceNumber}
+                                <button
+                                  onClick={() => handleInvoiceClick(entry.invoiceNumber, transaction.vendor)}
+                                  className="text-mobius-gray-900 hover:text-mobius-gray-700 hover:underline transition-all duration-200 cursor-pointer font-medium px-2 py-1 rounded hover:bg-mobius-gray-100 border border-transparent hover:border-mobius-gray-200 text-left"
+                                  title={`Click to view ${entry.invoiceNumber}`}
+                                >
+                                  {entry.invoiceNumber}
+                                </button>
                               </td>
                               <td className="p-3 text-sm text-mobius-gray-700">
                                 {entry.type}
@@ -1810,71 +1850,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
 // Journal entries are now generated using the shared JournalEntryGenerator class
 // which includes all transaction types including TVS BILLS cases (40, 41, 42) with proper TDS handling
 
-// Helper function to get GL account code
-function getGLAccountCode(accountName: string) {
-  switch (accountName) {
-    case "Cash/Accounts Receivable":
-      return "1001";
-    case "Accounts Receivable":
-      return "1002";
-    case "Deferred Revenue":
-      return "2001";
-    case "SaaS Revenue":
-      return "4001";
-    case "Revenue":
-      return "4002";
-    case "Professional Fees":
-      return "1010";
-    case "Rent":
-      return "1011";
-    case "Computers":
-      return "1012";
-    case "Freight and Postage":
-      return "1013";
-    case "Rates & Taxes":
-      return "1014";
-    case "Input CGST":
-      return "1015";
-    case "Input SGST":
-      return "1016";
-    case "Input IGST":
-      return "1017";
-    case "TDS on Professional Charges":
-      return "1018";
-    case "TDS on Rent":
-      return "1019";
-    case "TDS on Commission":
-      return "1020";
-    case "Data Services":
-      return "1021";
-    case "Property Commission":
-      return "1022";
-    case "Digital Advertising":
-      return "1023";
-    case "JCSS & Associates LLP":
-      return "2001";
-    case "Sogo Computers Pvt Ltd":
-      return "2002";
-    case "Clayworks Spaces Technologies Pvt Ltd":
-      return "2003";
-    case "NSDL Database Management Ltd":
-      return "2004";
-    case "Billions United":
-      return "2005";
-    case "SEVENRAJ'S ESTATE AGENCY":
-      return "2006";
-    case "SN AY (Something New Around You)":
-      return "2007";
-    case "Software Subscriptions":
-      return "3001";
-    case "Brex Card":
-      return "3002";
-    case "Suspense Account":
-      return "3003";
-    default:
-      return "";
-  }
-}
+// getGLAccountCode function is now imported from src/lib/GLaccount.ts
 
 // Helper function to get total debit
 function getTotalDebit(journalEntry: any, transaction?: any) {
@@ -1948,1006 +1924,16 @@ function getVendorBalance(vendorName: string) {
 function getPastJournalEntries(vendorName: string) {
   console.log('Getting past entries for vendor:', vendorName);
   
-  // Mock data - in real app this would come from the backend
-  const pastEntries: { [key: string]: any[] } = {
-    "JCSS & Associates LLP": [
-      {
-        invoiceNumber: "ASO-I/108/25-26",
-        date: "2025-04-26",
-        amount: 86400,
-        type: "Professional Fees",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-001",
-        date: "2025-04-30",
-        amount: -86400,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "ASO-I/107/25-26",
-        date: "2025-03-26",
-        amount: 64800,
-        type: "Professional Fees",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-002",
-        date: "2025-03-31",
-        amount: -64800,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "ASO-I/106/25-26",
-        date: "2025-02-26",
-        amount: 86400,
-        type: "Professional Fees",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-003",
-        date: "2025-02-28",
-        amount: -86400,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "ASO-I/105/25-26",
-        date: "2025-01-26",
-        amount: 64800,
-        type: "Professional Fees",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-004",
-        date: "2025-01-31",
-        amount: -64800,
-        type: "Payment",
-        status: "Paid"
-      }
-    ],
-    "Sogo Computers Pvt Ltd": [
-      {
-        invoiceNumber: "Pcd/25-26/001142",
-        date: "2025-04-19",
-        amount: 480850,
-        type: "Computers",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-005",
-        date: "2025-04-25",
-        amount: -480850,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "Pcd/25-26/001141",
-        date: "2025-03-19",
-        amount: 96170,
-        type: "Computers",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-006",
-        date: "2025-03-25",
-        amount: -96170,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "SOGO-FREIGHT-003",
-        date: "2025-04-15",
-        amount: 5310,
-        type: "Freight and Postage",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-007",
-        date: "2025-04-20",
-        amount: -5310,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "Pcd/25-26/001140",
-        date: "2025-02-19",
-        amount: 192340,
-        type: "Computers",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-008",
-        date: "2025-02-25",
-        amount: -192340,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "SOGO-FREIGHT-004",
-        date: "2025-03-15",
-        amount: 5310,
-        type: "Freight and Postage",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-009",
-        date: "2025-03-20",
-        amount: -5310,
-        type: "Payment",
-        status: "Paid"
-      }
-    ],
-    "Sogo Computers": [
-      {
-        invoiceNumber: "Pcd/25-26/001142",
-        date: "2025-04-19",
-        amount: 480850,
-        type: "Computers",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-005",
-        date: "2025-04-25",
-        amount: -480850,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "Pcd/25-26/001141",
-        date: "2025-03-19",
-        amount: 96170,
-        type: "Computers",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-006",
-        date: "2025-03-25",
-        amount: -96170,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "SOGO-FREIGHT-003",
-        date: "2025-04-15",
-        amount: 5310,
-        type: "Freight and Postage",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-007",
-        date: "2025-04-20",
-        amount: -5310,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "Pcd/25-26/001140",
-        date: "2025-02-19",
-        amount: 192340,
-        type: "Computers",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-008",
-        date: "2025-02-25",
-        amount: -192340,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "SOGO-FREIGHT-004",
-        date: "2025-03-15",
-        amount: 5310,
-        type: "Freight and Postage",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-009",
-        date: "2025-03-20",
-        amount: -5310,
-        type: "Payment",
-        status: "Paid"
-      }
-    ],
-    "Sogo": [
-      {
-        invoiceNumber: "Pcd/25-26/001142",
-        date: "2025-04-19",
-        amount: 480850,
-        type: "Computers",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-005",
-        date: "2025-04-25",
-        amount: -480850,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "Pcd/25-26/001141",
-        date: "2025-03-19",
-        amount: 96170,
-        type: "Computers",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-006",
-        date: "2025-03-25",
-        amount: -96170,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "SOGO-FREIGHT-003",
-        date: "2025-04-15",
-        amount: 5310,
-        type: "Freight and Postage",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-007",
-        date: "2025-04-20",
-        amount: -5310,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "Pcd/25-26/001140",
-        date: "2025-02-19",
-        amount: 192340,
-        type: "Computers",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-008",
-        date: "2025-02-25",
-        amount: -192340,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "SOGO-FREIGHT-004",
-        date: "2025-03-15",
-        amount: 5310,
-        type: "Freight and Postage",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-009",
-        date: "2025-03-20",
-        amount: -5310,
-        type: "Payment",
-        status: "Paid"
-      }
-    ],
-    "Clayworks Spaces Technologies Pvt Ltd": [
-      {
-        invoiceNumber: "INV-25/26/0257",
-        date: "2025-04-08",
-        amount: 102660,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-010",
-        date: "2025-04-15",
-        amount: -102660,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "INV-25/26/0375",
-        date: "2025-03-08",
-        amount: 5251,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-011",
-        date: "2025-03-15",
-        amount: -5251,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "INV-25/26/0256",
-        date: "2025-03-08",
-        amount: 102660,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-012",
-        date: "2025-03-15",
-        amount: -102660,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "INV-25/26/0374",
-        date: "2025-02-08",
-        amount: 5251,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-013",
-        date: "2025-02-15",
-        amount: -5251,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "INV-25/26/0255",
-        date: "2025-02-08",
-        amount: 102660,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-014",
-        date: "2025-02-15",
-        amount: -102660,
-        type: "Payment",
-        status: "Paid"
-      }
-    ],
-    "Clayworks Spaces Technologies": [
-      {
-        invoiceNumber: "INV-25/26/0257",
-        date: "2025-04-08",
-        amount: 102660,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-010",
-        date: "2025-04-15",
-        amount: -102660,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "INV-25/26/0375",
-        date: "2025-03-08",
-        amount: 5251,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-011",
-        date: "2025-03-15",
-        amount: -5251,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "INV-25/26/0256",
-        date: "2025-03-08",
-        amount: 102660,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-012",
-        date: "2025-03-15",
-        amount: -102660,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "INV-25/26/0374",
-        date: "2025-02-08",
-        amount: 5251,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-013",
-        date: "2025-02-15",
-        amount: -5251,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "INV-25/26/0255",
-        date: "2025-02-08",
-        amount: 102660,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-014",
-        date: "2025-02-15",
-        amount: -102660,
-        type: "Payment",
-        status: "Paid"
-      }
-    ],
-    "Clayworks Spaces Pvt Ltd": [
-      {
-        invoiceNumber: "INV-25/26/0257",
-        date: "2025-04-08",
-        amount: 102660,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-010",
-        date: "2025-04-15",
-        amount: -102660,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "INV-25/26/0375",
-        date: "2025-03-08",
-        amount: 5251,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-011",
-        date: "2025-03-15",
-        amount: -5251,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "INV-25/26/0256",
-        date: "2025-03-08",
-        amount: 102660,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-012",
-        date: "2025-03-15",
-        amount: -102660,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "INV-25/26/0374",
-        date: "2025-02-08",
-        amount: 5251,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-013",
-        date: "2025-02-15",
-        amount: -5251,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "INV-25/26/0255",
-        date: "2025-02-08",
-        amount: 102660,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-014",
-        date: "2025-02-15",
-        amount: -102660,
-        type: "Payment",
-        status: "Paid"
-      }
-    ],
-    "Clayworks Spaces": [
-      {
-        invoiceNumber: "INV-25/26/0257",
-        date: "2025-04-08",
-        amount: 102660,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-010",
-        date: "2025-04-15",
-        amount: -102660,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "INV-25/26/0375",
-        date: "2025-03-08",
-        amount: 5251,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-011",
-        date: "2025-03-15",
-        amount: -5251,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "INV-25/26/0256",
-        date: "2025-03-08",
-        amount: 102660,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-012",
-        date: "2025-03-15",
-        amount: -102660,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "INV-25/26/0374",
-        date: "2025-02-08",
-        amount: 5251,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-013",
-        date: "2025-02-15",
-        amount: -5251,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "INV-25/26/0255",
-        date: "2025-02-08",
-        amount: 102660,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-014",
-        date: "2025-02-15",
-        amount: -102660,
-        type: "Payment",
-        status: "Paid"
-      }
-    ],
-    "Clayworks": [
-      {
-        invoiceNumber: "INV-25/26/0257",
-        date: "2025-04-08",
-        amount: 102660,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-010",
-        date: "2025-04-15",
-        amount: -102660,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "INV-25/26/0375",
-        date: "2025-03-08",
-        amount: 5251,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-011",
-        date: "2025-03-15",
-        amount: -5251,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "INV-25/26/0256",
-        date: "2025-03-08",
-        amount: 102660,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-012",
-        date: "2025-03-15",
-        amount: -102660,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "INV-25/26/0374",
-        date: "2025-02-08",
-        amount: 5251,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-013",
-        date: "2025-02-15",
-        amount: -5251,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "INV-25/26/0255",
-        date: "2025-02-08",
-        amount: 102660,
-        type: "Rent",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-014",
-        date: "2025-02-15",
-        amount: -102660,
-        type: "Payment",
-        status: "Paid"
-      }
-    ],
-    "NSDL Database Management Ltd": [
-      {
-        invoiceNumber: "RTA/04/2526/4103",
-        date: "2025-04-30",
-        amount: 11800,
-        type: "Rates & Taxes",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-015",
-        date: "2025-05-05",
-        amount: -11800,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "RTA/03/2526/4102",
-        date: "2025-03-31",
-        amount: 11800,
-        type: "Rates & Taxes",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-016",
-        date: "2025-04-05",
-        amount: -11800,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "RTA/02/2526/4101",
-        date: "2025-02-28",
-        amount: 11800,
-        type: "Rates & Taxes",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-017",
-        date: "2025-03-05",
-        amount: -11800,
-        type: "Payment",
-        status: "Paid"
-      }
-    ],
-    "NSDL Database Management": [
-      {
-        invoiceNumber: "RTA/04/2526/4103",
-        date: "2025-04-30",
-        amount: 11800,
-        type: "Rates & Taxes",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-015",
-        date: "2025-05-05",
-        amount: -11800,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "RTA/03/2526/4102",
-        date: "2025-03-31",
-        amount: 11800,
-        type: "Rates & Taxes",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-016",
-        date: "2025-04-05",
-        amount: -11800,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "RTA/02/2526/4101",
-        date: "2025-02-28",
-        amount: 11800,
-        type: "Rates & Taxes",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-017",
-        date: "2025-03-05",
-        amount: -11800,
-        type: "Payment",
-        status: "Paid"
-      }
-    ],
-    "NSDL": [
-      {
-        invoiceNumber: "RTA/04/2526/4103",
-        date: "2025-04-30",
-        amount: 11800,
-        type: "Rates & Taxes",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-015",
-        date: "2025-05-05",
-        amount: -11800,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "RTA/03/2526/4102",
-        date: "2025-03-31",
-        amount: 11800,
-        type: "Rates & Taxes",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-016",
-        date: "2025-04-05",
-        amount: -11800,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "RTA/02/2526/4101",
-        date: "2025-02-28",
-        amount: 11800,
-        type: "Rates & Taxes",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-017",
-        date: "2025-03-05",
-        amount: -11800,
-        type: "Payment",
-        status: "Paid"
-      }
-    ],
-    "Mahat Labs Pvt Ltd": [
-      {
-        invoiceNumber: "Pcd/25-26/001142",
-        date: "2025-04-19",
-        amount: 480850,
-        type: "Computers",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-018",
-        date: "2025-04-25",
-        amount: -480850,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "Pcd/25-26/001141",
-        date: "2025-03-19",
-        amount: 240425,
-        type: "Computers",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-019",
-        date: "2025-03-25",
-        amount: -240425,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "Pcd/25-26/001140",
-        date: "2025-02-19",
-        amount: 480850,
-        type: "Computers",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-020",
-        date: "2025-02-25",
-        amount: -480850,
-        type: "Payment",
-        status: "Paid"
-      }
-    ],
-    "Mahat Labs": [
-      {
-        invoiceNumber: "Pcd/25-26/001142",
-        date: "2025-04-19",
-        amount: 480850,
-        type: "Computers",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-018",
-        date: "2025-04-25",
-        amount: -480850,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "Pcd/25-26/001141",
-        date: "2025-03-19",
-        amount: 240425,
-        type: "Computers",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-019",
-        date: "2025-03-25",
-        amount: -240425,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "Pcd/25-26/001140",
-        date: "2025-02-19",
-        amount: 480850,
-        type: "Computers",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-020",
-        date: "2025-02-25",
-        amount: -480850,
-        type: "Payment",
-        status: "Paid"
-      }
-    ],
-    "Mahat": [
-      {
-        invoiceNumber: "Pcd/25-26/001142",
-        date: "2025-04-19",
-        amount: 480850,
-        type: "Computers",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-018",
-        date: "2025-04-25",
-        amount: -480850,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "Pcd/25-26/001141",
-        date: "2025-03-19",
-        amount: 240425,
-        type: "Computers",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-019",
-        date: "2025-03-25",
-        amount: -240425,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "Pcd/25-26/001140",
-        date: "2025-02-19",
-        amount: 480850,
-        type: "Computers",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-020",
-        date: "2025-02-25",
-        amount: -480850,
-        type: "Payment",
-        status: "Paid"
-      }
-    ],
-    "Wonderslate": [
-      {
-        invoiceNumber: "Pcd/2526/00158",
-        date: "2025-04-19",
-        amount: 96170,
-        type: "Computers",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-021",
-        date: "2025-04-25",
-        amount: -96170,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "Pcd/2526/00157",
-        date: "2025-03-19",
-        amount: 96170,
-        type: "Computers",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-022",
-        date: "2025-03-25",
-        amount: -96170,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "Pcd/2526/00156",
-        date: "2025-02-19",
-        amount: 96170,
-        type: "Computers",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-023",
-        date: "2025-02-25",
-        amount: -96170,
-        type: "Payment",
-        status: "Paid"
-      }
-    ],
-    "HEPL": [
-      {
-        invoiceNumber: "HEPL-LAPTOP-002",
-        date: "2025-04-19",
-        amount: 96170,
-        type: "Computers",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-024",
-        date: "2025-04-25",
-        amount: -96170,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "HEPL-LAPTOP-003",
-        date: "2025-03-19",
-        amount: 96170,
-        type: "Computers",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-025",
-        date: "2025-03-25",
-        amount: -96170,
-        type: "Payment",
-        status: "Paid"
-      },
-      {
-        invoiceNumber: "HEPL-LAPTOP-004",
-        date: "2025-02-19",
-        amount: 96170,
-        type: "Computers",
-        status: "Approved"
-      },
-      {
-        invoiceNumber: "PAYMENT-026",
-        date: "2025-02-25",
-        amount: -96170,
-        type: "Payment",
-        status: "Paid"
-      }
-    ]
-  };
-  
   // Try exact match first
-  let entries = pastEntries[vendorName];
+  let entries = PAST_JOURNAL_ENTRIES[vendorName];
   
   // If no exact match, try partial matching
   if (!entries) {
-    const vendorKeys = Object.keys(pastEntries);
+    const vendorKeys = Object.keys(PAST_JOURNAL_ENTRIES);
     for (const key of vendorKeys) {
       if (vendorName.toLowerCase().includes(key.toLowerCase()) || 
           key.toLowerCase().includes(vendorName.toLowerCase())) {
-        entries = pastEntries[key];
+        entries = PAST_JOURNAL_ENTRIES[key];
         console.log('Found partial match for entries:', key, 'for vendor:', vendorName);
         break;
       }

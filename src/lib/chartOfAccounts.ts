@@ -397,6 +397,59 @@ export const chartOfAccounts: ChartAccount[] = [
     credit: 150000
   },
 
+  // Long Term Liabilities
+  {
+    code: "2500",
+    name: "Long Term Liabilities",
+    type: "Liability",
+    category: "Liabilities",
+    parent: null,
+    status: "active",
+    isHeader: true
+  },
+  {
+    code: "2510",
+    name: "Long Term Loans",
+    type: "Liability",
+    category: "Liabilities",
+    parent: "2500",
+    status: "active",
+    isHeader: true
+  },
+  {
+    code: "2511",
+    name: "Bank Loan",
+    type: "Liability",
+    category: "Liabilities",
+    parent: "2510",
+    status: "active",
+    isHeader: false,
+    balance: -500000,
+    debit: 0,
+    credit: 500000
+  },
+  {
+    code: "2520",
+    name: "Lease Obligations",
+    type: "Liability",
+    category: "Liabilities",
+    parent: "2500",
+    status: "active",
+    isHeader: true
+  },
+  {
+    code: "2521",
+    name: "Office Lease",
+    type: "Liability",
+    category: "Liabilities",
+    parent: "2520",
+    status: "active",
+    isHeader: false,
+    balance: -120000,
+    debit: 0,
+    credit: 120000
+  },
+
   // Equity
   {
     code: "3000",
@@ -523,7 +576,10 @@ export const chartOfAccounts: ChartAccount[] = [
     category: "Expenses",
     parent: null,
     status: "active",
-    isHeader: true
+    isHeader: false,
+    balance: 0,
+    debit: 0,
+    credit: 0
   },
   {
     code: "5100",

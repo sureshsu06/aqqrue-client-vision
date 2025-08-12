@@ -12,13 +12,15 @@ import {
   Search, 
   Bell, 
   User,
-  BookOpen,
+  FileText,
   Calendar,
-  HardDrive,
-  Menu
+  Calculator,
+  Menu,
+  CheckCircle2
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
+import { CloseStatus } from "@/close/CloseChecklist";
 
 interface LayoutProps {
   children: ReactNode;
@@ -43,10 +45,11 @@ export const useClientContext = () => {
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Exceptions", href: "/exceptions", icon: AlertTriangle },
-  { name: "Ledger", href: "/ledger", icon: BookOpen },
+  { name: "Ledger", href: "/ledger", icon: FileText },
   { name: "Schedules", href: "/schedules", icon: Calendar },
-  { name: "Fixed Assets", href: "/fixed-assets", icon: HardDrive },
+  { name: "Fixed Assets", href: "/fixed-assets", icon: Building },
   { name: "Reporting", href: "/reporting", icon: BarChart3 },
+  { name: "Close Checklist", href: "/close-checklist", icon: CheckCircle2 },
 ];
 
 const bottomNavigation = [
@@ -211,6 +214,7 @@ export function Layout({ children }: LayoutProps) {
             </div>
 
             <div className="flex items-center space-x-4">
+              <CloseStatus />
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-mobius-gray-500 w-4 h-4" />
                 <Input 

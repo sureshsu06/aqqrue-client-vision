@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Filter, Upload, Plus } from "lucide-react";
+import { Filter, Upload, Square, CheckSquare } from "lucide-react";
 
 interface InboxHeaderProps {
   unreadCount: number;
@@ -20,6 +20,8 @@ interface InboxHeaderProps {
   onFilterChange: (filter: string) => void;
   onStatusChange: (status: string) => void;
   onStatusOptionChange: (statusOption: string) => void;
+  onSelectAllVisible: () => void;
+  allVisibleSelected: boolean;
 }
 
 export function InboxHeader({ 
@@ -31,7 +33,9 @@ export function InboxHeader({
   selectedStatusOption,
   onFilterChange,
   onStatusChange,
-  onStatusOptionChange
+  onStatusOptionChange,
+  onSelectAllVisible,
+  allVisibleSelected
 }: InboxHeaderProps) {
   const progressPercent = Math.round((doneCount / totalCount) * 100);
 
@@ -40,6 +44,35 @@ export function InboxHeader({
       {/* Single toolbar with everything */}
       <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center space-x-1">
+          {/* Select All Visible Button */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className={`h-8 w-8 p-0 rounded-xl ${
+                    allVisibleSelected 
+                      ? "bg-mobius-blue hover:bg-mobius-blue/90" 
+                      : "hover:bg-mobius-gray-100"
+                  }`}
+                  onClick={onSelectAllVisible}
+                >
+                  {allVisibleSelected ? (
+                    <CheckSquare className="w-4 h-4 text-white" />
+                  ) : (
+                    <Square className="w-4 h-4 text-mobius-gray-600" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Select All</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <div className="w-px h-6 bg-mobius-gray-200 mx-2" />
+
           {/* Status Selection Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -90,21 +123,6 @@ export function InboxHeader({
               </TooltipTrigger>
               <TooltipContent>
                 <p>Upload</p>
-              </TooltipContent>
-            </Tooltip>
-            
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-8 w-8 p-0 hover:bg-mobius-gray-100 rounded"
-                >
-                  <Plus className="w-4 h-4 text-mobius-gray-600" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Add Transaction</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

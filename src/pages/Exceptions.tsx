@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { usePanelSizes } from "@/hooks/use-panel-sizes";
+import { useCloseProgress } from "@/close/closeProgress";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -161,6 +162,7 @@ export function ExceptionsInbox({ onTransactionSelect }: ExceptionsInboxProps) {
   const [selectedTransaction, setSelectedTransaction] = useState<ExceptionTransaction | null>(null);
   const { toast } = useToast();
   const { sizes, updateSizes, resetSizes } = usePanelSizes();
+  const { emit } = useCloseProgress();
 
   const filteredTransactions = mockExceptionTransactions.filter(transaction => {
     if (selectedStatus === "all") return true;
@@ -175,6 +177,11 @@ export function ExceptionsInbox({ onTransactionSelect }: ExceptionsInboxProps) {
       setSelectedTransaction(filteredTransactions[0]);
     }
   }, [filteredTransactions, selectedTransaction]);
+
+  // Emit exceptions status whenever filtered transactions change
+  useEffect(() => {
+    emit({ type: "EXCEPTIONS_STATUS", open: filteredTransactions.length });
+  }, [filteredTransactions, emit]);
 
   const duplicateCount = mockExceptionTransactions.filter(t => t.exceptionType === "duplicate").length;
   const noInvoiceCount = mockExceptionTransactions.filter(t => t.exceptionType === "no-invoice").length;
