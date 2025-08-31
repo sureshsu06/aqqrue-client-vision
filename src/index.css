@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom utility classes */
+.bg-gray-25 {
+  background-color: #fafafa;
+}
+
 /* Prevent body scrolling to ensure proper layout */
 html, body {
   height: 100%;

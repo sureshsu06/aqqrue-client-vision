@@ -16,7 +16,9 @@ import {
   Calendar,
   Calculator,
   Menu,
-  CheckCircle2
+  CheckCircle2,
+  Command,
+  Inbox
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -44,6 +46,9 @@ export const useClientContext = () => {
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "CFO Daily Inbox", href: "/cfo-daily-inbox", icon: Inbox },
+  { name: "Financial Command Center", href: "/financial-command-center", icon: Command },
+  { name: "Plan vs Actuals", href: "/plan-vs-actuals", icon: BarChart3 },
   { name: "Exceptions", href: "/exceptions", icon: AlertTriangle },
   { name: "Ledger", href: "/ledger", icon: FileText },
   { name: "Schedules", href: "/schedules", icon: Calendar },
@@ -173,7 +178,7 @@ export function Layout({ children }: LayoutProps) {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-screen">
         {/* Top Header */}
         <header className="bg-white border-b border-mobius-gray-100 px-6 py-4 flex-shrink-0">
           <div className="flex items-center justify-between">
@@ -233,7 +238,7 @@ export function Layout({ children }: LayoutProps) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-hidden">
+        <main className="flex-1 overflow-auto">
           <ClientContext.Provider value={{ selectedClient, setSelectedClient }}>
             {children}
           </ClientContext.Provider>
