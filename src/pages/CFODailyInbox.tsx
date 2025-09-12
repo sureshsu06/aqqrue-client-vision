@@ -26,10 +26,7 @@ const CFODailyInbox = () => {
   const [sortField, setSortField] = useState<'priorityScore' | 'dueTime' | 'impact' | 'newest'>('priorityScore');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
-  const { sizes, updateSizes } = usePanelSizes({
-    inbox: 40,
-    detail: 60
-  });
+  const { sizes, updateSizes } = usePanelSizes();
 
   // Filter and sort items
   const filteredAndSortedItems = mockCFOInboxItems
@@ -113,11 +110,12 @@ const CFODailyInbox = () => {
         <PanelGroup 
           direction="horizontal" 
           className="h-full"
-          onLayout={(sizes) => {
-            if (sizes.length >= 2) {
+          onLayout={(panelSizes) => {
+            if (panelSizes.length >= 2) {
               updateSizes({
-                inbox: sizes[0],
-                detail: sizes[1]
+                ...sizes,
+                inbox: panelSizes[0],
+                detail: panelSizes[1]
               });
             }
           }}

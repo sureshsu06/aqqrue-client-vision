@@ -1,4 +1,4 @@
-import { CFOInboxItem } from '@/types/cfoInbox';
+import { CFOInboxItem, CFOInboxStats } from '@/types/cfoInbox';
 
 export const mockCFOInboxItems: CFOInboxItem[] = [
   {
@@ -66,7 +66,7 @@ export const mockCFOInboxItems: CFOInboxItem[] = [
     confidence: 0.88,
     priorityScore: 89,
     status: "new",
-    owner: { suggested: "sarah@company.com" },
+    owner: { suggested: "Sarah@company.com" },
     why: "Contract expires Sep 14; health score 67; 2 P1 support tickets open.",
     assumptions: ["No contract changes", "Standard renewal terms"],
     sources: [
@@ -122,8 +122,8 @@ export const mockCFOInboxItems: CFOInboxItem[] = [
     confidence: 0.92,
     priorityScore: 76,
     status: "new",
-    owner: { suggested: "devops@company.com" },
-    why: "EC2 instances 35% over-provisioned; RDS clusters not optimized; new data pipeline deployed.",
+    owner: { suggested: "Devops@company.com" },
+    why: "AWS costs have increased significantly due to unoptimized EC2 instances and increased data transfer costs. The current infrastructure is not aligned with actual usage patterns, leading to unnecessary expenses.",
     assumptions: ["Usage patterns continue", "No immediate rollback"],
     sources: [
       { 
@@ -220,7 +220,7 @@ export const mockCFOInboxItems: CFOInboxItem[] = [
     confidence: 0.89,
     priorityScore: 68,
     status: "new",
-    owner: { suggested: "hr@company.com" },
+    owner: { suggested: "HR@company.com" },
     why: "Contractor spend $275K vs $200K budget; 3 new contractors added without approval.",
     assumptions: ["Contractors needed for project delivery", "No immediate termination"],
     sources: [
@@ -306,7 +306,7 @@ export const mockCFOInboxItems: CFOInboxItem[] = [
     id: "item_month_end_overdue",
     createdAt: "2025-08-31T07:30:00Z",
     category: "Close",
-    title: "Month-end close task overdue: Bank recon (APAC entity)",
+    title: "Month-end close task overdue: Bank recon APAC",
     entity: "APAC Inc.",
     impact: { 
       amount: 0, 
@@ -318,7 +318,7 @@ export const mockCFOInboxItems: CFOInboxItem[] = [
     confidence: 0.94,
     priorityScore: 82,
     status: "in_progress",
-    owner: { suggested: "controller@company.com" },
+    owner: { suggested: "Mike@company.com" },
     why: "Bank reconciliation overdue by 2 days; 3 outstanding items need resolution.",
     assumptions: ["All supporting docs available", "No new transactions"],
     sources: [
@@ -367,8 +367,8 @@ export const mockCFOInboxItems: CFOInboxItem[] = [
     confidence: 0.91,
     priorityScore: 74,
     status: "new",
-    owner: { suggested: "treasury@company.com" },
-    why: "€3.2M receivables due in 30-60 days; no hedge protection; EUR/USD volatility high.",
+    owner: { suggested: "Treasury@company.com" },
+    why: "",
     assumptions: ["Receivables will be collected", "No immediate hedge needed"],
     sources: [
       { 
@@ -416,7 +416,7 @@ export const mockCFOInboxItems: CFOInboxItem[] = [
     confidence: 0.97,
     priorityScore: 66,
     status: "new",
-    owner: { suggested: "tax@company.com" },
+    owner: { suggested: "Tax@company.com" },
     why: "UK VAT return due Sep 5; all data prepared; ready for filing.",
     assumptions: ["No last-minute changes", "Filing system operational"],
     sources: [
@@ -465,7 +465,7 @@ export const mockCFOInboxItems: CFOInboxItem[] = [
     confidence: 0.93,
     priorityScore: 71,
     status: "new",
-    owner: { suggested: "billing@company.com" },
+    owner: { suggested: "Billing@company.com" },
     why: "Credit memo $120K issued for service quality issues; customer satisfaction at risk.",
     assumptions: ["Credit memo justified", "Service issues resolved"],
     sources: [

@@ -4,12 +4,14 @@ interface PanelSizes {
   inbox: number;
   document: number;
   creditCard: number;
+  detail: number;
 }
 
 const DEFAULT_SIZES: PanelSizes = {
   inbox: 20,
   document: 40,
   creditCard: 40,
+  detail: 40,
 };
 
 const STORAGE_KEY = 'mobius-panel-sizes';

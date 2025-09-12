@@ -16,6 +16,15 @@ const formatCurrency = (amount: number, currency: string) => {
   return `${currency} ${amount.toFixed(0)}`;
 };
 
+const formatVariance = (amount: number, currency: string) => {
+  if (Math.abs(amount) >= 1000000) {
+    return `${currency} ${(amount / 1000000).toFixed(1)}mm`;
+  } else if (Math.abs(amount) >= 1000) {
+    return `${currency} ${(amount / 1000).toFixed(0)}K`;
+  }
+  return `${currency} ${amount.toFixed(0)}`;
+};
+
 const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
   switch (trend) {
     case 'up':
@@ -61,7 +70,7 @@ export const KPISummaryCards = ({ kpis }: KPISummaryCardsProps) => {
                 Plan: {formatCurrency(kpi.plan, kpi.currency)}
               </div>
               <div className="text-xs text-gray-400">
-                Variance: {formatCurrency(kpi.variance, kpi.currency)}
+                Variance: {formatVariance(kpi.variance, kpi.currency)}
               </div>
             </div>
           </CardContent>

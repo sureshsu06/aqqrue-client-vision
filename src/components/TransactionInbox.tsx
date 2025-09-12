@@ -1082,12 +1082,13 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
         <PanelGroup 
           direction="horizontal" 
           className="h-full"
-          onLayout={(sizes) => {
-            if (sizes.length >= 3) {
+          onLayout={(panelSizes) => {
+            if (panelSizes.length >= 3) {
               updateSizes({
-                inbox: sizes[0],
-                document: sizes[1],
-                creditCard: sizes[2]
+                ...sizes,
+                inbox: panelSizes[0],
+                document: panelSizes[1],
+                creditCard: panelSizes[2]
               });
             }
           }}

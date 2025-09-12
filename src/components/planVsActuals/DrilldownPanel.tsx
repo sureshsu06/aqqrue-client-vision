@@ -28,6 +28,15 @@ const formatCurrency = (amount: number) => {
   return `$${amount.toFixed(0)}`;
 };
 
+const formatVariance = (amount: number) => {
+  if (Math.abs(amount) >= 1000000) {
+    return `$${(amount / 1000000).toFixed(1)}mm`;
+  } else if (Math.abs(amount) >= 1000) {
+    return `$${(amount / 1000).toFixed(0)}K`;
+  }
+  return `$${amount.toFixed(0)}`;
+};
+
 const formatValue = (amount: number, unit: string) => {
   if (unit === 'USD') {
     return formatCurrency(amount);

@@ -254,8 +254,7 @@ export function CFOInboxList({
                               <div
             key={item.id}
             className={cn(
-              "p-4 transition-colors cursor-pointer border-l-4 relative bg-white",
-              item.status === "new" ? "border-l-mobius-blue" : "border-l-transparent",
+              "p-3 transition-colors cursor-pointer relative bg-white",
               selectedItem?.id === item.id ? "bg-mobius-blue/10" : "hover:bg-mobius-gray-50"
             )}
             onClick={() => onItemSelect(item)}
@@ -272,22 +271,16 @@ export function CFOInboxList({
               </div>
               
               {/* Category Icon */}
-              <div className="flex flex-col items-center space-y-2">
+              <div className="flex flex-col items-center space-y-1">
                 {/* Category Icon */}
-                <div className="w-8 h-8 bg-mobius-gray-100 rounded-lg flex items-center justify-center">
-                  {getCategoryIcon(item.category)}
-                </div>
-                {/* Status Icon */}
-                <div className="absolute -top-1 -right-1 z-10">
-                  {getStatusIcon(item.status)}
-                </div>
+                {getCategoryIcon(item.category)}
               </div>
 
                         <div className="flex-1 min-w-0">
                           {/* First line: Bold Title */}
                           <div className="flex items-start justify-between">
                             <h3 className={cn(
-                              "text-sm font-bold leading-tight",
+                              "text-xs font-semibold leading-tight",
                               item.status === "new" ? "text-mobius-gray-900" : "text-mobius-gray-700"
                             )}>
                               {item.title}
@@ -326,34 +319,19 @@ export function CFOInboxList({
                             </div>
                           </div>
                           
-                          {/* Second line: Impact and Urgency Pills */}
-                          <div className="mt-2 flex items-center space-x-2">
-                            {/* Impact Pill */}
-                            <span className={cn(
-                              "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
-                              item.impact.direction === "negative" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
-                            )}>
-                              {formatCurrency(item.impact.amount, item.impact.currency)} {item.impact.metric}
-                            </span>
-                            
-                            {/* Urgency Pill */}
-                            <span className={cn(
-                              "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
-                              item.urgency.isOverdue ? "bg-red-100 text-red-700" : 
-                              item.urgency.dueInDays <= 7 ? "bg-amber-100 text-amber-700" : 
-                              "bg-gray-100 text-gray-600"
-                            )}>
-                              {formatDueTime(item.urgency.dueInDays, item.urgency.isOverdue)}
-                            </span>
+                          {/* Second line: Executive Summary */}
+                          <div className="mt-1.5">
+                            <p className="text-xs text-mobius-gray-600 leading-relaxed">
+                              {item.impact.direction === "negative" ? "Risk" : "Opportunity"}: {formatCurrency(item.impact.amount, item.impact.currency)} {item.impact.metric.toLowerCase()} • {formatDueTime(item.urgency.dueInDays, item.urgency.isOverdue)} • {Math.round(item.confidence * 100)}% confidence
+                            </p>
                           </div>
 
                           {/* Third line: Context and Metadata */}
-                          <div className="mt-2 flex items-center justify-between">
+                          <div className="mt-1.5 flex items-center justify-between">
                             <div className="flex items-center space-x-3">
                               <span className="text-xs text-mobius-gray-600">
                                 {item.entity}
                               </span>
-                              <span className="text-mobius-gray-400">•</span>
                               <span className="text-xs text-mobius-gray-600">
                                 {item.owner.suggested.split('@')[0]}
                               </span>
@@ -366,17 +344,11 @@ export function CFOInboxList({
                             </div>
                             <div className="flex items-center space-x-2">
                               <span className="text-xs text-mobius-gray-500 bg-mobius-gray-100 px-2 py-1 rounded">
-                                {item.dataFreshness}
+                                {item.sources[0]?.lastUpdated || item.dataFreshness}
                               </span>
                             </div>
                           </div>
 
-                          {/* Fourth line: Why this is here */}
-                          <div className="mt-2">
-                            <p className="text-xs text-mobius-gray-500 line-clamp-2 leading-relaxed">
-                              {item.why}
-                            </p>
-                          </div>
                         </div>
                       </div>
                     </div>

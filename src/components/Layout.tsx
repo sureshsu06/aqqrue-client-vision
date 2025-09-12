@@ -18,7 +18,9 @@ import {
   Menu,
   CheckCircle2,
   Command,
-  Inbox
+  Inbox,
+  MessageSquare,
+  Database
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -47,6 +49,8 @@ export const useClientContext = () => {
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "CFO Daily Inbox", href: "/cfo-daily-inbox", icon: Inbox },
+  { name: "Chat with Financials", href: "/chat-with-financials", icon: MessageSquare },
+  { name: "Data Classification", href: "/data-classification", icon: Database },
   { name: "Financial Command Center", href: "/financial-command-center", icon: Command },
   { name: "Plan vs Actuals", href: "/plan-vs-actuals", icon: BarChart3 },
   { name: "Exceptions", href: "/exceptions", icon: AlertTriangle },

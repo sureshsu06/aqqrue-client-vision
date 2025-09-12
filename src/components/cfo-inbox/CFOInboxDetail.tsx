@@ -59,11 +59,9 @@ export function CFOInboxDetail({ item, onAction }: CFOInboxDetailProps) {
           );
         case 'Spend': 
           return (
-            <img 
-              src="/logos/data-sources/Amazon_Web_Services_Logo.svg.png" 
-              alt="AWS" 
-              className="w-8 h-8 object-contain"
-            />
+            <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
+              <span className="text-xs font-medium text-gray-600">$</span>
+            </div>
           );
         case 'People': 
           return (
@@ -111,7 +109,7 @@ export function CFOInboxDetail({ item, onAction }: CFOInboxDetailProps) {
           <div className="flex items-center space-x-3">
             {getUrgencyIcon()}
             <div>
-              <h1 className="text-base font-bold text-mobius-gray-900 mb-2">
+              <h1 className="text-sm font-semibold text-mobius-gray-900 mb-2">
                 {item.title}
               </h1>
               <div className="flex items-center space-x-3">
@@ -152,11 +150,6 @@ export function CFOInboxDetail({ item, onAction }: CFOInboxDetailProps) {
               )}
             </p>
             <div className="flex items-center space-x-2 mt-2">
-              <img
-                src="/logos/data-sources/4844517.png"
-                alt="Data Source"
-                className="h-4 w-4"
-              />
               <span className="text-xs text-blue-700">Data powered by {item.sources[0]?.system || 'multiple sources'}</span>
             </div>
           </div>
@@ -169,12 +162,12 @@ export function CFOInboxDetail({ item, onAction }: CFOInboxDetailProps) {
             </p>
           </div>
           
-          {/* Next Steps */}
+          {/* Aqqrue Actions */}
           <div>
             <p className="text-xs text-blue-800 leading-relaxed">
-              <span className="font-medium">Next Steps:</span> Assign to {item.owner.suggested.split('@')[0]} for immediate action. 
-              {item.urgency.isOverdue && ' This item requires urgent attention as it is already overdue.'}
-              {item.urgency.dueInDays <= 7 && ` Due within ${item.urgency.dueInDays} days.`}
+              <span className="font-medium">Aqqrue:</span> Automatically flagged this item based on threshold analysis and assigned to {item.owner.suggested.split('@')[0]}. 
+              {item.urgency.isOverdue && ' Escalated due to overdue status.'}
+              {item.urgency.dueInDays <= 7 && ` Scheduled for review within ${item.urgency.dueInDays} days.`}
             </p>
           </div>
         </div>

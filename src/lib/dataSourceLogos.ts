@@ -41,6 +41,13 @@ export const dataSourceLogos: DataSourceLogo[] = [
     logoPath: '/logos/data-sources/Amazon_Web_Services_Logo.svg.png',
     altText: 'AWS',
     description: 'Cloud infrastructure costs'
+  },
+  {
+    id: 'quickbooks',
+    name: 'QuickBooks',
+    logoPath: '/logos/data-sources/quickbooks-2.svg',
+    altText: 'QuickBooks',
+    description: 'Accounting and financial data'
   }
 ];
 
@@ -65,6 +72,9 @@ export const getDataSourceLogoBySource = (source: string): DataSourceLogo | unde
   }
   if (sourceLower.includes('aws')) {
     return getDataSourceLogo('aws');
+  }
+  if (sourceLower.includes('quickbooks') || sourceLower.includes('qb')) {
+    return getDataSourceLogo('quickbooks');
   }
   
   return undefined;

@@ -18,6 +18,15 @@ const formatCurrency = (amount: number) => {
   return `$${amount.toFixed(0)}`;
 };
 
+const formatVariance = (amount: number) => {
+  if (Math.abs(amount) >= 1000000) {
+    return `$${(amount / 1000000).toFixed(1)}mm`;
+  } else if (Math.abs(amount) >= 1000) {
+    return `$${(amount / 1000).toFixed(0)}K`;
+  }
+  return `$${amount.toFixed(0)}`;
+};
+
 const formatPercentage = (amount: number) => {
   return `${amount.toFixed(1)}%`;
 };
@@ -117,13 +126,105 @@ export const PnLTable = ({ pnlLines }: PnLTableProps) => {
     return amount.toString();
   };
 
+  const getSectionSummary = (section: string, totals: any) => {
+    const variancePercent = totals.variancePercent;
+    const variance = totals.variance;
+    const actual = totals.actual;
+    const plan = totals.plan;
+    
+    // Helper function to get variance magnitude description
+    const getVarianceMagnitude = (percent: number) => {
+      const absPercent = Math.abs(percent);
+      if (absPercent < 1) return 'minimal';
+      if (absPercent < 3) return 'moderate';
+      if (absPercent < 5) return 'significant';
+      if (absPercent < 10) return 'substantial';
+      return 'major';
+    };
+    
+    // Helper function to format variance amount
+    const formatVarianceAmount = (variance: number) => {
+      const absVariance = Math.abs(variance);
+      if (absVariance >= 1000000) {
+        return `$${(absVariance / 1000000).toFixed(1)}mm`;
+      } else if (absVariance >= 1000) {
+        return `$${(absVariance / 1000).toFixed(0)}K`;
+      }
+      return `$${absVariance.toFixed(0)}`;
+    };
+    
+    const magnitude = getVarianceMagnitude(variancePercent);
+    const varianceAmount = formatVarianceAmount(variance);
+    
+    switch (section) {
+      case 'Revenue':
+        if (Math.abs(variancePercent) < 1) {
+          return 'Revenue performance closely aligned with plan, indicating strong forecasting accuracy';
+        } else if (variancePercent > 0) {
+          return `Revenue exceeded plan by ${Math.abs(variancePercent).toFixed(1)}% (${varianceAmount} above target) - ${magnitude} outperformance`;
+        } else {
+          return `Revenue below plan by ${Math.abs(variancePercent).toFixed(1)}% (${varianceAmount} shortfall) - ${magnitude} underperformance`;
+        }
+      case 'COGS':
+        if (Math.abs(variancePercent) < 1) {
+          return 'Cost of goods sold precisely aligned with budget expectations';
+        } else if (variancePercent > 0) {
+          return `COGS exceeded budget by ${Math.abs(variancePercent).toFixed(1)}% (${varianceAmount} over) - ${magnitude} cost pressure`;
+        } else {
+          return `COGS under budget by ${Math.abs(variancePercent).toFixed(1)}% (${varianceAmount} savings) - ${magnitude} cost efficiency`;
+        }
+      case 'Gross Profit':
+        if (Math.abs(variancePercent) < 1) {
+          return 'Gross profit margin maintained at target levels as expected';
+        } else if (variancePercent > 0) {
+          return `Gross profit improved by ${Math.abs(variancePercent).toFixed(1)}% (${varianceAmount} increase) - ${magnitude} margin expansion`;
+        } else {
+          return `Gross profit declined by ${Math.abs(variancePercent).toFixed(1)}% (${varianceAmount} decrease) - ${magnitude} margin compression`;
+        }
+      case 'Operating Expenses':
+        if (Math.abs(variancePercent) < 1) {
+          return 'Operating expenses tightly controlled within budget parameters';
+        } else if (variancePercent > 0) {
+          return `Operating expenses exceeded budget by ${Math.abs(variancePercent).toFixed(1)}% (${varianceAmount} over) - ${magnitude} overspend`;
+        } else {
+          return `Operating expenses under budget by ${Math.abs(variancePercent).toFixed(1)}% (${varianceAmount} savings) - ${magnitude} cost control`;
+        }
+      case 'Operating Income':
+        if (Math.abs(variancePercent) < 1) {
+          return 'Operating income performance on track with strategic targets';
+        } else if (variancePercent > 0) {
+          return `Operating income above target by ${Math.abs(variancePercent).toFixed(1)}% (${varianceAmount} increase) - ${magnitude} operational outperformance`;
+        } else {
+          return `Operating income below target by ${Math.abs(variancePercent).toFixed(1)}% (${varianceAmount} shortfall) - ${magnitude} operational challenge`;
+        }
+      case 'Other Income/Expense':
+        if (Math.abs(variancePercent) < 1) {
+          return 'Other income and expense items performing as anticipated';
+        } else if (variancePercent > 0) {
+          return `Other income favorable by ${Math.abs(variancePercent).toFixed(1)}% (${varianceAmount} benefit) - ${magnitude} positive variance`;
+        } else {
+          return `Other expenses unfavorable by ${Math.abs(variancePercent).toFixed(1)}% (${varianceAmount} impact) - ${magnitude} negative variance`;
+        }
+      case 'Net Income':
+        if (Math.abs(variancePercent) < 1) {
+          return 'Net income performance precisely aligned with financial plan';
+        } else if (variancePercent > 0) {
+          return `Net income exceeded plan by ${Math.abs(variancePercent).toFixed(1)}% (${varianceAmount} above target) - ${magnitude} bottom-line outperformance`;
+        } else {
+          return `Net income below plan by ${Math.abs(variancePercent).toFixed(1)}% (${varianceAmount} shortfall) - ${magnitude} bottom-line underperformance`;
+        }
+      default:
+        return 'Section performance analysis with detailed variance assessment';
+    }
+  };
+
   const renderSectionHeader = (section: string) => {
     const sectionLines = pnlLines.filter(line => line.section === section);
     const totals = calculateSectionTotals(sectionLines);
     
     return (
     <TableRow key={`section-${section}`} className="border-t border-gray-200">
-        <TableCell className="font-medium text-gray-700 py-3">
+        <TableCell className="font-medium text-gray-700 py-2">
         <div className="flex items-center space-x-2">
           <button
             onClick={() => toggleSection(section)}
@@ -139,21 +240,21 @@ export const PnLTable = ({ pnlLines }: PnLTableProps) => {
           <span>{section}</span>
         </div>
       </TableCell>
-        <TableCell className="text-right font-medium text-gray-700">
+        <TableCell className="text-right font-medium text-gray-700 py-1">
           {formatValue(totals.plan, 'USD')}
         </TableCell>
-        <TableCell className="text-right font-medium text-gray-700">
+        <TableCell className="text-right font-medium text-gray-700 py-1">
           {formatValue(totals.actual, 'USD')}
         </TableCell>
-        <TableCell className="text-right font-medium text-gray-700">
-          {totals.variance >= 0 ? '+' : ''}{formatValue(totals.variance, 'USD')}
+        <TableCell className="text-right font-medium text-gray-700 py-1">
+          {totals.variance >= 0 ? '+' : ''}{formatVariance(totals.variance)}
         </TableCell>
-        <TableCell className="text-right font-medium text-gray-700">
+        <TableCell className="text-right font-medium text-gray-700 py-1">
           {totals.variancePercent >= 0 ? '+' : ''}{totals.variancePercent.toFixed(1)}%
         </TableCell>
-        <TableCell className="text-xs text-gray-600">
+        <TableCell className="text-xs text-gray-600 py-1">
           <div className="text-left text-xs text-gray-500">
-            {collapsedSections.has(section) ? 'Click to expand for details' : 'Section summary'}
+            {collapsedSections.has(section) ? 'Click to expand for details' : getSectionSummary(section, totals)}
           </div>
         </TableCell>
     </TableRow>
@@ -162,7 +263,7 @@ export const PnLTable = ({ pnlLines }: PnLTableProps) => {
 
   const renderSubsectionHeader = (subsection: string, isFirst: boolean = false) => (
     <TableRow key={`subsection-${subsection}`} className="border-t border-gray-100">
-      <TableCell colSpan={6} className="font-medium text-gray-600 py-2 pl-8">
+      <TableCell colSpan={6} className="font-medium text-gray-600 py-1 pl-8">
         <div className="flex items-center space-x-2">
           <button
             onClick={() => toggleSubsection(subsection)}
@@ -644,7 +745,7 @@ export const PnLTable = ({ pnlLines }: PnLTableProps) => {
             <TableHead className="text-right text-xs">Plan</TableHead>
             <TableHead className="text-right text-xs">Actual</TableHead>
             <TableHead className="text-right text-xs">Variance</TableHead>
-            <TableHead className="text-right text-xs">% Variance</TableHead>
+            <TableHead className="text-right text-xs w-24">%</TableHead>
             <TableHead className="w-[500px] text-xs">Analysis</TableHead>
           </TableRow>
         </TableHeader>
@@ -673,7 +774,7 @@ export const PnLTable = ({ pnlLines }: PnLTableProps) => {
                           {subsectionLines.map((line) => (
                                 <React.Fragment key={line.key}>
                                   <TableRow className={getRowStyle(line)}>
-                              <TableCell className={getRowIndentation(line)}>
+                              <TableCell className={`${getRowIndentation(line)} py-1`}>
                                 <div className="flex items-center space-x-2">
                                         {shouldShowExpandableData(line.name.trim()) && (
                                           <button
@@ -740,19 +841,19 @@ export const PnLTable = ({ pnlLines }: PnLTableProps) => {
                               </div>
                             )}
                           </TableCell>
-                          <TableCell className="text-right font-medium">
+                          <TableCell className="text-right font-medium py-1">
                             {formatValue(line.plan, line.unit)}
                           </TableCell>
-                          <TableCell className="text-right font-medium">
+                          <TableCell className="text-right font-medium py-1">
                             {formatValue(line.actual, line.unit)}
                           </TableCell>
-                                                               <TableCell className="text-right font-medium">
-                                       {line.variance >= 0 ? '+' : ''}{formatValue(line.variance, line.unit)}
+                                                               <TableCell className="text-right font-medium py-1">
+                                       {line.variance >= 0 ? '+' : ''}{formatVariance(line.variance)}
                                      </TableCell>
-                                     <TableCell className="text-right font-medium">
+                                     <TableCell className="text-right font-medium py-1">
                                        {line.variancePercent >= 0 ? '+' : ''}{line.variancePercent.toFixed(1)}%
                                      </TableCell>
-                          <TableCell className="text-xs text-gray-600">
+                          <TableCell className="text-xs text-gray-600 py-1">
                             {line.drilldownData?.explanation ? (
                               <div className="text-left">
                                 <div className="font-medium mb-1 text-xs">Key Drivers:</div>
@@ -901,22 +1002,22 @@ export const PnLTable = ({ pnlLines }: PnLTableProps) => {
                     })}
                     {/* Section Totals */}
                     <TableRow className="border-t-2 border-gray-300 bg-gray-50">
-                      <TableCell className="font-medium text-gray-800 pl-4">
+                      <TableCell className="font-medium text-gray-800 pl-4 py-1">
                         {section} Total
                       </TableCell>
-                      <TableCell className="text-right font-medium text-gray-800">
+                      <TableCell className="text-right font-medium text-gray-800 py-1">
                         {formatValue(calculateSectionTotals(sectionLines).plan, 'USD')}
                       </TableCell>
-                      <TableCell className="text-right font-medium text-gray-800">
+                      <TableCell className="text-right font-medium text-gray-800 py-1">
                         {formatValue(calculateSectionTotals(sectionLines).actual, 'USD')}
                       </TableCell>
-                      <TableCell className="text-right font-medium">
-                        {calculateSectionTotals(sectionLines).variance >= 0 ? '+' : ''}{formatValue(calculateSectionTotals(sectionLines).variance, 'USD')}
+                      <TableCell className="text-right font-medium py-1">
+                        {calculateSectionTotals(sectionLines).variance >= 0 ? '+' : ''}{formatVariance(calculateSectionTotals(sectionLines).variance)}
                       </TableCell>
-                      <TableCell className="text-right font-medium">
+                      <TableCell className="text-right font-medium py-1">
                         {calculateSectionTotals(sectionLines).variancePercent >= 0 ? '+' : ''}{calculateSectionTotals(sectionLines).variancePercent.toFixed(1)}%
                       </TableCell>
-                      <TableCell className="text-xs text-gray-600">
+                      <TableCell className="text-xs text-gray-600 py-1">
                         <div className="text-left text-xs text-gray-500">
                           Section aggregate
                         </div>

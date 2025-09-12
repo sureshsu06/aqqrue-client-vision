@@ -129,6 +129,15 @@ export function InboxHeader({
         </div>
 
         <div className="flex items-center space-x-3">
+          {/* QuickBooks Logo */}
+          <div className="flex items-center">
+            <img
+              src="/logos/data-sources/quickbooks-2.svg"
+              alt="QuickBooks"
+              className="w-6 h-6 object-contain"
+            />
+          </div>
+          
           {/* Progress indicator */}
           <div className="flex items-center space-x-2 text-sm text-mobius-gray-600">
             <span>{doneCount} of {totalCount} done</span>

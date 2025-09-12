@@ -15,6 +15,9 @@ import CloseChecklist from "./pages/CloseChecklist";
 import Reports from "./pages/Reports";
 import PlanVsActuals from "./pages/PlanVsActuals";
 import CFODailyInbox from "./pages/CFODailyInbox";
+import ChatWithFinancials from "./pages/ChatWithFinancials";
+import AWSVendorDetail from "./pages/AWSVendorDetail";
+import DataClassification from "./pages/DataClassification";
 import NotFound from "./pages/NotFound";
 import { Layout } from "@/components/Layout";
 
@@ -39,6 +42,9 @@ const App = () => (
               <Route path="/reporting" element={<Layout><Reports /></Layout>} />
               <Route path="/plan-vs-actuals" element={<Layout><PlanVsActuals /></Layout>} />
               <Route path="/cfo-daily-inbox" element={<Layout><CFODailyInbox /></Layout>} />
+              <Route path="/chat-with-financials" element={<Layout><ChatWithFinancials /></Layout>} />
+              <Route path="/data-classification" element={<Layout><DataClassification /></Layout>} />
+              <Route path="/vendors/aws/transactions" element={<AWSVendorDetail />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -6,7 +6,7 @@ export interface CFOInboxItem {
   entity: string;
   impact: {
     amount: number;
-    currency: 'USD' | 'INR';
+    currency: 'USD' | 'INR' | 'GBP';
     metric: string;
     direction: 'positive' | 'negative';
   };
