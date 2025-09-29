@@ -392,6 +392,13 @@ const ChatWithFinancials: React.FC = () => {
       if (contentLower.includes('ar ') && q.category.includes('Receivable')) return true;
       if (contentLower.includes('collection') && q.category.includes('Receivable')) return true;
       if (contentLower.includes('aging') && q.category.includes('Receivable')) return true;
+      if (contentLower.includes('procurement') && q.category.includes('Procurement')) return true;
+      if (contentLower.includes('apparel') && q.category.includes('Procurement')) return true;
+      if (contentLower.includes('raw materials') && q.category.includes('Procurement')) return true;
+      if (contentLower.includes('vendor selection') && q.category.includes('Procurement')) return true;
+      if (contentLower.includes('working capital') && q.category.includes('Procurement')) return true;
+      if (contentLower.includes('margins') && q.category.includes('Procurement')) return true;
+      if (contentLower.includes('tat') && q.category.includes('Procurement')) return true;
       
       // Check for specific keywords in question content
       if (contentLower.includes('burn rate') && q.id.includes('burn_rate')) return true;
@@ -504,6 +511,9 @@ const ChatWithFinancials: React.FC = () => {
                       {selectedQuestion.category === 'Vendor Management' && 
                         "Vendor spend analysis reveals both opportunities and risks in our supplier relationships. Total vendor spend has increased 8% month-over-month, with AWS costs showing the most significant spike at 22% due to unoptimized infrastructure. Our vendor concentration is high, with the top 5 vendors representing 70% of total spend, creating potential single points of failure. However, we have identified substantial optimization opportunities, particularly in cloud infrastructure and contract renewals, that could yield significant cost savings."
                       }
+                      {selectedQuestion.category === 'Procurement Intelligence' && 
+                        "Procurement intelligence analysis reveals significant optimization opportunities in our raw materials sourcing strategy. After evaluating 5 major vendors across working capital cycle, margins, and turnaround time metrics, TextileCorp Asia emerges as the optimal choice. Their 45-day payment terms provide $180K in working capital relief compared to industry standard 30-day terms, while their 14-day TAT enables faster inventory turnover and reduced carrying costs. The 2.3% margin improvement potential, combined with 99.2% quality score, positions this vendor selection to deliver $225K in annual cost savings while maintaining superior product quality standards."
+                      }
                     </p>
                   </div>
                 </div>
@@ -511,7 +521,9 @@ const ChatWithFinancials: React.FC = () => {
                 {/* Key Metrics Table */}
                 <div>
                   <h3 className="text-sm font-semibold text-mobius-gray-900 mb-3">
-                    {selectedQuestion.category === 'Vendor Management' ? 'Quarter-wise Top 10 Vendor Spend' : 'Key Financial Metrics'}
+                    {selectedQuestion.category === 'Vendor Management' ? 'Quarter-wise Top 10 Vendor Spend' : 
+                     selectedQuestion.category === 'Procurement Intelligence' ? 'Vendor Comparison Analysis' : 
+                     'Key Financial Metrics'}
                   </h3>
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs">
@@ -525,6 +537,15 @@ const ChatWithFinancials: React.FC = () => {
                               <th className="text-right py-3 px-4 font-medium text-mobius-gray-700">Q1 2025</th>
                               <th className="text-right py-3 px-4 font-medium text-mobius-gray-700">Change QoQ</th>
                               <th className="text-center py-3 px-4 font-medium text-mobius-gray-700">Department</th>
+                            </>
+                          ) : selectedQuestion.category === 'Procurement Intelligence' ? (
+                            <>
+                              <th className="text-left py-3 px-4 font-medium text-mobius-gray-700">Vendor</th>
+                              <th className="text-right py-3 px-4 font-medium text-mobius-gray-700">Payment Terms</th>
+                              <th className="text-right py-3 px-4 font-medium text-mobius-gray-700">TAT (Days)</th>
+                              <th className="text-right py-3 px-4 font-medium text-mobius-gray-700">Quality Score</th>
+                              <th className="text-right py-3 px-4 font-medium text-mobius-gray-700">WC Impact</th>
+                              <th className="text-center py-3 px-4 font-medium text-mobius-gray-700">Recommendation</th>
                             </>
                           ) : (
                             <>
@@ -579,6 +600,40 @@ const ChatWithFinancials: React.FC = () => {
                                   'bg-gray-100 text-gray-800'
                                 }`}>
                                   {vendor.department}
+                                </span>
+                              </td>
+                            </tr>
+                          ))
+                        ) : selectedQuestion.category === 'Procurement Intelligence' ? (
+                          // Procurement vendor comparison data
+                          [
+                            { vendor: 'TextileCorp Asia', paymentTerms: '45 days', tat: '14 days', quality: '99.2%', wcImpact: '$180K savings', recommendation: 'Recommended' },
+                            { vendor: 'GlobalTextiles', paymentTerms: '30 days', tat: '18 days', quality: '97.8%', wcImpact: '$0', recommendation: 'Alternative' },
+                            { vendor: 'FabricSource Ltd', paymentTerms: '30 days', tat: '21 days', quality: '98.5%', wcImpact: '$0', recommendation: 'Backup' },
+                            { vendor: 'MaterialCorp', paymentTerms: '60 days', tat: '16 days', quality: '96.9%', wcImpact: '$120K savings', recommendation: 'Consider' },
+                            { vendor: 'TextileDirect', paymentTerms: '15 days', tat: '25 days', quality: '95.2%', wcImpact: '-$90K cost', recommendation: 'Avoid' }
+                          ].map((vendor, index) => (
+                            <tr 
+                              key={index} 
+                              className="border-b border-mobius-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
+                              onDoubleClick={() => {
+                                navigator.clipboard.writeText(`${vendor.vendor}: ${vendor.paymentTerms} terms, ${vendor.tat} TAT, ${vendor.quality} quality`);
+                              }}
+                            >
+                              <td className="py-3 px-4 text-mobius-gray-900 font-medium">{vendor.vendor}</td>
+                              <td className="py-3 px-4 text-right font-semibold text-mobius-gray-900">{vendor.paymentTerms}</td>
+                              <td className="py-3 px-4 text-right text-mobius-gray-600">{vendor.tat}</td>
+                              <td className="py-3 px-4 text-right text-mobius-gray-600">{vendor.quality}</td>
+                              <td className="py-3 px-4 text-right text-mobius-gray-600">{vendor.wcImpact}</td>
+                              <td className="py-3 px-4 text-center">
+                                <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                  vendor.recommendation === 'Recommended' ? 'bg-green-100 text-green-800' :
+                                  vendor.recommendation === 'Alternative' ? 'bg-yellow-100 text-yellow-800' :
+                                  vendor.recommendation === 'Backup' ? 'bg-blue-100 text-blue-800' :
+                                  vendor.recommendation === 'Consider' ? 'bg-purple-100 text-purple-800' :
+                                  'bg-red-100 text-red-800'
+                                }`}>
+                                  {vendor.recommendation}
                                 </span>
                               </td>
                             </tr>
@@ -662,6 +717,8 @@ const ChatWithFinancials: React.FC = () => {
                   <p className="text-xs text-mobius-gray-500 mt-2 italic">
                     {selectedQuestion.category === 'Vendor Management' 
                       ? 'Double-click any vendor to view detailed transactions and invoices'
+                      : selectedQuestion.category === 'Procurement Intelligence'
+                      ? 'Double-click any vendor to copy comparison details to clipboard'
                       : 'Double-click any row to copy metric details to clipboard'
                     }
                   </p>

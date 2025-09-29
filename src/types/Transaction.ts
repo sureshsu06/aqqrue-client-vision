@@ -9,6 +9,9 @@ export interface Transaction {
   confidence?: number;
   isDuplicate?: boolean;
   isRecurring?: boolean;
+  isPrepaid?: boolean;
+  prepaidPeriod?: 'monthly' | 'quarterly' | 'annual';
+  prepaidAmount?: number;
   pdfFile?: string;
   invoiceNumber?: string;
   documentUrl?: string;
@@ -33,6 +36,9 @@ export interface JournalEntry {
   narration: string;
   isRecurring?: boolean;
   isBillable?: boolean;
+  isPrepaid?: boolean;
+  prepaidPeriod?: 'monthly' | 'quarterly' | 'annual';
+  prepaidAmount?: number;
   costCenter?: string;
   location?: string;
   entries: JournalEntryLine[];

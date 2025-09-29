@@ -377,7 +377,7 @@ export function InboxList({
                       "text-sm font-medium truncate",
                       transaction.status === "unread" ? "text-mobius-gray-900 font-semibold" : "text-mobius-gray-700"
                     )}>
-                      {(transaction.type === 'contract' || transaction.type === 'credit-card') ? '$' : '₹'}{transaction.amount.toLocaleString()}
+                      {transaction.currency === 'USD' ? '$' : '₹'}{transaction.amount.toLocaleString()}
                     </h3>
                     {transaction.isDuplicate && (
                       <Badge className="text-xs bg-amber-100 text-amber-800 border-amber-200">

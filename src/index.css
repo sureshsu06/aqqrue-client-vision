@@ -43,6 +43,29 @@ All colors MUST be HSL.
 
 @layer base {
 :root {
+    /* Core design system variables */
+    --font-sans: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    --bg: #F7FAFC;               /* page background */
+    --surface: #FFFFFF;          /* card surface */
+    --muted: #6B7280;            /* labels / secondary text */
+    --text: #0F1724;             /* primary text */
+    --primary: #2563EB;          /* main accent (blue-600) */
+    --primary-weak: #EFF6FF;     /* subtle blue bg for tiny highlights */
+    --border: #E6EDF3;           /* subtle borders */
+    --shadow-sm: 0 2px 6px rgba(15,23,42,0.04);
+    --shadow-md: 0 10px 30px rgba(15,23,42,0.06);
+    --radius: 10px;
+    --space-xs: 6px; 
+    --space-sm: 8px; 
+    --space-md: 16px; 
+    --space-lg: 24px;
+    --h1: 28px; 
+    --h2: 20px; 
+    --h3: 16px; 
+    --body: 15px; 
+    --label: 13px;
+
+    /* Legacy variables for compatibility */
     --background: 0 0% 100%;
     --foreground: 220 8.9% 46.1%;
 
@@ -52,13 +75,11 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 220 8.9% 46.1%;
 
-    --primary: 214 100% 45%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 220 8.9% 46.1%;
 
-    --muted: 220 14.3% 95.9%;
     --muted-foreground: 220 8.9% 46.1%;
 
     --accent: 210 40% 96.1%;
@@ -67,7 +88,6 @@ All colors MUST be HSL.
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 220 13% 91%;
     --input: 220 13% 91%;
     --ring: 214 100% 45%;
 
@@ -94,28 +114,13 @@ All colors MUST be HSL.
     --gradient-primary: linear-gradient(135deg, hsl(var(--mobius-blue)), hsl(var(--mobius-blue-dark)));
     --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(220 14.3% 98%) 100%);
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(220 43% 11% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(220 43% 11% / 0.1), 0 2px 4px -1px hsl(220 43% 11% / 0.06);
-    --shadow-lg: 0 10px 15px -3px hsl(220 43% 11% / 0.1), 0 4px 6px -2px hsl(220 43% 11% / 0.05);
-    --shadow-glow: 0 0 20px hsl(var(--mobius-blue) / 0.15);
-
-    --radius: 0.5rem;
-
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -164,6 +169,47 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    background: radial-gradient(circle at top left, #F0F4F8 0%, #FFFFFF 70%) !important;
+    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000' fill-opacity='0.03'%3E%3Ccircle cx='20' cy='20' r='1'/%3E%3C/g%3E%3C/svg%3E") !important;
+    background-size: 40px 40px !important;
+    font-family: var(--font-sans);
+    @apply text-foreground;
+    min-height: 100vh;
+  }
+
+  /* Force the background to apply to the root element as well */
+  #root {
+    background: radial-gradient(circle at top left, #F0F4F8 0%, #FFFFFF 70%);
+    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000' fill-opacity='0.03'%3E%3Ccircle cx='20' cy='20' r='1'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 40px 40px;
+    min-height: 100vh;
+  }
+
+  /* Ensure the main app container inherits the background */
+  .app-container {
+    background: radial-gradient(circle at top left, #F0F4F8 0%, #FFFFFF 70%);
+    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000' fill-opacity='0.03'%3E%3Ccircle cx='20' cy='20' r='1'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 40px 40px;
+    min-height: 100vh;
+  }
+
+  /* Focus states for accessibility */
+  *:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  /* Smooth transitions for all interactive elements */
+  button, input, select, textarea, [role="button"] {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Hover states for better interaction feedback */
+  button:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  button:active:not(:disabled) {
+    transform: translateY(0);
   }
 }

@@ -15,9 +15,14 @@ import CloseChecklist from "./pages/CloseChecklist";
 import Reports from "./pages/Reports";
 import PlanVsActuals from "./pages/PlanVsActuals";
 import CFODailyInbox from "./pages/CFODailyInbox";
+import CFOInboxMock from "./pages/CFOInboxMock";
+import CFOInboxMock2 from "./pages/CFOInboxMock2";
 import ChatWithFinancials from "./pages/ChatWithFinancials";
 import AWSVendorDetail from "./pages/AWSVendorDetail";
 import DataClassification from "./pages/DataClassification";
+import Onboarding from "./pages/Onboarding";
+import TaskManagement from "./pages/TaskManagement";
+import PrepaidResults from "./pages/PrepaidResults";
 import NotFound from "./pages/NotFound";
 import { Layout } from "@/components/Layout";
 
@@ -42,8 +47,14 @@ const App = () => (
               <Route path="/reporting" element={<Layout><Reports /></Layout>} />
               <Route path="/plan-vs-actuals" element={<Layout><PlanVsActuals /></Layout>} />
               <Route path="/cfo-daily-inbox" element={<Layout><CFODailyInbox /></Layout>} />
+              <Route path="/cfo-inbox-mock" element={<CFOInboxMock />} />
+              <Route path="/cfo-inbox-mock2" element={<CFOInboxMock2 />} />
               <Route path="/chat-with-financials" element={<Layout><ChatWithFinancials /></Layout>} />
               <Route path="/data-classification" element={<Layout><DataClassification /></Layout>} />
+              <Route path="/onboarding" element={<Layout><Onboarding /></Layout>} />
+              <Route path="/task-management" element={<Layout><TaskManagement /></Layout>} />
+              <Route path="/prepaid-results" element={<Layout><PrepaidResults /></Layout>} />
+              {/* OnboardingMagic route removed */}
               <Route path="/vendors/aws/transactions" element={<AWSVendorDetail />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

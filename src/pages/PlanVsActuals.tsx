@@ -50,7 +50,7 @@ export default function PlanVsActuals() {
   };
 
   return (
-    <div className="bg-white">
+    <div className="bg-[#F8FAFC]">
       <div className="px-2 py-4">
         {/* Header Controls */}
         <HeaderControls

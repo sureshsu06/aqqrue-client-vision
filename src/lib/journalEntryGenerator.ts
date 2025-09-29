@@ -274,30 +274,22 @@ export class JournalEntryGenerator {
           ]
         };
 
-      // Credit Card transactions
-      case "28": // HubSpot Inc - Marketing Hub Starter & Sales Hub Professional
+      // HubSpot Prepaid Expenses
+      case "17": // HubSpot Inc - Marketing Hub Starter & Sales Hub Professional (Prepaid)
         return {
           invoiceNumber: "HUBSPOT-614657704",
           totalAmount: 2324.11,
-          entryType: "Software Subscriptions",
-          narration: "Being the quarterly subscription charges for HubSpot Marketing Hub Starter & Sales Hub Professional",
+          entryType: "Prepaid Software Subscriptions",
+          narration: "Being the quarterly prepaid subscription charges for HubSpot Marketing Hub Starter & Sales Hub Professional - to be amortized over 3 months",
           entries: [
-            { account: "Software Subscriptions", debit: 2324.11, credit: 0, confidence: 95 },
-            { account: "Suspense Account", debit: 0, credit: 2324.11, confidence: 100 }
-          ]
+            { account: "Prepaid Software Subscriptions", debit: 2324.11, credit: 0, confidence: 95 },
+            { account: "HubSpot Inc", debit: 0, credit: 2324.11, confidence: 100 }
+          ],
+          isPrepaid: true,
+          prepaidPeriod: "quarterly",
+          prepaidAmount: 2324.11
         };
 
-      case "29": // HubSpot Inc - Duplicate
-        return {
-          invoiceNumber: "HUBSPOT-614657704-DUP",
-          totalAmount: 2324.11,
-          entryType: "Software Subscriptions",
-          narration: "Being the quarterly subscription charges for HubSpot Marketing Hub Starter & Sales Hub Professional (Duplicate)",
-          entries: [
-            { account: "Software Subscriptions", debit: 2324.11, credit: 0, confidence: 90 },
-            { account: "Suspense Account", debit: 0, credit: 2324.11, confidence: 100 }
-          ]
-        };
 
       case "30": // AgentHub Canada Inc - Gumloop Starter Plan
         return {

@@ -185,7 +185,7 @@ export function CFOInboxList({
   };
 
   return (
-    <div className="bg-white h-full flex flex-col overflow-hidden">
+    <div className="bg-[#F8FAFC] h-full flex flex-col overflow-hidden">
       {/* Bulk Actions Bar */}
       {selectedItems.length > 0 && (
         <div className="bg-mobius-blue/5 border-b border-mobius-gray-100 px-4 py-3 flex items-center justify-between">
@@ -236,7 +236,7 @@ export function CFOInboxList({
             return (
               <div key={bucket}>
                 {/* Section Header */}
-                <div className="sticky top-0 bg-white z-10 px-4 py-2 border-b border-mobius-gray-100">
+                <div className="sticky top-0 bg-[#F8FAFC] z-10 px-4 py-2 border-b border-mobius-gray-100">
                   <h3 className={cn(
                     "text-xs font-semibold uppercase tracking-wide",
                     bucket === 'Overdue' ? 'text-red-600' :
@@ -254,7 +254,7 @@ export function CFOInboxList({
                               <div
             key={item.id}
             className={cn(
-              "p-3 transition-colors cursor-pointer relative bg-white",
+              "p-3 transition-colors cursor-pointer relative bg-[#F8FAFC]",
               selectedItem?.id === item.id ? "bg-mobius-blue/10" : "hover:bg-mobius-gray-50"
             )}
             onClick={() => onItemSelect(item)}

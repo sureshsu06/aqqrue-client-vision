@@ -734,6 +734,108 @@ export const cfoQuestions: CFOQuestion[] = [
     ],
     confidence: 0.88,
     lastUpdated: '2025-08-31T04:15:00Z'
+  },
+  {
+    id: 'procurement_vendor_selection',
+    question: 'Which vendor should I use for purchasing apparel raw materials?',
+    category: 'Procurement Intelligence',
+    priority: 'high',
+    answer: {
+      executiveSummary: 'Based on comprehensive analysis of working capital cycle, margins, and TAT, TextileCorp Asia emerges as the optimal vendor for apparel raw materials. They offer the best combination of 45-day payment terms (vs 30-day industry average), 12% margin improvement potential, and 14-day TAT. This selection could improve our working capital by $180K and increase gross margins by 2.3 percentage points.',
+      detailedAnalysis: 'Our procurement analysis evaluated 5 major vendors across key financial metrics. TextileCorp Asia provides 45-day payment terms (vs 30-day average), reducing our working capital requirements by $180K annually. Their 14-day TAT enables faster inventory turnover, reducing carrying costs by $45K. Quality metrics show 99.2% defect-free delivery vs 97.8% industry average. However, their minimum order quantity of $50K requires careful inventory planning. Alternative vendor GlobalTextiles offers better pricing but requires 60-day payment terms, increasing working capital needs.',
+      keyMetrics: [
+        { metric: 'Recommended Vendor', value: 'TextileCorp Asia', change: 'Optimal choice', trend: 'stable' },
+        { metric: 'Payment Terms', value: '45 days', change: '+15 days vs avg', trend: 'up' },
+        { metric: 'Working Capital Impact', value: '$180K reduction', change: 'Improved cash flow', trend: 'up' },
+        { metric: 'Margin Improvement', value: '+2.3%', change: 'Gross margin boost', trend: 'up' },
+        { metric: 'TAT (Turnaround Time)', value: '14 days', change: '-3 days vs avg', trend: 'up' },
+        { metric: 'Quality Score', value: '99.2%', change: '+1.4% vs avg', trend: 'up' },
+        { metric: 'Minimum Order Value', value: '$50K', change: 'Higher than avg', trend: 'down' },
+        { metric: 'Annual Cost Savings', value: '$225K', change: 'Total optimization', trend: 'up' }
+      ],
+      actionItems: [
+        { priority: 'immediate', action: 'Initiate contract negotiation with TextileCorp Asia', owner: 'Procurement Team', impact: 'Secure optimal terms' },
+        { priority: 'this_week', action: 'Implement inventory planning for $50K MOQ', owner: 'Supply Chain', impact: 'Optimize order frequency' },
+        { priority: 'this_month', action: 'Establish quality monitoring dashboard', owner: 'Quality Team', impact: 'Maintain 99.2% quality' },
+        { priority: 'next_quarter', action: 'Evaluate GlobalTextiles as backup vendor', owner: 'Procurement', impact: 'Risk mitigation' }
+      ],
+      risks: [
+        { risk: 'TextileCorp Asia capacity constraints', probability: 'medium', impact: 'high', mitigation: 'Backup vendor agreements' },
+        { risk: 'Quality degradation over time', probability: 'low', impact: 'medium', mitigation: 'Regular quality audits' },
+        { risk: 'Currency fluctuation impact', probability: 'high', impact: 'medium', mitigation: 'Hedging strategy' }
+      ]
+    },
+    sources: [
+      {
+        system: 'Procurement Intelligence Platform',
+        type: 'vendor_analysis',
+        id: 'VENDOR-ANALYSIS-APPAREL-2025',
+        link: '/procurement/vendors/apparel-raw-materials-2025',
+        lastUpdated: '2 hours ago',
+        description: 'Comprehensive vendor analysis for apparel raw materials procurement'
+      },
+      {
+        system: 'Supply Chain Management',
+        type: 'working_capital_analysis',
+        id: 'WC-ANALYSIS-Q3-2025',
+        link: '/supply-chain/working-capital/q3-2025',
+        lastUpdated: '1 hour ago',
+        description: 'Working capital impact analysis for vendor selection'
+      },
+      {
+        system: 'Quality Management System',
+        type: 'vendor_quality_scores',
+        id: 'QUALITY-SCORES-APPAREL',
+        link: '/quality/vendor-scores/apparel-vendors',
+        lastUpdated: '3 hours ago',
+        description: 'Vendor quality scores and performance metrics'
+      },
+      {
+        system: 'Financial Planning',
+        type: 'margin_analysis',
+        id: 'MARGIN-ANALYSIS-APPAREL',
+        link: '/fp-a/margins/apparel-procurement',
+        lastUpdated: '4 hours ago',
+        description: 'Margin impact analysis for vendor selection decisions'
+      }
+    ],
+    transactionLineage: [
+      {
+        id: 'TXN-2025-0906',
+        description: 'TextileCorp Asia - Raw Materials Order',
+        amount: 125000,
+        currency: 'USD',
+        date: '2025-08-25',
+        type: 'debit',
+        account: 'Raw Materials Inventory',
+        reference: 'PO-TEXTILE-0906',
+        entity: 'US Inc'
+      },
+      {
+        id: 'TXN-2025-0907',
+        description: 'GlobalTextiles - Sample Materials',
+        amount: 5000,
+        currency: 'USD',
+        date: '2025-08-20',
+        type: 'debit',
+        account: 'Sample Materials',
+        reference: 'PO-GLOBAL-0907',
+        entity: 'US Inc'
+      },
+      {
+        id: 'TXN-2025-0908',
+        description: 'TextileCorp Asia - Payment (45-day terms)',
+        amount: 125000,
+        currency: 'USD',
+        date: '2025-08-25',
+        type: 'credit',
+        account: 'Accounts Payable',
+        reference: 'PAY-TEXTILE-0908',
+        entity: 'US Inc'
+      }
+    ],
+    confidence: 0.93,
+    lastUpdated: '2025-08-31T11:30:00Z'
   }
 ];
 

@@ -40,7 +40,7 @@ export function InboxHeader({
   const progressPercent = Math.round((doneCount / totalCount) * 100);
 
   return (
-    <div className="border-b border-mobius-gray-200 bg-white">
+    <div className="border-b border-mobius-gray-100 bg-white">
       {/* Single toolbar with everything */}
       <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center space-x-1">
@@ -71,7 +71,7 @@ export function InboxHeader({
             </Tooltip>
           </TooltipProvider>
 
-          <div className="w-px h-6 bg-mobius-gray-200 mx-2" />
+          <div className="w-px h-6 bg-mobius-gray-100 mx-2" />
 
           {/* Status Selection Dropdown */}
           <DropdownMenu>
@@ -108,7 +108,7 @@ export function InboxHeader({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <div className="w-px h-6 bg-mobius-gray-200 mx-2" />
+          <div className="w-px h-6 bg-mobius-gray-100 mx-2" />
 
           <TooltipProvider>
             <Tooltip>
@@ -129,6 +129,11 @@ export function InboxHeader({
         </div>
 
         <div className="flex items-center space-x-3">
+          {/* Policy Text */}
+          <div className="text-sm text-mobius-gray-600 italic">
+            Human review of all entries before posting
+          </div>
+          
           {/* QuickBooks Logo */}
           <div className="flex items-center">
             <img

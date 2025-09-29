@@ -102,9 +102,9 @@ export function CFOInboxDetail({ item, onAction }: CFOInboxDetailProps) {
   };
 
   return (
-    <div className="h-full flex flex-col bg-white">
+    <div className="h-full flex flex-col bg-[#F8FAFC]">
       {/* Executive Summary Header */}
-              <div className="bg-white p-6 border-b border-mobius-gray-200">
+              <div className="bg-[#F8FAFC] p-6 border-b border-mobius-gray-200">
         <div className="mb-4">
           <div className="flex items-center space-x-3">
             {getUrgencyIcon()}
@@ -175,7 +175,7 @@ export function CFOInboxDetail({ item, onAction }: CFOInboxDetailProps) {
         {/* Details */}
         <div className="space-y-4">
           <h2 className="text-sm font-semibold text-mobius-gray-900">Details</h2>
-          <div className="bg-white border border-mobius-gray-100 rounded-lg p-6">
+          <div className="bg-[#F8FAFC] border border-mobius-gray-100 rounded-lg p-6">
             <div className="prose prose-sm max-w-none">
               <p className="text-xs text-mobius-gray-700 leading-relaxed">
                 <span className="font-medium">Current Situation:</span> {item.why} This item requires immediate attention due to its {item.severity} priority level and potential impact on {item.impact.metric.toLowerCase()}.

@@ -651,9 +651,9 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
   // Move analysisSteps calculation here, after all helper functions are declared
   const analysisSteps = getAnalysisSteps(transaction);
 
-  // Helper function to get currency symbol based on transaction type
+  // Helper function to get currency symbol based on transaction currency
   const getCurrencySymbol = (transaction: any) => {
-    return (transaction.type === 'contract' || transaction.type === 'credit-card') ? '$' : '₹';
+    return transaction.currency === 'USD' ? '$' : '₹';
   };
 
   // Helper function to generate analysis summary
@@ -761,13 +761,13 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
       <div className="p-4 border-b border-mobius-gray-100 flex-shrink-0">
         {/* Client Pill */}
         <div className="mb-3">
-          <Badge variant="outline" className="bg-mobius-blue/10 text-mobius-blue border-mobius-blue/20 text-sm font-medium">
+          <Badge variant="outline" className="bg-mobius-blue/10 text-mobius-blue border-mobius-blue/20 text-xs font-medium">
             {transaction.client}
           </Badge>
         </div>
         
         <div className="flex items-center justify-between mb-2">
-          <h3 className="font-semibold text-lg">{transaction.vendor}</h3>
+          <h3 className="font-semibold text-xs">{transaction.vendor}</h3>
           <div className="flex items-center space-x-2">
             <Badge 
               variant="outline" 
@@ -797,7 +797,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
           <div className="mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
             <div className="flex items-start space-x-2">
               <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5" />
-              <div className="text-sm">
+              <div className="text-xs">
                 <p className="text-amber-800 font-medium">Duplicate detected</p>
                 <p className="text-amber-700">
                   WeWork sent this to joy@ and accounting@. Keep one copy to avoid double entry.
@@ -810,8 +810,8 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
           </div>
         )}
 
-        <p className="text-sm text-mobius-gray-500">
-          {(transaction.type === 'contract' || transaction.type === 'credit-card') ? '$' : '₹'}{(transaction.amount || 0).toLocaleString()} • {new Date(transaction.date || new Date()).toLocaleDateString()}
+        <p className="text-xs text-mobius-gray-500">
+          {transaction.currency === 'USD' ? '$' : '₹'}{(transaction.amount || 0).toLocaleString()} • {new Date(transaction.date || new Date()).toLocaleDateString()}
         </p>
       </div>
 
@@ -831,7 +831,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
           <div className="text-center text-red-600 p-4">
             <AlertTriangle className="w-8 h-8 mx-auto mb-2" />
             <p className="font-medium">Error Loading Transaction</p>
-            <p className="text-sm text-red-500 mt-1">{error}</p>
+            <p className="text-xs text-red-500 mt-1">{error}</p>
             <Button 
               variant="outline" 
               size="sm" 
@@ -854,7 +854,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
             <button
               onClick={() => setActiveTab('summary')}
               className={cn(
-                "flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors",
+                "flex-1 py-2 px-4 text-xs font-medium rounded-md transition-colors",
                 activeTab === 'summary'
                   ? "bg-white text-mobius-gray-900 shadow-sm"
                   : "text-mobius-gray-600 hover:text-mobius-gray-900"
@@ -865,7 +865,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
             <button
               onClick={() => setActiveTab('ledger')}
               className={cn(
-                "flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors",
+                "flex-1 py-2 px-4 text-xs font-medium rounded-md transition-colors",
                 activeTab === 'ledger'
                   ? "bg-white text-mobius-gray-900 shadow-sm"
                   : "text-mobius-gray-600 hover:text-mobius-gray-900"
@@ -882,7 +882,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
         <div className="flex-1 overflow-y-auto px-2 pb-4">
           <div className="p-2">
             <div className="space-y-4">
-              <div className="space-y-3 text-sm">
+              <div className="space-y-3 text-xs">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-mobius-gray-500">Client:</p>
@@ -903,14 +903,14 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                   {transaction.type === 'bill' && (
                     <div>
                       <p className="text-mobius-gray-500">Reconciled Against:</p>
-                      <p className="font-medium">PAY-{transaction.id.padStart(6, '0')}</p>
+                      <p className="font-medium text-mobius-gray-400">-</p>
                     </div>
                   )}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-mobius-gray-500">Currency:</p>
-                    <p className="font-medium">{(transaction.type === 'contract' || transaction.type === 'credit-card') ? 'US Dollar ($)' : 'Indian Rupee (₹)'}</p>
+                    <p className="font-medium">{transaction.currency === 'USD' ? 'US Dollar ($)' : 'Indian Rupee (₹)'}</p>
                   </div>
                   {transaction.type === 'bill' && (
                     <div>
@@ -928,15 +928,15 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                     <div className="space-y-2">
                       {/* Contract Details */}
                       <div className="bg-mobius-gray-50 rounded-lg p-3">
-                        <h4 className="text-sm font-medium text-mobius-gray-900 mb-3">Contract Details</h4>
-                        <div className="grid grid-cols-2 gap-4 text-sm">
+                        <h4 className="text-xs font-medium text-mobius-gray-900 mb-3">Contract Details</h4>
+                        <div className="grid grid-cols-2 gap-4 text-xs">
                           <div>
                             <p className="text-mobius-gray-500">Contract Value:</p>
                             <p className="font-medium">${(transaction.contractValue || 0).toLocaleString()}</p>
                           </div>
                           <div>
                             <p className="text-mobius-gray-500">Currency:</p>
-                            <p className="font-medium">{transaction.currency || 'USD'}</p>
+                            <p className="font-medium">{transaction.currency === 'USD' ? 'US Dollar ($)' : 'Indian Rupee (₹)'}</p>
                           </div>
                           <div>
                             <p className="text-mobius-gray-500">Contract Term:</p>
@@ -960,7 +960,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                       {/* Deferred Revenue Schedule */}
                       <div className="p-3">
                         <div className="flex justify-between mb-4">
-                          <h4 className="text-sm font-medium text-mobius-gray-900">Deferred Revenue Schedule:</h4>
+                          <h4 className="text-xs font-medium text-mobius-gray-900">Deferred Revenue Schedule:</h4>
                           <div className="flex gap-2">
                             <Button 
                               variant="ghost" 
@@ -1009,7 +1009,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                           
                           <div className="space-y-1">
                             {(isScheduleEditMode ? editedSchedule : generateDeferredRevenueSchedule(transaction)).map((period, index) => (
-                              <div key={index} className="grid grid-cols-4 gap-2 text-sm border-b border-mobius-gray-200 pb-2">
+                              <div key={index} className="grid grid-cols-4 gap-2 text-xs border-b border-mobius-gray-200 pb-2">
                                 <div className="font-medium">{period.period}</div>
                                 <div className="text-right">
                                   {isScheduleEditMode ? (
@@ -1017,7 +1017,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                                       type="number"
                                       value={period.monthlyRevenue}
                                       onChange={(e) => updateScheduleEntry(index, 'monthlyRevenue', parseFloat(e.target.value) || 0)}
-                                      className="h-6 text-sm text-right border-mobius-gray-200 w-20"
+                                      className="h-6 text-xs text-right border-mobius-gray-200 w-20"
                                     />
                                   ) : (
                                     `$${period.monthlyRevenue.toLocaleString()}`
@@ -1029,7 +1029,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                                       type="number"
                                       value={period.deferredRevenue}
                                       onChange={(e) => updateScheduleEntry(index, 'deferredRevenue', parseFloat(e.target.value) || 0)}
-                                      className="h-6 text-sm text-right border-mobius-gray-200 w-20"
+                                      className="h-6 text-xs text-right border-mobius-gray-200 w-20"
                                     />
                                   ) : (
                                     `$${period.deferredRevenue.toLocaleString()}`
@@ -1041,7 +1041,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                                       type="number"
                                       value={period.recognized}
                                       onChange={(e) => updateScheduleEntry(index, 'recognized', parseFloat(e.target.value) || 0)}
-                                      className="h-6 text-sm text-right border-mobius-gray-200 w-20"
+                                      className="h-6 text-xs text-right border-mobius-gray-200 w-20"
                                     />
                                   ) : (
                                     `$${period.recognized.toLocaleString()}`
@@ -1092,10 +1092,11 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                         </div>
                       </div>
 
+
                       {/* Editable Journal Entry Table for Contracts */}
                       <div className="p-3">
                         <div className="flex justify-between mb-4">
-                          <h4 className="text-sm font-medium text-mobius-gray-900">Journal Entries:</h4>
+                          <h4 className="text-xs font-medium text-mobius-gray-900">Journal Entries:</h4>
                           <div className="flex gap-2">
                             <Button 
                               variant="ghost" 
@@ -1144,15 +1145,15 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                           
                           <div className="space-y-1">
                             {(isEditMode ? editedJournalEntry : journalEntry).entries.map((entry: any, index: number) => (
-                              <div key={index} className="grid grid-cols-12 gap-2 text-sm items-center group">
-                                <div className="col-span-5 font-medium text-sm">
+                              <div key={index} className="grid grid-cols-12 gap-2 text-xs items-center group">
+                                <div className="col-span-5 font-medium text-xs">
                                   {isEditMode ? (
                                     <Select 
                                       value={entry.account} 
                                       onValueChange={(value) => updateJournalEntry(index, 'account', value)}
                                     >
-                                      <SelectTrigger className="h-8 text-sm border-mobius-gray-200 text-left justify-start">
-                                        <SelectValue className="text-sm text-left" />
+                                      <SelectTrigger className="h-8 text-xs border-mobius-gray-200 text-left justify-start">
+                                        <SelectValue className="text-xs text-left" />
                                       </SelectTrigger>
                                       <SelectContent>
                                         <SelectItem value="Cash/Accounts Receivable">Cash/Accounts Receivable</SelectItem>
@@ -1197,7 +1198,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                                         }
                                       }}
                                       className={cn(
-                                        "h-8 text-sm text-right border-mobius-gray-200",
+                                        "h-8 text-xs text-right border-mobius-gray-200",
                                         isFormulaMode ? "bg-blue-50 border-blue-300 font-mono" : "font-variant-numeric tabular-nums"
                                       )}
                                       placeholder={isFormulaMode ? "=B1*0.1" : "0.00"}
@@ -1224,7 +1225,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                                         }
                                       }}
                                       className={cn(
-                                        "h-8 text-sm text-right border-mobius-gray-200",
+                                        "h-8 text-xs text-right border-mobius-gray-200",
                                         isFormulaMode ? "bg-blue-50 border-blue-300 font-mono" : "font-variant-numeric tabular-nums"
                                       )}
                                       placeholder={isFormulaMode ? "=C1*0.1" : "0.00"}
@@ -1275,10 +1276,10 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                           <Separator className="my-2" />
                           
                           {/* Totals Row */}
-                          <div className="grid grid-cols-12 gap-2 text-sm font-medium">
-                            <div className="col-span-5">Totals</div>
-                            <div className="col-span-3 text-right">{getTotalDebit(journalEntry, transaction)}</div>
-                            <div className="col-span-3 text-right">{getTotalCredit(journalEntry, transaction)}</div>
+                          <div className="grid grid-cols-12 gap-2 text-xs font-medium">
+                            <div className="col-span-5 text-xs">Totals</div>
+                            <div className="col-span-3 text-right text-xs">{getTotalDebit(journalEntry, transaction)}</div>
+                            <div className="col-span-3 text-right text-xs">{getTotalCredit(journalEntry, transaction)}</div>
                             <div className="col-span-1"></div>
                           </div>
                           
@@ -1358,7 +1359,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                           
                           <div className="space-y-1">
                             <div className="grid grid-cols-12 gap-2 text-sm items-center group">
-                              <div className="col-span-5 font-medium text-sm">
+                              <div className="col-span-5 font-medium text-xs">
                                 <div>
                                   <div className="font-medium">Deferred Revenue <span className="text-xs text-mobius-gray-500 font-normal">(2001)</span></div>
                                 </div>
@@ -1376,7 +1377,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                             </div>
                             
                             <div className="grid grid-cols-12 gap-2 text-sm items-center group">
-                              <div className="col-span-5 font-medium text-sm">
+                              <div className="col-span-5 font-medium text-xs">
                                 <div>
                                   <div className="font-medium">Revenue <span className="text-xs text-mobius-gray-500 font-normal">(4001)</span></div>
                                 </div>
@@ -1456,8 +1457,8 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                         
                         <div className="space-y-1">
                           {(isEditMode ? editedJournalEntry : journalEntry).entries.map((entry: any, index: number) => (
-                            <div key={index} className="grid grid-cols-12 gap-2 text-sm items-center group">
-                              <div className="col-span-5 font-medium text-sm">
+                            <div key={index} className="grid grid-cols-12 gap-2 text-xs items-center group">
+                              <div className="col-span-5 font-medium text-xs">
                                 {isEditMode ? (
                                   <Select 
                                     value={entry.account} 
@@ -1584,10 +1585,10 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                         <Separator className="my-2" />
                         
                         {/* Totals Row */}
-                        <div className="grid grid-cols-12 gap-2 text-sm font-medium">
-                          <div className="col-span-5">Totals</div>
-                          <div className="col-span-3 text-right">{getTotalDebit(journalEntry, transaction)}</div>
-                          <div className="col-span-3 text-right">{getTotalCredit(journalEntry, transaction)}</div>
+                        <div className="grid grid-cols-12 gap-2 text-xs font-medium">
+                          <div className="col-span-5 text-xs">Totals</div>
+                          <div className="col-span-3 text-right text-xs">{getTotalDebit(journalEntry, transaction)}</div>
+                          <div className="col-span-3 text-right text-xs">{getTotalCredit(journalEntry, transaction)}</div>
                           <div className="col-span-1"></div>
                         </div>
                         
@@ -1616,50 +1617,118 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                     </>
                   )}
 
+                  {/* Prepaid Expense Analysis - for all transaction types */}
+                  {transaction.isPrepaid && (
+                    <div className="space-y-2">
+
+                      {/* Prepaid Amortization Schedule */}
+                      <div className="p-3">
+                        <div className="flex justify-between mb-4">
+                          <h4 className="text-xs font-medium text-mobius-gray-900">Prepaid Amortization Schedule:</h4>
+                        </div>
+
+                        {/* Prepaid Amortization Schedule Table */}
+                        <div className="mt-4">
+                          <div className="grid grid-cols-4 gap-2 text-xs font-medium text-mobius-gray-500 uppercase tracking-wide mb-3 pt-2">
+                            <div>PERIOD</div>
+                            <div className="text-right">MONTHLY EXPENSE</div>
+                            <div className="text-right">DEFERRED EXPENSE</div>
+                            <div className="text-right">RECOGNIZED</div>
+                          </div>
+                          
+                          <div className="space-y-1">
+                            {generatePrepaidSchedule(transaction).map((period, index) => (
+                              <div key={index} className="grid grid-cols-4 gap-2 text-xs border-b border-mobius-gray-200 pb-2">
+                                <div className="font-medium">{period.period}</div>
+                                <div className="text-right">${period.monthlyExpense.toFixed(0)}</div>
+                                <div className="text-right">${period.remainingBalance.toFixed(0)}</div>
+                                <div className="text-right">${period.monthlyExpense.toFixed(0)}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Monthly Amortization Journal Entries */}
+                      <div className="p-3">
+                        <div className="flex justify-between mb-4">
+                          <h4 className="text-xs font-medium text-mobius-gray-900">Monthly Scheduled Entries:</h4>
+                        </div>
+
+                        {/* Monthly Scheduled Entries Table */}
+                        <div className="mt-4">
+                          <div className="grid grid-cols-3 gap-2 text-xs font-medium text-mobius-gray-500 uppercase tracking-wide mb-3 pt-2">
+                            <div>ACCOUNT</div>
+                            <div className="text-right">DEBIT</div>
+                            <div className="text-right">CREDIT</div>
+                          </div>
+                          
+                          <div className="space-y-1">
+                            <div className="grid grid-cols-3 gap-2 text-xs border-b border-mobius-gray-200 pb-2">
+                              <div className="font-medium">Marketing Expenses (5001)</div>
+                              <div className="text-right">{getCurrencySymbol(transaction)}{Math.round((transaction.prepaidAmount || transaction.amount || 0) / 3)}</div>
+                              <div className="text-right">—</div>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 text-xs border-b border-mobius-gray-200 pb-2">
+                              <div className="font-medium">Prepaid Software (1201)</div>
+                              <div className="text-right">—</div>
+                              <div className="text-right">{getCurrencySymbol(transaction)}{Math.round((transaction.prepaidAmount || transaction.amount || 0) / 3)}</div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
+                          Monthly entry made as services are consumed over the subscription period.
+                        </div>
+                      </div>
+
+                      {/* Prepaid Expense Classification */}
+                      <div className="p-3">
+                        <div className="bg-blue-50 rounded-lg p-3 max-w-2xl">
+                          <div className="space-y-2 text-xs">
+                            <div className="flex items-center space-x-2">
+                              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                              <span className="text-blue-800 font-medium">Company Policy Applied:</span>
+                            </div>
+                            <p className="text-blue-700 ml-4">
+                              Quarterly software subscriptions exceeding $500 are classified as prepaid expenses and amortized over the subscription period.
+                            </p>
+                            <div className="grid grid-cols-2 gap-4 mt-3">
+                             
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Analysis Summary Section */}
                   <Separator />
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-medium text-mobius-gray-900">Analysis Summary</h4>
+                      <h4 className="text-xs font-medium text-mobius-gray-900">Analysis Summary</h4>
                       <Badge variant="outline" className="bg-status-done/10 text-status-done border-status-done/20 text-xs">
                         {confidence}%
                       </Badge>
                     </div>
                     
                     <div className="bg-mobius-gray-50 rounded-lg p-4">
-                      <p className="text-sm text-mobius-gray-700 leading-relaxed">
+                      <p className="text-xs text-mobius-gray-700 leading-relaxed">
                         {getAnalysisSummary(transaction)}
                       </p>
                     </div>
                     
-                    {/* Comment Section */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-mobius-gray-700">Comments</label>
-                      <div className="flex items-center space-x-2">
-                        <Input
-                          placeholder="Add a comment or correction for this analysis..."
-                          className="h-8 text-xs border-mobius-gray-200 flex-1"
-                        />
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="h-8 w-8 p-0"
-                          onClick={() => console.log(`Retry analysis for transaction ${transaction.id}`)}
-                        >
-                          <RotateCcw className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </div>
+                   
                   </div>
 
                   {/* Activity Trail */}
                   <div className="p-3">
-                    <h4 className="text-sm font-medium text-mobius-gray-900 mb-3">Activity Trail</h4>
+                    <h4 className="text-xs font-medium text-mobius-gray-900 mb-3">Activity Trail</h4>
                     <div className="space-y-2">
                       <div className="flex items-center space-x-3">
                         <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
                         <div className="flex-1">
-                          <p className="text-sm text-mobius-gray-900">
+                          <p className="text-xs text-mobius-gray-900">
                             <span className="font-medium">Transaction Posted</span> • Posted to QuickBooks • JE# QB-000192 • by Controller • 2 hours ago
                           </p>
                         </div>
@@ -1668,7 +1737,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                       <div className="flex items-center space-x-3">
                         <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
                         <div className="flex-1">
-                          <p className="text-sm text-mobius-gray-900">
+                          <p className="text-xs text-mobius-gray-900">
                             <span className="font-medium">Journal Entry Edited</span> • Updated account classification and amounts • by joy@mobius.ai • 3 hours ago
                           </p>
                         </div>
@@ -1677,7 +1746,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                       <div className="flex items-center space-x-3">
                         <div className="w-2 h-2 bg-amber-500 rounded-full flex-shrink-0"></div>
                         <div className="flex-1">
-                          <p className="text-sm text-mobius-gray-900">
+                          <p className="text-xs text-mobius-gray-900">
                             <span className="font-medium">Transaction Assigned</span> • Assigned to Controller for review • by accounting@mobius.ai • 4 hours ago
                           </p>
                         </div>
@@ -1686,7 +1755,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                       <div className="flex items-center space-x-3">
                         <div className="w-2 h-2 bg-mobius-gray-400 rounded-full flex-shrink-0"></div>
                         <div className="flex-1">
-                          <p className="text-sm text-mobius-gray-900">
+                          <p className="text-xs text-mobius-gray-900">
                             <span className="font-medium">Transaction Created</span> • Automatically processed from email • by system • 5 hours ago
                           </p>
                         </div>
@@ -1698,7 +1767,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
                 /* Ledger Tab Content */
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <h4 className="text-sm font-medium text-mobius-gray-900">Vendor Ledger</h4>
+                    <h4 className="text-xs font-medium text-mobius-gray-900">Vendor Ledger</h4>
                     <Badge variant="outline" className="text-xs">
                       {transaction.vendor}
                     </Badge>
@@ -1823,7 +1892,7 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg w-11/12 h-5/6 flex flex-col">
             <div className="flex items-center justify-between p-4 border-b">
-              <h3 className="text-lg font-semibold">Previous Bills - {transaction.vendor}</h3>
+              <h3 className="text-xs font-semibold">Previous Bills - {transaction.vendor}</h3>
               <Button 
                 variant="ghost" 
                 size="sm" 
@@ -1855,15 +1924,46 @@ export function AnalysisPane({ transaction, onApprove, onEdit, onSeeHow }: Analy
 // Helper function to get total debit
 function getTotalDebit(journalEntry: any, transaction?: any) {
   const amount = journalEntry.entries.reduce((sum: number, entry: any) => sum + (entry.debit || 0), 0);
-  const currency = (transaction?.type === 'contract' || transaction?.type === 'credit-card') ? '$' : '₹';
+  const currency = transaction?.currency === 'USD' ? '$' : '₹';
   return `${currency}${amount.toFixed(2)}`;
 }
 
 // Helper function to get total credit
 function getTotalCredit(journalEntry: any, transaction?: any) {
   const amount = journalEntry.entries.reduce((sum: number, entry: any) => sum + (entry.credit || 0), 0);
-  const currency = (transaction?.type === 'contract' || transaction?.type === 'credit-card') ? '$' : '₹';
+  const currency = transaction?.currency === 'USD' ? '$' : '₹';
   return `${currency}${amount.toFixed(2)}`;
+}
+
+// Helper function to generate prepaid amortization schedule
+function generatePrepaidSchedule(transaction: any) {
+  const prepaidAmount = transaction.prepaidAmount || transaction.amount || 0;
+  const period = transaction.prepaidPeriod || 'quarterly';
+  
+  let months = 3; // Default to quarterly
+  if (period === 'monthly') months = 1;
+  else if (period === 'annual') months = 12;
+  
+  const monthlyExpense = prepaidAmount / months;
+  const schedule = [];
+  
+  // For HubSpot, start from May 2025
+  const startDate = new Date('2025-05-01');
+  
+  for (let i = 0; i < months; i++) {
+    const remainingBalance = prepaidAmount - (monthlyExpense * (i + 1));
+    const monthDate = new Date(startDate);
+    monthDate.setMonth(startDate.getMonth() + i);
+    
+    schedule.push({
+      period: monthDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+      monthlyExpense: monthlyExpense,
+      remainingBalance: Math.max(0, remainingBalance),
+      status: i === 0 ? 'Current' : 'Scheduled'
+    });
+  }
+  
+  return schedule;
 }
 
 // Helper function to check if journal entry is balanced

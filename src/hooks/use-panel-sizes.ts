@@ -9,8 +9,8 @@ interface PanelSizes {
 
 const DEFAULT_SIZES: PanelSizes = {
   inbox: 20,
-  document: 40,
-  creditCard: 40,
+  document: 45,
+  creditCard: 35,
   detail: 40,
 };
 

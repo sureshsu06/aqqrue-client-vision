@@ -461,7 +461,7 @@ const DataClassification = () => {
 
   if (isLoading) {
     return (
-      <div className="h-full flex flex-col bg-white">
+      <div className="h-full flex flex-col bg-[#F8FAFC]">
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <RefreshCw className="w-8 h-8 animate-spin text-mobius-gray-500 mx-auto mb-4" />
@@ -473,7 +473,7 @@ const DataClassification = () => {
   }
 
   return (
-    <div className="h-full flex flex-col bg-white">
+    <div className="h-full flex flex-col bg-[#F8FAFC]">
       {/* Upload Section */}
       <div className="bg-white border-b border-mobius-gray-100">
         <div className="px-6 py-4 space-y-4">

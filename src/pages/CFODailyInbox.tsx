@@ -80,9 +80,9 @@ const CFODailyInbox = () => {
   };
 
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-mobius-gray-50">
+    <div className="h-full flex flex-col overflow-hidden bg-[#F8FAFC]">
       {/* Filters with Date */}
-      <div className="bg-white border-b border-mobius-gray-100 px-6 py-3">
+      <div className="bg-[#F8FAFC] border-b border-mobius-gray-100 px-6 py-3">
         <div className="flex items-center justify-between">
           <CFOInboxFilters 
             filters={filters}
@@ -122,7 +122,7 @@ const CFODailyInbox = () => {
         >
           {/* Left Pane - Inbox List */}
           <Panel defaultSize={50} minSize={25} maxSize={60} className="min-h-0">
-            <div className="h-full flex flex-col border-r border-mobius-gray-100 bg-white">
+            <div className="h-full flex flex-col border-r border-mobius-gray-100 bg-[#F8FAFC]">
               <div className="flex-1 overflow-y-auto">
                 <CFOInboxList
                   items={filteredAndSortedItems}
@@ -145,7 +145,7 @@ const CFODailyInbox = () => {
 
           {/* Right Pane - Detail View */}
           <Panel defaultSize={50} minSize={35} maxSize={75} className="min-h-0">
-            <div className="h-full flex flex-col bg-white">
+            <div className="h-full flex flex-col bg-[#F8FAFC]">
               <div className="flex-1 overflow-y-auto">
                 {selectedItem ? (
                   <CFOInboxDetail 

@@ -280,7 +280,7 @@ const mockTransactions: Transaction[] = [
     amount: 2324.11,
     currency: "USD",
     source: "brex",
-    type: "credit-card",
+    type: "bill",
     status: "unread",
     date: "2025-04-30",
     description: "Marketing Hub Starter & Sales Hub Professional - Quarterly Subscription",
@@ -288,24 +288,10 @@ const mockTransactions: Transaction[] = [
     confidence: 95,
     pdfFile: "creditcard/Copy of HubSpot-INVOICE-614657704.0-1.pdf",
     documentUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=1000&fit=crop",
-    isRecurring: true
-  },
-  {
-    id: "18",
-    vendor: "HubSpot Inc",
-    amount: 2324.11,
-    currency: "USD",
-    source: "brex",
-    type: "credit-card",
-    status: "unread",
-    date: "2025-04-30",
-    description: "Marketing Hub Starter & Sales Hub Professional - Quarterly Subscription (Duplicate)",
-    client: "Rhythms",
-    confidence: 90,
-    pdfFile: "creditcard/Copy of HubSpot-INVOICE-614657704.0-2.pdf",
-    documentUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&h=1000&fit=crop",
     isRecurring: true,
-    isDuplicate: true
+    isPrepaid: true,
+    prepaidPeriod: "quarterly",
+    prepaidAmount: 2324.11
   },
   {
     id: "19",
@@ -388,6 +374,23 @@ const mockTransactions: Transaction[] = [
     isRecurring: true
   },
   // Credit Card transactions WITHOUT invoices (these go to Exceptions tab)
+  {
+    id: "18",
+    vendor: "HubSpot Inc",
+    amount: 2324.11,
+    currency: "USD",
+    source: "brex",
+    type: "credit-card",
+    status: "unread",
+    date: "2025-04-30",
+    description: "Marketing Hub Starter & Sales Hub Professional - Quarterly Subscription (Duplicate)",
+    client: "Rhythms",
+    confidence: 90,
+    // No pdfFile - this transaction goes to Exceptions tab
+    documentUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&h=1000&fit=crop",
+    isRecurring: true,
+    isDuplicate: true
+  },
   {
     id: "24",
     vendor: "AWS",
@@ -924,7 +927,7 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
       />
 
       {/* Transaction Type Tabs Row */}
-      <div className="flex items-center justify-between py-3 px-4 bg-white border-b border-mobius-gray-200 flex-shrink-0">
+      <div className="flex items-center justify-between py-3 px-4 bg-[#F8FAFC] border-b border-mobius-gray-100 flex-shrink-0">
         <div className="flex items-center space-x-1">
           <Button 
             variant={selectedTab === "expenses" ? "default" : "ghost"}
