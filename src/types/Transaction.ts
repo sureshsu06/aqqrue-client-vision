@@ -3,7 +3,7 @@ export interface Transaction {
   vendor: string;
   amount: number;
   date: string;
-  type: 'invoice' | 'contract' | 'credit-card' | 'bill' | 'fixed-asset' | 'payment' | 'receipt';
+  type: 'invoice' | 'contract' | 'bill' | 'fixed-asset' | 'payment' | 'receipt';
   client: string;
   currency?: 'USD' | 'INR';
   confidence?: number;
@@ -14,6 +14,7 @@ export interface Transaction {
   prepaidAmount?: number;
   pdfFile?: string;
   invoiceNumber?: string;
+  bankId?: string;
   documentUrl?: string;
   
   // Contract-specific fields
@@ -26,6 +27,8 @@ export interface Transaction {
   status?: 'unread' | 'review' | 'approved' | 'done';
   source?: 'email' | 'drive' | 'brex' | 'ramp' | 'bank';
   description?: string;
+  transactionType?: string;
+  matchSource?: string;
 }
 
 export interface JournalEntry {

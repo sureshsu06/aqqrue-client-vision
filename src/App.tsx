@@ -23,8 +23,10 @@ import DataClassification from "./pages/DataClassification";
 import Onboarding from "./pages/Onboarding";
 import TaskManagement from "./pages/TaskManagement";
 import PrepaidResults from "./pages/PrepaidResults";
+import Reconciliations from "./pages/Reconciliations";
 import NotFound from "./pages/NotFound";
 import { Layout } from "@/components/Layout";
+import InventoryMaster from "./pages/InventoryMaster";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +56,8 @@ const App = () => (
               <Route path="/onboarding" element={<Layout><Onboarding /></Layout>} />
               <Route path="/task-management" element={<Layout><TaskManagement /></Layout>} />
               <Route path="/prepaid-results" element={<Layout><PrepaidResults /></Layout>} />
+              <Route path="/reconciliations" element={<Layout><Reconciliations /></Layout>} />
+              <Route path="/inventory-master" element={<Layout><InventoryMaster /></Layout>} />
               {/* OnboardingMagic route removed */}
               <Route path="/vendors/aws/transactions" element={<AWSVendorDetail />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

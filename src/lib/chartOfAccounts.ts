@@ -310,15 +310,6 @@ export const chartOfAccounts: ChartAccount[] = [
     credit: 45000
   },
   {
-    code: "2200",
-    name: "Credit Cards",
-    type: "Liability",
-    category: "Liabilities",
-    parent: "2000",
-    status: "active",
-    isHeader: true
-  },
-  {
     code: "2210",
     name: "Brex Card",
     type: "Liability",

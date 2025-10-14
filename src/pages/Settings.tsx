@@ -59,7 +59,7 @@ const integrations = [
   },
   {
     name: "Brex",
-    description: "Corporate credit card transactions",
+    description: "Corporate card transactions",
     status: "connected", 
     lastSync: "5 minutes ago",
     icon: "💳",

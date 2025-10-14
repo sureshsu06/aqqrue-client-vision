@@ -4,9 +4,11 @@ export const GL_ACCOUNT_CODES: { [key: string]: string } = {
   // Asset Accounts
   "Cash/Accounts Receivable": "1001",
   "Accounts Receivable": "1002",
+  "Prepaid Software Subscriptions": "1003",
   
   // Liability Accounts
   "Deferred Revenue": "2001",
+  "Sales Tax": "2002",
   
   // Revenue Accounts
   "SaaS Revenue": "4001",
@@ -36,6 +38,7 @@ export const GL_ACCOUNT_CODES: { [key: string]: string } = {
   "Billions United": "2005",
   "SEVENRAJ'S ESTATE AGENCY": "2006",
   "SN AY (Something New Around You)": "2007",
+  "HubSpot Inc": "2008",
   
   // Other Accounts
   "Software Subscriptions": "3001",

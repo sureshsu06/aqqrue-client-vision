@@ -29,7 +29,6 @@ export const mockChartOfAccounts: ChartOfAccount[] = [
   // Liability Accounts
   { id: 'liab_1', name: 'Accounts Payable', code: '2000', category: 'liability', subcategory: 'Current Liabilities', isActive: true },
   { id: 'liab_2', name: 'Accrued Expenses', code: '2100', category: 'liability', subcategory: 'Current Liabilities', isActive: true },
-  { id: 'liab_3', name: 'Credit Card Payable', code: '2200', category: 'liability', subcategory: 'Current Liabilities', isActive: true },
 
   // Equity Accounts
   { id: 'eq_1', name: 'Owner Equity', code: '3000', category: 'equity', subcategory: 'Equity', isActive: true },

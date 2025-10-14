@@ -314,11 +314,11 @@ const workflowData = {
     ]
   },
   "procure-to-pay-0": {
-    title: "Corporate Credit Card Transactions",
+    title: "Corporate Card Transactions",
     nodes: [
       { 
         id: "start", 
-        label: "Credit Card Processing", 
+        label: "Card Processing", 
         x: 50, y: 20, 
         type: "start" as const,
         app: "system" as const,
@@ -620,13 +620,7 @@ export const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ selectedWorkflow
         ref={canvasRef}
         className="workflow-canvas relative w-full h-[calc(100vh-141px)] rounded-xl border border-[var(--border)] overflow-hidden mb-8 cursor-grab active:cursor-grabbing"
         style={{
-          backgroundColor: '#f2f2f2',
-          backgroundImage: `
-            radial-gradient(circle at 1px 1px, rgba(0,0,0,0.05) 1px, transparent 0),
-            radial-gradient(circle at 1px 1px, rgba(0,0,0,0.02) 1px, transparent 0)
-          `,
-          backgroundSize: '20px 20px, 40px 40px',
-          backgroundPosition: '0 0, 0 0'
+          backgroundColor: '#f2f2f2'
         }}
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
@@ -661,18 +655,6 @@ export const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({ selectedWorkflow
           </div>
         )}
         
-        {/* Texture overlay */}
-        <div 
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage: `
-              radial-gradient(circle at 1px 1px, rgba(0,0,0,0.05) 1px, transparent 0),
-              radial-gradient(circle at 1px 1px, rgba(0,0,0,0.02) 1px, transparent 0)
-            `,
-            backgroundSize: '20px 20px, 40px 40px',
-            backgroundPosition: '0 0, 0 0'
-          }}
-        />
 
         {/* Loading bar animation styles */}
         <style>{`

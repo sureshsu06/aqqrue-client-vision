@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MessageCircle, ChevronRight, Settings } from "lucide-react";
@@ -12,7 +12,11 @@ interface Workflow {
   subWorkflows: string[];
 }
 
-export const PlaygroundTab = () => {
+interface PlaygroundTabProps {
+  selectedWorkflow?: string;
+}
+
+export const PlaygroundTab = ({ selectedWorkflow: propSelectedWorkflow }: PlaygroundTabProps) => {
   const [showChat, setShowChat] = useState(false);
   const [workflows, setWorkflows] = useState<Workflow[]>([
     {
@@ -38,7 +42,26 @@ export const PlaygroundTab = () => {
     }
   ]);
 
-  const [selectedWorkflow, setSelectedWorkflow] = useState<string>("order-to-cash");
+  const [selectedWorkflow, setSelectedWorkflow] = useState<string>(propSelectedWorkflow || "order-to-cash");
+
+  // Map subsection IDs to workflow IDs
+  const getWorkflowId = (subsectionId: string) => {
+    const mapping: { [key: string]: string } = {
+      "vendor-invoice-approval": "procure-to-pay-1",
+      "prepaid-payment-reconciliation": "order-to-cash-1", 
+      "corporate-card-posting": "procure-to-pay-0",
+      "shopify-uniware-reconciliation": "order-to-cash-0",
+      "cod-reconciliation": "order-to-cash-2"
+    };
+    return mapping[subsectionId] || "order-to-cash-0";
+  };
+
+  // Set the correct workflow when prop changes
+  useEffect(() => {
+    if (propSelectedWorkflow) {
+      setSelectedWorkflow(getWorkflowId(propSelectedWorkflow));
+    }
+  }, [propSelectedWorkflow]);
 
   const toggleWorkflow = (workflowId: string) => {
     setWorkflows(prev => 

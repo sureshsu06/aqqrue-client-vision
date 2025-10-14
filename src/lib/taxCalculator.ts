@@ -34,6 +34,11 @@ export class TaxCalculator {
    * Gets GST analysis result for a transaction
    */
   static getGSTResult(transaction: Transaction): string {
+    // Check if this is a US transaction - no GST applicable
+    if (transaction.currency === "USD") {
+      return "No GST applicable - US transaction. GST is only applicable to Indian transactions.";
+    }
+    
     switch (transaction.id) {
       case "1":
       case "2":
@@ -72,6 +77,11 @@ export class TaxCalculator {
    * Gets TDS analysis result for a transaction
    */
   static getTDSResult(transaction: Transaction): string {
+    // Check if this is a US transaction - TDS is not applicable to US transactions
+    if (transaction.currency === "USD") {
+      return "No TDS applicable - US transaction. TDS is only applicable to Indian transactions under Indian tax laws.";
+    }
+    
     switch (transaction.id) {
       case "1":
         return "TDS 10% under Section 194J - Professional fees. Section threshold: ₹30,000 per annum. Invoice amount: ₹94,400 (above threshold)";
@@ -149,7 +159,7 @@ export class TaxCalculator {
    * Gets currency symbol based on transaction type
    */
   static getCurrencySymbol(transaction: Transaction): string {
-    return (transaction.type === 'contract' || transaction.type === 'credit-card') ? '$' : '₹';
+    return (transaction.type === 'contract') ? '$' : '₹';
   }
 
   /**

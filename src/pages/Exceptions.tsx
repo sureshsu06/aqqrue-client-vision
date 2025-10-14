@@ -16,7 +16,6 @@ import {
 import { 
   Check, 
   Mail, 
-  CreditCard, 
   FileText,
   Clock,
   ArrowUpDown,
@@ -64,23 +63,23 @@ const mockExceptionTransactions: ExceptionTransaction[] = [
     exceptionReason: "Duplicate invoice detected - same invoice number and amount as transaction #1",
     duplicateOf: "1"
   },
-  // Credit Card transactions without invoices (pending) - moved to exceptions
+  // Transactions without invoices (pending) - moved to exceptions
   {
     id: "35",
     vendor: "Stripe Inc",
     amount: 299.00,
     currency: "USD",
     source: "brex",
-    type: "credit-card",
+    type: "bill",
     status: "unread",
     date: "2025-05-31",
     description: "Stripe Payment Processing - Monthly Fee",
-    client: "Rhythms",
+    client: "Ripple",
     confidence: 85,
     documentUrl: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=1000&fit=crop",
     isRecurring: true,
     exceptionType: "no-invoice",
-    exceptionReason: "Credit card transaction processed but corresponding invoice not yet available"
+    exceptionReason: "Transaction processed but corresponding invoice not yet available"
   },
   {
     id: "36",
@@ -88,16 +87,16 @@ const mockExceptionTransactions: ExceptionTransaction[] = [
     amount: 156.78,
     currency: "USD",
     source: "brex",
-    type: "credit-card",
+    type: "bill",
     status: "unread",
     date: "2025-05-30",
     description: "Amazon Web Services - Cloud Infrastructure",
-    client: "Rhythms",
+    client: "Ripple",
     confidence: 92,
     documentUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=1000&fit=crop",
     isRecurring: true,
     exceptionType: "no-invoice",
-    exceptionReason: "Credit card transaction processed but corresponding invoice not yet available"
+    exceptionReason: "Transaction processed but corresponding invoice not yet available"
   },
   {
     id: "37",
@@ -105,16 +104,16 @@ const mockExceptionTransactions: ExceptionTransaction[] = [
     amount: 89.45,
     currency: "USD",
     source: "brex",
-    type: "credit-card",
+    type: "bill",
     status: "review",
     date: "2025-05-29",
     description: "Google Cloud Platform - Compute Services",
-    client: "Rhythms",
+    client: "Ripple",
     confidence: 88,
     documentUrl: "https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=800&h=1000&fit=crop",
     isRecurring: true,
     exceptionType: "no-invoice",
-    exceptionReason: "Credit card transaction processed but corresponding invoice not yet available"
+    exceptionReason: "Transaction processed but corresponding invoice not yet available"
   },
   {
     id: "38",
@@ -122,16 +121,16 @@ const mockExceptionTransactions: ExceptionTransaction[] = [
     amount: 149.90,
     currency: "USD",
     source: "brex",
-    type: "credit-card",
+    type: "bill",
     status: "unread",
     date: "2025-05-28",
     description: "Zoom Pro - Monthly Subscription",
-    client: "Rhythms",
+    client: "Ripple",
     confidence: 90,
     documentUrl: "https://images.unsplash.com/photo-1483058712412-4245e9b90334?w=800&h=1000&fit=crop",
     isRecurring: true,
     exceptionType: "no-invoice",
-    exceptionReason: "Credit card transaction processed but corresponding invoice not yet available"
+    exceptionReason: "Transaction processed but corresponding invoice not yet available"
   },
   {
     id: "39",
@@ -139,16 +138,16 @@ const mockExceptionTransactions: ExceptionTransaction[] = [
     amount: 67.50,
     currency: "USD",
     source: "brex",
-    type: "credit-card",
+    type: "bill",
     status: "review",
     date: "2025-05-27",
     description: "Slack Standard - Monthly Plan",
-    client: "Rhythms",
+    client: "Ripple",
     confidence: 87,
     documentUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=1000&fit=crop",
     isRecurring: true,
     exceptionType: "no-invoice",
-    exceptionReason: "Credit card transaction processed but corresponding invoice not yet available"
+    exceptionReason: "Transaction processed but corresponding invoice not yet available"
   }
 ];
 
@@ -330,7 +329,6 @@ export function ExceptionsInbox({ onTransactionSelect }: ExceptionsInboxProps) {
               updateSizes({
                 inbox: sizes[0],
                 document: sizes[1],
-                creditCard: sizes[2]
               });
             }
           }}
@@ -378,7 +376,7 @@ export function ExceptionsInbox({ onTransactionSelect }: ExceptionsInboxProps) {
               </PanelResizeHandle>
 
               {/* Analysis Pane - Resizable */}
-              <Panel defaultSize={sizes.creditCard} minSize={25} maxSize={60} className="min-h-0">
+              <Panel defaultSize={sizes.detail} minSize={25} maxSize={60} className="min-h-0">
                 <div className="h-full flex flex-col">
                   <div className="flex-1 overflow-y-auto">
                     <AnalysisPane 

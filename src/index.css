@@ -170,8 +170,6 @@ All colors MUST be HSL.
 
   body {
     background: radial-gradient(circle at top left, #F0F4F8 0%, #FFFFFF 70%) !important;
-    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000' fill-opacity='0.03'%3E%3Ccircle cx='20' cy='20' r='1'/%3E%3C/g%3E%3C/svg%3E") !important;
-    background-size: 40px 40px !important;
     font-family: var(--font-sans);
     @apply text-foreground;
     min-height: 100vh;
@@ -180,16 +178,12 @@ All colors MUST be HSL.
   /* Force the background to apply to the root element as well */
   #root {
     background: radial-gradient(circle at top left, #F0F4F8 0%, #FFFFFF 70%);
-    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000' fill-opacity='0.03'%3E%3Ccircle cx='20' cy='20' r='1'/%3E%3C/g%3E%3C/svg%3E");
-    background-size: 40px 40px;
     min-height: 100vh;
   }
 
   /* Ensure the main app container inherits the background */
   .app-container {
     background: radial-gradient(circle at top left, #F0F4F8 0%, #FFFFFF 70%);
-    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000' fill-opacity='0.03'%3E%3Ccircle cx='20' cy='20' r='1'/%3E%3C/g%3E%3C/svg%3E");
-    background-size: 40px 40px;
     min-height: 100vh;
   }
 

@@ -22,7 +22,7 @@ interface BusinessOverview {
 
 interface ToolStack {
   geo: string;
-  oms: string;
+  crm: string;
   erp: string;
   paymentProcessor: string;
   primaryBank: string;
@@ -100,84 +100,75 @@ const Tooltip = ({ children, content }: { children: React.ReactNode; content: st
 
 export const AboutCompanyTab = () => {
   const [businessOverview, setBusinessOverview] = useState<BusinessOverview>({
-    natureOfBusiness: "E-commerce brand (fashion & essentials)",
-    legalEntity: "Aqqrue Retail Pvt Ltd",
-    reportingCurrency: "INR",
+    natureOfBusiness: "SaaS AI OKR software platform",
+    legalEntity: "Ripple Technologies Inc.",
+    reportingCurrency: "USD",
     fyStart: "April",
-    subsidiaries: ["Aqqrue MENA FZ-LLC (UAE)", "Aqqrue Global Ltd (SG)"],
-    primaryChannels: ["Shopify", "Amazon (Seller Central)", "Flipkart", "Proprietary D2C"],
-    primaryGeos: ["India", "UAE", "Singapore"],
-    paymentProcessors: ["Razorpay (IN)", "Stripe (INTL)", "Amazon Pay (IN)"],
-    primaryBanks: ["HDFC Bank (IN)", "Standard Chartered UAE", "DBS Singapore"],
-    payrollTool: "BreatheHR (India), Payoneer (Intl contractors)",
-    expenseTool: "Pleo (Corporate Cards)",
+    subsidiaries: ["Ripple Technologies India Pvt Ltd"],
+    primaryChannels: ["Direct Sales", "Partner Channel", "Self-Service", "Enterprise Sales"],
+    primaryGeos: ["United States", "India"],
+    paymentProcessors: ["Stripe (US)", "Razorpay (India)", "PayPal (Global)"],
+    primaryBanks: ["Chase Bank (US)", "HDFC Bank (India)", "ICICI Bank (India)"],
+    payrollTool: "Gusto (US), Keka (India)",
+    expenseTool: "Expensify (Corporate Cards)",
     auditor: "PwC India",
-    notes: "Order ingestion frequency: daily. Returns window: 30 days. Significant marketplace commissions on Amazon."
+    notes: "Subscription-based revenue model. Monthly and annual billing cycles. Enterprise customers with custom contracts."
   });
 
   const [toolStack, setToolStack] = useState<ToolStack[]>([
     { 
+      geo: "US", 
+      crm: "HubSpot CRM", 
+      erp: "NetSuite", 
+      paymentProcessor: "Stripe",
+      primaryBank: "Chase Bank",
+      payroll: "Gusto",
+      expenseTool: "Expensify"
+    },
+    { 
       geo: "India", 
-      oms: "Uniware", 
-      erp: "Tally", 
+      crm: "HubSpot CRM", 
+      erp: "Tally ERP", 
       paymentProcessor: "Razorpay",
       primaryBank: "HDFC Bank",
-      payroll: "BreatheHR",
-      expenseTool: "Pleo"
-    },
-    { 
-      geo: "UAE", 
-      oms: "Shopify (Region storefront)", 
-      erp: "QuickBooks Online", 
-      paymentProcessor: "Stripe",
-      primaryBank: "Standard Chartered UAE",
-      payroll: "Local payroll partner (outsourced)",
-      expenseTool: "Pleo (global)"
-    },
-    { 
-      geo: "SG", 
-      oms: "Shopify (SG)", 
-      erp: "Xero", 
-      paymentProcessor: "Stripe",
-      primaryBank: "DBS Singapore",
-      payroll: "Payoneer (contractors)",
-      expenseTool: "Expensefy"
+      payroll: "Keka",
+      expenseTool: "Expensify"
     }
   ]);
 
   const [internalControls, setInternalControls] = useState<InternalControl[]>([
     { 
       id: "IC-001", 
-      title: "Corporate card policy",
-      rule: "All corporate card transactions posted to suspense until invoice attached. Transactions > ₹50,000 require controller approval. All corporate card transactions must be supported by original receipts and business justification. Cardholders are required to submit expense reports within 7 days of transaction date. Transactions without proper documentation are flagged for immediate review. Monthly reconciliation of all corporate cards is mandatory with variance analysis. Card limits are set based on role and business requirements with quarterly reviews. Suspicious transactions are automatically flagged for fraud investigation. All card transactions are subject to random audit sampling. Cardholders must complete annual training on expense policies and fraud prevention.",
+      title: "Subscription revenue controls",
+      rule: "All subscription revenue must be recognized in accordance with ASC 606. Monthly reconciliation between billing system and accounting system is mandatory. Revenue recognition schedules are maintained for all subscription contracts with proper deferral calculations. Contract modifications require controller approval and updated revenue schedules. Automated revenue recognition system flags discrepancies for manual review. Monthly aging analysis of deferred revenue with variance explanations. Customer contract terms are validated against revenue recognition policies. Quarterly review of revenue recognition patterns for unusual activity. All revenue adjustments require dual approval and supporting documentation. Revenue recognition training is mandatory for all finance team members.",
       severity: "high",
       lastVerified: "2025-09-23T23:58:00Z"
     },
     { 
       id: "IC-002", 
-      title: "PO matching",
-      rule: "PO matching required for invoices > ₹25,000. Matching tolerance for quantity/price +/- 2%. All purchase orders must be pre-approved before vendor engagement. Three-way matching (PO, receipt, invoice) is mandatory for all transactions above threshold. Variance analysis is performed for all mismatched items with detailed explanations required. Automated matching system flags discrepancies for manual review. Monthly reconciliation of unmatched items with aging analysis. Vendor master data is reviewed quarterly for accuracy. Purchase authorization matrix defines approval limits by role and department. All procurement activities are subject to competitive bidding requirements above certain thresholds.",
-      severity: "medium",
+      title: "Customer data security",
+      rule: "All customer data access requires proper authorization and is logged. Data encryption is mandatory for all customer information at rest and in transit. Regular security audits are performed quarterly with penetration testing. Access controls are reviewed monthly with immediate revocation of unused accounts. Customer data retention policies are strictly enforced with automated deletion. Incident response procedures are documented and tested annually. All third-party integrations undergo security assessment before implementation. Employee access to production data requires manager approval and is time-limited. Data backup and recovery procedures are tested monthly with documented results.",
+      severity: "high",
       lastVerified: "2025-09-23T23:40:00Z"
     },
     { 
       id: "IC-003", 
-      title: "Invoice approvals",
-      rule: "Invoices > ₹5,00,000 require CFO approval. Between ₹50,000–₹5,00,000 require controller approval. All invoices must be supported by purchase orders and delivery receipts. Invoice approval workflow includes automated routing based on amount and vendor. Duplicate invoice detection system prevents payment of same invoice twice. Vendor master data validation ensures accurate payment processing. Monthly aging analysis of outstanding invoices with escalation procedures. Payment terms are strictly enforced with late payment penalties. All invoice approvals are documented with timestamps and approver details. Quarterly review of approval authority matrix and delegation of authority.",
+      title: "Software development controls",
+      rule: "All code changes require peer review and automated testing before deployment. Production deployments require dual approval from development and operations teams. Version control systems maintain complete audit trail of all code changes. Automated testing coverage must exceed 80% for all new features. Security scanning is mandatory for all code before production deployment. Database schema changes require DBA approval and rollback procedures. API rate limiting and authentication controls are enforced for all endpoints. Performance monitoring alerts are configured for all critical system components.",
       severity: "high",
       lastVerified: "2025-09-23T23:50:00Z"
     },
     { 
       id: "IC-004", 
       title: "Segregation of duties (SoD)",
-      rule: "Person who creates PO cannot be same as approver for orders > ₹1L. Finance ops enforces role checks in Uniware. Segregation of duties matrix is maintained for all critical business processes. No single individual can initiate, approve, and record the same transaction. Regular SoD testing is performed quarterly with remediation of any violations. System access controls enforce segregation requirements automatically. Role-based access controls are reviewed annually with business process owners. Exception reporting identifies potential SoD violations for immediate investigation. Training programs ensure all employees understand their role limitations. Audit trail maintains complete record of all system access and transactions.",
+      rule: "Person who creates customer contracts cannot approve revenue recognition. Development team cannot directly access production databases. Finance team cannot modify customer billing configurations. System administrators cannot access customer data without proper authorization. Role-based access controls are enforced across all systems with quarterly reviews. No single individual can initiate, approve, and record customer transactions. Regular SoD testing is performed quarterly with remediation of violations. Exception reporting identifies potential SoD violations for immediate investigation.",
       severity: "high",
       lastVerified: "2025-09-23T23:30:00Z"
     },
     { 
       id: "IC-005", 
       title: "Journal entry reviews",
-      rule: "All month-end adjusting JEs require two approvers for amounts > ₹2L. Recurring JEs reviewed quarterly. Journal entry templates are pre-approved for standard transactions. All manual journal entries require detailed supporting documentation. Automated journal entries are subject to exception reporting and review. Monthly reconciliation of all balance sheet accounts with variance analysis. Journal entry approval workflow includes automated routing and escalation. Supporting documentation must be attached to all journal entries. Quarterly review of journal entry patterns for unusual activity. All journal entries are subject to random audit sampling with detailed testing procedures.",
+      rule: "All month-end adjusting JEs require two approvers for amounts > $20,000. Recurring JEs reviewed quarterly. Journal entry templates are pre-approved for standard transactions. All manual journal entries require detailed supporting documentation. Automated journal entries are subject to exception reporting and review. Monthly reconciliation of all balance sheet accounts with variance analysis. Journal entry approval workflow includes automated routing and escalation. Supporting documentation must be attached to all journal entries. Quarterly review of journal entry patterns for unusual activity.",
       severity: "medium",
       lastVerified: "2025-09-01T09:00:00Z"
     }
@@ -187,32 +178,32 @@ export const AboutCompanyTab = () => {
     { 
       id: "AP-001", 
       title: "Revenue recognition",
-      policy: "Accrual basis. Marketplace commission and returns are deducted at settlement date. Revenue recognized on shipment confirmation for marketplace orders; on payment confirmation for D2C prepaids. For marketplace transactions, revenue is recognized net of platform fees, payment processing charges, and estimated returns based on historical return rates. D2C revenue is recognized when goods are shipped and title transfers to customer, with appropriate provisions for returns and exchanges. Subscription revenue is recognized ratably over the subscription period. Revenue from gift cards is deferred until redemption or expiration. All revenue recognition follows ASC 606 standards with proper identification of performance obligations, transaction price allocation, and satisfaction of performance obligations.",
-      effectiveDate: "2025-04-01"
+      policy: "Subscription revenue recognized ratably over the contract term using ASC 606. Performance obligations include software access, support, and updates. Contract modifications are accounted for as separate contracts or contract modifications based on substance. Setup fees are deferred and recognized over the customer relationship period. Professional services revenue recognized as services are performed using percentage-of-completion method. Revenue from multi-year contracts is recognized monthly based on contract value and term. Customer refunds and credits are recorded as contra-revenue when granted. Revenue recognition schedules are maintained for all contracts with proper deferral calculations.",
+      effectiveDate: "2025-01-01"
     },
     { 
       id: "AP-002", 
-      title: "Capitalization",
-      policy: "Capitalize fixed assets > ₹100,000. Useful life: computers 3 years (straight-line), furniture 5 years. All fixed assets are capitalized at cost including purchase price, import duties, taxes, and directly attributable costs. Depreciation is calculated using straight-line method over estimated useful lives. Assets under construction are capitalized separately and transferred to appropriate asset categories upon completion. Impairment testing is performed annually or when indicators of impairment exist. Disposal of assets requires proper authorization and any gains/losses are recorded in the period of disposal. Leasehold improvements are amortized over the shorter of lease term or useful life.",
-      effectiveDate: "2024-04-01"
+      title: "Software development costs",
+      policy: "Research and development costs are expensed as incurred. Software development costs are capitalized only after technological feasibility is established. Capitalized costs include direct materials, direct labor, and overhead costs directly attributable to software development. Amortization begins when the software is available for general release and is calculated using the greater of straight-line method or percentage of revenue method. Useful life is estimated at 3-5 years based on expected product lifecycle. Impairment testing is performed annually or when indicators of impairment exist. Costs related to maintenance and minor enhancements are expensed as incurred.",
+      effectiveDate: "2024-01-01"
     },
     { 
       id: "AP-003", 
-      title: "Prepaid expenses",
-      policy: "Prepaids to be amortized monthly based on benefit period; prepaid marketing recognized over campaign period. All prepaid expenses are initially recorded at cost and systematically amortized over the period of benefit. Prepaid insurance is amortized over the policy period. Prepaid rent is amortized over the lease term. Prepaid marketing expenses are amortized based on the expected benefit period of the campaign, typically 3-6 months. Prepaid software licenses are amortized over the license period. Any prepaid amounts that expire without benefit are written off immediately. Prepaid expenses are reviewed quarterly for potential impairment.",
+      title: "Deferred revenue",
+      policy: "Customer prepayments and annual subscriptions are recorded as deferred revenue and recognized ratably over the service period. Deferred revenue is classified as current or non-current based on expected recognition timing. Contract liabilities are separately disclosed and reconciled monthly. Customer contract modifications may require adjustment to deferred revenue balances. Unearned revenue is reviewed quarterly for potential adjustments due to contract changes or cancellations. Revenue recognition schedules are maintained for all deferred revenue with proper aging analysis.",
       effectiveDate: "2025-01-01"
     },
     { 
       id: "AP-004", 
       title: "Foreign currency",
-      policy: "Functional currency = INR for India entity; use month-end spot rate for translation. FX gains/losses booked to other income. All foreign currency transactions are initially recorded at the exchange rate prevailing on the transaction date. Monetary assets and liabilities denominated in foreign currencies are translated at the closing rate at each balance sheet date. Non-monetary items are carried at historical cost. Exchange differences arising on translation are recognized in profit and loss account. For subsidiaries, assets and liabilities are translated at closing rates, income and expenses at average rates, and resulting exchange differences are accumulated in foreign currency translation reserve. Hedge accounting is applied where appropriate for qualifying hedging relationships.",
+      policy: "Functional currency = USD for US entity, INR for India entity. Use month-end spot rate for translation of India subsidiary. FX gains/losses booked to other income/expense. All foreign currency transactions are initially recorded at the exchange rate prevailing on the transaction date. Monetary assets and liabilities denominated in foreign currencies are translated at the closing rate at each balance sheet date. Non-monetary items are carried at historical cost. Exchange differences arising on translation are recognized in profit and loss account. For subsidiaries, assets and liabilities are translated at closing rates, income and expenses at average rates.",
       effectiveDate: "2024-07-01"
     },
     { 
       id: "AP-005", 
       title: "Tax treatment",
-      policy: "GST applied at point of supply. Marketplace TCS and reverse-charge treatments flagged for accounting review. All tax provisions are calculated based on applicable tax rates and regulations. Current tax is measured at the amount expected to be paid to tax authorities. Deferred tax is recognized for temporary differences between carrying amounts and tax bases. Tax credits and incentives are recognized when there is reasonable certainty of utilization. Transfer pricing documentation is maintained for related party transactions. Tax returns are filed within prescribed due dates and any assessments are reviewed and contested where appropriate. Tax positions are evaluated for uncertain tax treatments and provisions are made where necessary.",
-      effectiveDate: "2025-04-01"
+      policy: "Income tax provisions calculated based on applicable tax rates in each jurisdiction. Current tax measured at amount expected to be paid to tax authorities. Deferred tax recognized for temporary differences between carrying amounts and tax bases. Tax credits and incentives recognized when there is reasonable certainty of utilization. Transfer pricing documentation maintained for related party transactions between US and India entities. Tax returns filed within prescribed due dates in each jurisdiction. Tax positions evaluated for uncertain tax treatments with provisions made where necessary. R&D tax credits claimed where applicable for software development activities.",
+      effectiveDate: "2025-01-01"
     }
   ]);
 
@@ -220,56 +211,56 @@ export const AboutCompanyTab = () => {
     {
       id: "S-001",
       type: "Best practice",
-      text: "Tighten corporate card review: require controller approval for transactions > ₹25k (peers). Expected benefit: 15% faster clearing of cards.",
-      confidence: 0.76
+      text: "Implement automated revenue recognition for subscription contracts to reduce manual processing by 80% and improve accuracy.",
+      confidence: 0.89
     },
     {
       id: "S-002",
       type: "Policy gap",
-      text: "Define clear policy for marketplace chargebacks & reimbursements to improve reconciliations across Amazon/Shopify.",
-      confidence: 0.81
+      text: "Define clear policy for customer contract modifications and their impact on deferred revenue recognition schedules.",
+      confidence: 0.76
     },
     {
       id: "S-003",
       type: "Automation",
-      text: "Auto-ingest Stripe settlement reports into reconciliation workflow to reduce manual CSV uploads (saves ~3 hrs/week).",
-      confidence: 0.89
+      text: "Auto-sync billing data from Stripe/Razorpay to accounting system to eliminate manual revenue reconciliation (saves ~5 hrs/week).",
+      confidence: 0.92
     },
     {
       id: "S-004",
       type: "Control",
-      text: "Add automated slack nudge for expense approvers after 48 hours to reduce suspense items piling up.",
-      confidence: 0.65
+      text: "Add automated alerts for unusual customer churn patterns to enable proactive revenue protection measures.",
+      confidence: 0.71
     }
   ]);
 
   const [changeHistory] = useState<ChangeHistory[]>([
     {
       timestamp: "2025-09-24T00:18:00Z",
-      actor: "Michael Chen",
-      action: "Changed corporate card approval threshold",
-      details: "Updated corporate card auto-approve threshold from ₹50,000 to ₹25,000",
-      actorRole: "Founder"
+      actor: "Priya Sharma",
+      action: "Updated revenue recognition policy",
+      details: "Modified subscription revenue recognition to align with ASC 606 standards for multi-year contracts",
+      actorRole: "CFO"
     },
     {
       timestamp: "2025-09-23T23:55:00Z",
-      actor: "Sarah Johnson",
-      action: "Controller approved UAE geo config",
-      details: "Approved QuickBooks mapping and bank account connections for UAE entity",
+      actor: "David Kim",
+      action: "Approved India entity setup",
+      details: "Approved Tally ERP configuration and HDFC bank account connections for India subsidiary",
       actorRole: "Controller"
     },
     {
       timestamp: "2025-09-23T23:40:00Z",
-      actor: "Aqqrue",
-      action: "Aqqrue inferred revenue recognition",
-      details: "Inferred D2C prepaids recognized on payment; marketplace recognized on shipment confirmation",
-      actorRole: "Aqqrue Agent"
+      actor: "Rhythms AI",
+      action: "Inferred customer data security controls",
+      details: "Auto-generated data security policies based on SOC 2 compliance requirements and customer data handling patterns",
+      actorRole: "AI Agent"
     },
     {
       timestamp: "2025-09-23T23:00:00Z",
       actor: "Onboarding Bot",
-      action: "Generated draft SOP",
-      details: "Auto-generated draft SOP: 'Order-to-Cash (India) v0.1' saved to /onboarding/sops/OrderToCash_v0.1.docx",
+      action: "Generated revenue recognition SOP",
+      details: "Auto-generated draft SOP: 'Subscription Revenue Recognition v1.0' saved to /onboarding/sops/RevenueRecognition_v1.0.docx",
       actorRole: "Agent"
     }
   ]);
@@ -295,39 +286,36 @@ export const AboutCompanyTab = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div>
+        {/* Section Header - smaller font */}
+        <p className="text-sm font-medium text-blue-600 mb-2">
+          Overview
+        </p>
+        
+        {/* Sub-section Title - large and semi-bold */}
+        <h2 className="text-2xl font-semibold text-gray-900 mb-3">
+          Business Overview
+        </h2>
+        
+        {/* Sub-section Description - medium grey */}
+        <p className="text-base text-gray-600 mb-6">
+          Company information, accounting setup, and operational details for financial management and compliance.
+        </p>
+
         {/* Main Content */}
-        <div className="lg:col-span-2 space-y-8">
+        <div className="space-y-8">
           {/* Business Overview */}
-          <div className="bg-white rounded-xl shadow-sm border border-[var(--border)] hover:shadow-md transition-all duration-200">
-            {/* Meta strip */}
-            <div className="bg-[var(--primary-weak)] px-6 py-3 rounded-t-xl border-b border-[var(--border)]">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-[12px] text-[var(--primary)] font-medium">📄 Inferred from:</span>
-                    <span className="text-[12px] text-[var(--text)]">Onboarding call (Sept 18)</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-[12px] text-[var(--primary)] font-medium">Confidence:</span>
-                    <span className="text-[12px] text-[var(--text)]">87%</span>
-                  </div>
-                </div>
-                <button className="text-[11px] text-[var(--primary)] hover:underline">View highlights</button>
-              </div>
-            </div>
-            
-            <div className="p-6">
+          <div>
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-4">
                   <h3 className="text-[16px] leading-6 font-semibold text-[var(--text)]">Business Overview</h3>
                   <div className="flex items-center space-x-2">
                     <span className="text-[12px] text-[var(--muted)]">Entity:</span>
                     <select className="px-2 py-1 text-[12px] border border-[var(--border)] rounded bg-white hover:border-[var(--primary)] focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] transition-colors">
-                      <option value="india">India</option>
-                      <option value="uae">UAE</option>
-                      <option value="singapore">Singapore</option>
+                      <option value="us">United States</option>
+                      <option value="canada">Canada</option>
+                      <option value="uk">United Kingdom</option>
                     </select>
                   </div>
                 </div>
@@ -338,8 +326,8 @@ export const AboutCompanyTab = () => {
 
               {/* Executive Summary */}
               <div className="mb-6 p-4 bg-[var(--primary-weak)] rounded-lg border border-[var(--border)]">
-                <div className="text-[13px] text-[var(--text)] leading-relaxed">
-                  Aqqrue Retail Pvt Ltd is a fast-growing e-commerce brand specializing in fashion and essentials, operating across India, UAE, and Singapore. The company leverages multiple sales channels including Shopify, Amazon Seller Central, Flipkart, and proprietary D2C platforms to reach diverse customer segments. With a multi-geographic presence, Aqqrue manages complex operations through region-specific ERP systems (Tally, QuickBooks, Xero) and payment processors (Razorpay, Stripe) while maintaining standardized expense management through Pleo corporate cards...
+                  <div className="text-[13px] text-[var(--text)] leading-relaxed">
+                  Ripple Technologies Inc. is a fast-growing SaaS company building AI-powered OKR software, operating across the United States and India. The company serves enterprise customers through direct sales, partner channels, and self-service platforms. With a dual-entity structure, Ripple manages operations through region-specific ERP systems (NetSuite for US, Tally for India) and payment processors (Stripe for US, Razorpay for India) while maintaining standardized expense management through Expensify corporate cards...
                 </div>
                 <button className="mt-2 text-[11px] text-[var(--primary)] hover:underline font-medium">
                   Read full summary
@@ -487,7 +475,7 @@ export const AboutCompanyTab = () => {
           </div>
 
           {/* Tool Stack */}
-          <div className="bg-white rounded-xl shadow-sm border border-[var(--border)] p-6 hover:shadow-md transition-all duration-200">
+          <div>
             <div className="flex items-start justify-between mb-2">
               <h3 className="text-[16px] leading-6 font-semibold text-[var(--text)]">Tool Stack (by Geo)</h3>
               <button className="p-2 text-[var(--primary)] hover:bg-[var(--primary-weak)] rounded-md transition-colors">
@@ -500,7 +488,7 @@ export const AboutCompanyTab = () => {
                 <thead className="text-[11px] text-[var(--muted)]">
                   <tr>
                     <th className="text-left py-4 w-20">Geo</th>
-                    <th className="text-left py-4">OMS</th>
+                    <th className="text-left py-4">CRM</th>
                     <th className="text-left py-4">ERP</th>
                     <th className="text-left py-4">Payment processor</th>
                     <th className="text-left py-4">Primary bank</th>
@@ -512,7 +500,7 @@ export const AboutCompanyTab = () => {
                     {toolStack.map((tool, index) => (
                     <tr key={index} className="hover:bg-[var(--bg)] transition-colors">
                       <td className="py-4 w-20">{tool.geo}</td>
-                      <td className="py-4">{tool.oms}</td>
+                      <td className="py-4">{tool.crm}</td>
                       <td className="py-4">{tool.erp}</td>
                       <td className="py-4">{tool.paymentProcessor}</td>
                       <td className="py-4">{tool.primaryBank}</td>
@@ -526,25 +514,7 @@ export const AboutCompanyTab = () => {
           </div>
 
           {/* Internal Controls */}
-          <div className="bg-gradient-to-br from-red-25 to-orange-25 rounded-xl shadow-sm border border-red-100 hover:shadow-md transition-all duration-200">
-            {/* Meta strip */}
-            <div className="bg-red-50 px-6 py-3 rounded-t-xl border-b border-red-100">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-[12px] text-red-700 font-medium">🔒 Controls & Compliance</span>
-                    <span className="text-[12px] text-red-600">High-risk items flagged</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-[12px] text-red-700 font-medium">Last verified:</span>
-                    <span className="text-[12px] text-red-600">Sept 23, 2025</span>
-                  </div>
-                </div>
-                <button className="text-[11px] text-red-700 hover:underline">View audit trail</button>
-              </div>
-            </div>
-            
-            <div className="p-6">
+          <div>
               
               {/* Group by severity */}
               <div className="space-y-6">
@@ -568,8 +538,8 @@ export const AboutCompanyTab = () => {
                             <h5 className="text-[13px] font-medium text-[var(--text)]">{control.title}</h5>
                             <div className="flex items-center space-x-2">
                               <div className="flex items-center space-x-1">
-                                <img src="/mobius-logo.png" alt="Aqqrue" className="w-3 h-3" />
-                                <span className="text-[9px] text-red-600">Inferred from QBO</span>
+                                <img src="/mobius-logo.png" alt="Ripple" className="w-3 h-3" />
+                                <span className="text-[9px] text-red-600">Inferred from NetSuite</span>
                               </div>
                               <span className="text-[9px] px-1.5 py-0.5 bg-red-100 text-red-700 rounded-full font-medium">HIGH</span>
                             </div>
@@ -643,25 +613,7 @@ export const AboutCompanyTab = () => {
           </div>
 
           {/* Accounting Policies */}
-          <div className="bg-gradient-to-br from-blue-25 to-indigo-25 rounded-xl shadow-sm border border-blue-100 hover:shadow-md transition-all duration-200">
-            {/* Meta strip */}
-            <div className="bg-blue-50 px-6 py-3 rounded-t-xl border-b border-blue-100">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-[12px] text-blue-700 font-medium">Accounting Standards</span>
-                    <span className="text-[12px] text-blue-600">GAAP compliant policies</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-[12px] text-blue-700 font-medium">Auditor:</span>
-                    <span className="text-[12px] text-blue-600">PwC India</span>
-                  </div>
-                </div>
-                <button className="text-[11px] text-blue-700 hover:underline">View policy docs</button>
-              </div>
-            </div>
-            
-            <div className="p-6">
+          <div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {accountingPolicies.map((policy) => {
@@ -703,122 +655,6 @@ export const AboutCompanyTab = () => {
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Right Sidebar */}
-        <div className="space-y-6">
-          {/* Change History */}
-          <div className="bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl shadow-sm border border-gray-200">
-            {/* Meta strip */}
-            <div className="bg-gray-100 px-6 py-3 rounded-t-xl border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-[12px] text-gray-700 font-medium">Activity Timeline</span>
-                      <span className="text-[12px] text-gray-600">Real-time updates</span>
-                    </div>
-                  </div>
-              </div>
-            </div>
-            
-            <div className="p-6">
-              
-              {/* Change History */}
-              <div className="space-y-3">
-                {changeHistory.map((change, index) => (
-                  <div key={index} className="relative">
-                    {index > 0 && (
-                      <div className="absolute left-0 top-0 w-px h-6 bg-gray-200 -ml-2"></div>
-                    )}
-                    <div className="flex items-start space-x-3">
-                      <div className="w-2 h-2 bg-[var(--primary)] rounded-full mt-1.5 flex-shrink-0"></div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <span className="text-[13px] font-medium text-[var(--text)]">{change.actor}</span>
-                          <span className="text-[11px] text-[var(--muted)]">{getRelativeTime(change.timestamp)}</span>
-                        </div>
-                        <div className="text-[12px] text-[var(--text)] mb-1">{change.action}</div>
-                        <div className="text-[11px] text-[var(--muted)]">{change.details}</div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Smart Suggestions */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-            {/* Header */}
-            <div className="bg-green-50 px-6 py-3 rounded-t-xl border-b border-green-100">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-[12px] text-gray-700 font-medium">Smart Suggestions</span>
-                    <span className="text-[12px] text-gray-600">AI-powered insights</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="p-4">
-              {/* Suggestions List */}
-              <div className="space-y-3">
-                {suggestions.map((suggestion, index) => (
-                  <div key={suggestion.id} className="group">
-                    {/* Suggestion Card */}
-                    <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all duration-200">
-                      <div className="flex items-start justify-between gap-3">
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          {/* Type Badge */}
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                              suggestion.type === 'Best practice' ? 'bg-blue-100 text-blue-700' :
-                              suggestion.type === 'Policy gap' ? 'bg-orange-100 text-orange-700' :
-                              suggestion.type === 'Automation' ? 'bg-purple-100 text-purple-700' :
-                              'bg-red-100 text-red-700'
-                            }`}>
-                              {suggestion.type}
-                            </span>
-                            <div className="flex items-center gap-1 text-xs text-gray-500">
-                              <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                              <span>{Math.round(suggestion.confidence * 100)}% confidence</span>
-                            </div>
-                          </div>
-                          
-                          {/* Suggestion Text */}
-                          <p className="text-xs text-gray-900 leading-relaxed mb-2">
-                            {suggestion.text}
-                          </p>
-                          
-                          {/* Footer */}
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-1 text-xs text-gray-500">
-                              <img src="/mobius-logo.png" alt="Aqqrue" className="w-3 h-3" />
-                              <span>Aqqrue</span>
-                            </div>
-                            
-                            {/* Action Buttons */}
-                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button className="p-1 text-green-600 hover:bg-green-50 rounded-md transition-colors">
-                                <Check className="w-3 h-3" />
-                              </button>
-                              <button className="p-1 text-red-600 hover:bg-red-50 rounded-md transition-colors">
-                                <X className="w-3 h-3" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 };

@@ -7,6 +7,8 @@ import { InboxList } from "./inbox/InboxList";
 import { Transaction } from "@/types/Transaction";
 import { DocumentPane } from "./inbox/DocumentPane";
 import { AnalysisPane } from "./inbox/AnalysisPane";
+import { PaymentsInbox } from "./inbox/PaymentsInbox";
+import { ReceiptsInbox } from "./inbox/ReceiptsInbox";
 import { useToast } from "@/hooks/use-toast";
 import { usePanelSizes } from "@/hooks/use-panel-sizes";
 import { useClientContext } from "./Layout";
@@ -19,11 +21,12 @@ import {
 import { 
   Check, 
   Mail, 
-  CreditCard, 
   FileText,
   Clock,
   ArrowUpDown,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Undo2,
   Filter,
   Upload,
@@ -273,7 +276,7 @@ const mockTransactions: Transaction[] = [
     pdfFile: "bills/220525I049900411.pdf",
     documentUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=1000&fit=crop"
   },
-  // Credit Card transactions from /public/documents/creditcard
+  // Transactions from /public/documents/creditcard
   {
     id: "17",
     vendor: "HubSpot Inc",
@@ -284,7 +287,7 @@ const mockTransactions: Transaction[] = [
     status: "unread",
     date: "2025-04-30",
     description: "Marketing Hub Starter & Sales Hub Professional - Quarterly Subscription",
-    client: "Rhythms",
+    client: "Ripple",
     confidence: 95,
     pdfFile: "creditcard/Copy of HubSpot-INVOICE-614657704.0-1.pdf",
     documentUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=1000&fit=crop",
@@ -299,11 +302,11 @@ const mockTransactions: Transaction[] = [
     amount: 97.00,
     currency: "USD",
     source: "brex",
-    type: "credit-card",
+    type: "bill",
     status: "unread",
     date: "2025-05-19",
     description: "Gumloop Starter Plan - Monthly Subscription",
-    client: "Rhythms",
+    client: "Ripple",
     confidence: 90,
     pdfFile: "creditcard/Copy of Invoice-6D330809-0003.pdf",
     documentUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=1000&fit=crop",
@@ -315,11 +318,11 @@ const mockTransactions: Transaction[] = [
     amount: 716.30,
     currency: "USD",
     source: "brex",
-    type: "credit-card",
+    type: "bill",
     status: "review",
     date: "2025-05-30",
     description: "X Premium Subscription - Monthly",
-    client: "Rhythms",
+    client: "Ripple",
     confidence: 88,
     pdfFile: "creditcard/Copy of Invoice-7D7DB7C2-0007.pdf",
     documentUrl: "https://images.unsplash.com/photo-1483058712412-4245e9b90334?w=800&h=1000&fit=crop",
@@ -331,11 +334,11 @@ const mockTransactions: Transaction[] = [
     amount: 43.75,
     currency: "USD",
     source: "brex",
-    type: "credit-card",
+    type: "bill",
     status: "done",
     date: "2024-08-13",
     description: "Pitch Pro - Monthly Subscription (3 seats)",
-    client: "Rhythms",
+    client: "Ripple",
     confidence: 96,
     pdfFile: "creditcard/Copy of Invoice-9A31BB6E-0001.pdf",
     documentUrl: "https://images.unsplash.com/photo-1572044162444-ad60f128bdea?w=800&h=1000&fit=crop",
@@ -347,11 +350,11 @@ const mockTransactions: Transaction[] = [
     amount: 22.04,
     currency: "USD",
     source: "brex",
-    type: "credit-card",
+    type: "bill",
     status: "done",
     date: "2025-05-14",
     description: "Teams Monthly Subscription",
-    client: "Rhythms",
+    client: "Ripple",
     confidence: 98,
     pdfFile: "creditcard/Copy of invoice_13904471-1.pdf",
     documentUrl: "https://images.unsplash.com/photo-1633114127408-af671c774b39?w=800&h=1000&fit=crop",
@@ -363,28 +366,28 @@ const mockTransactions: Transaction[] = [
     amount: 109.10,
     currency: "USD",
     source: "brex",
-    type: "credit-card",
+    type: "bill",
     status: "done",
     date: "2025-05-16",
     description: "Typeform Business - Monthly Subscription",
-    client: "Rhythms",
+    client: "Ripple",
     confidence: 97,
     pdfFile: "creditcard/Copy of invoice_USIN-2025-0114021.pdf",
     documentUrl: "https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=800&h=1000&fit=crop",
     isRecurring: true
   },
-  // Credit Card transactions WITHOUT invoices (these go to Exceptions tab)
+  // Transactions WITHOUT invoices (these go to Exceptions tab)
   {
     id: "18",
     vendor: "HubSpot Inc",
     amount: 2324.11,
     currency: "USD",
     source: "brex",
-    type: "credit-card",
+    type: "bill",
     status: "unread",
     date: "2025-04-30",
     description: "Marketing Hub Starter & Sales Hub Professional - Quarterly Subscription (Duplicate)",
-    client: "Rhythms",
+    client: "Ripple",
     confidence: 90,
     // No pdfFile - this transaction goes to Exceptions tab
     documentUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&h=1000&fit=crop",
@@ -397,11 +400,11 @@ const mockTransactions: Transaction[] = [
     amount: 156.78,
     currency: "USD",
     source: "brex",
-    type: "credit-card",
+    type: "bill",
     status: "unread",
     date: "2025-05-30",
     description: "Cloud Infrastructure - Monthly Charges",
-    client: "Rhythms",
+    client: "Ripple",
     confidence: 92,
     // No pdfFile - this transaction goes to Exceptions tab
     documentUrl: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=1000&fit=crop",
@@ -413,11 +416,11 @@ const mockTransactions: Transaction[] = [
     amount: 299.00,
     currency: "USD",
     source: "brex",
-    type: "credit-card",
+    type: "bill",
     status: "unread",
     date: "2025-05-29",
     description: "Payment Processing Fees - Monthly",
-    client: "Rhythms",
+    client: "Ripple",
     confidence: 85,
     // No pdfFile - this transaction goes to Exceptions tab
     documentUrl: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=800&h=1000&fit=crop",
@@ -429,11 +432,11 @@ const mockTransactions: Transaction[] = [
     amount: 89.45,
     currency: "USD",
     source: "brex",
-    type: "credit-card",
+    type: "bill",
     status: "review",
     date: "2025-05-28",
     description: "Compute Services - Monthly Charges",
-    client: "Rhythms",
+    client: "Ripple",
     confidence: 88,
     // No pdfFile - this transaction goes to Exceptions tab
     documentUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=1000&fit=crop",
@@ -449,8 +452,8 @@ const mockTransactions: Transaction[] = [
     type: "contract",
     status: "unread",
     date: "2025-10-01",
-    description: "RhythmsAI OKR Platform - 65 Owner Users",
-    client: "Rhythms",
+    description: "RippleAI OKR Platform - 65 Owner Users",
+    client: "Ripple",
     confidence: 85,
     pdfFile: "contracts/Bishop Wisecarver_Complete_with_Docusign_Rhythms_-_Cloud_Servi (2).pdf",
     documentUrl: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&h=1000&fit=crop",
@@ -469,8 +472,8 @@ const mockTransactions: Transaction[] = [
     type: "contract",
     status: "review",
     date: "2025-09-01",
-    description: "RhythmsAI OKR Platform - 100 Permitted Users",
-    client: "Rhythms",
+    description: "RippleAI OKR Platform - 100 Permitted Users",
+    client: "Ripple",
     confidence: 92,
     pdfFile: "contracts/MARKETview_Complete_with_Docusign_Rhythms_-_Cloud_Servi (1).pdf",
     documentUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=1000&fit=crop",
@@ -490,7 +493,7 @@ const mockTransactions: Transaction[] = [
     status: "done",
     date: "2025-05-15",
     description: "SaaS Cloud Services Agreement",
-    client: "Rhythms",
+    client: "Ripple",
     confidence: 98,
     pdfFile: "contracts/Sera_Complete_with_Docusign_Rhythms_-_Cloud_Servi (2).pdf",
     documentUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=1000&fit=crop",
@@ -509,8 +512,8 @@ const mockTransactions: Transaction[] = [
     type: "contract",
     status: "unread",
     date: "2025-06-12",
-    description: "RhythmsAI OKR Platform - SaaS Subscription",
-    client: "Rhythms",
+    description: "RippleAI OKR Platform - SaaS Subscription",
+    client: "Ripple",
     confidence: 88,
     pdfFile: "contracts/050825 Rhythms Valpak Cloud Services Agreement - signed - signed.pdf",
     documentUrl: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=1000&fit=crop",
@@ -530,7 +533,7 @@ const mockTransactions: Transaction[] = [
     status: "review",
     date: "2025-05-05",
     description: "SaaS Cloud Services Agreement",
-    client: "Rhythms",
+    client: "Ripple",
     confidence: 94,
     pdfFile: "contracts/Rhythms - Cloud Services Agreement - Networkology.doc.pdf",
     documentUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=1000&fit=crop",
@@ -550,7 +553,7 @@ const mockTransactions: Transaction[] = [
     status: "done",
     date: "2025-05-01",
     description: "SaaS Cloud Services Agreement",
-    client: "Rhythms",
+    client: "Ripple",
     confidence: 96,
     pdfFile: "contracts/Rhythms - Cloud Services Agreement - AlineOps.docx.pdf",
     documentUrl: "https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=800&h=1000&fit=crop",
@@ -758,7 +761,6 @@ const mockTransactions: Transaction[] = [
 const filters = [
   { id: "all", label: "All", count: 38, icon: Check },
   { id: "bills", label: "Bills", count: 16, icon: FileText },
-  { id: "cards", label: "Credit Cards", count: 10, icon: CreditCard },
   { id: "contracts", label: "Contracts", count: 6, icon: FileText },
   { id: "payments", label: "Payments", count: 3, icon: FileText },
   { id: "receipts", label: "Receipts", count: 3, icon: FileText }
@@ -778,10 +780,11 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
   const [selectedFilter, setSelectedFilter] = useState("bills");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedStatusOption, setSelectedStatusOption] = useState("All");
-  const [selectedTab, setSelectedTab] = useState<"expenses" | "revenue" | "fixed-assets" | "credit-card" | "payments" | "receipts">("expenses");
+  const [selectedTab, setSelectedTab] = useState<"expenses" | "revenue" | "fixed-assets" | "payments" | "receipts">("expenses");
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [showManualEntryModal, setShowManualEntryModal] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const { toast } = useToast();
   const { sizes, updateSizes, resetSizes } = usePanelSizes();
   const { selectedClient, setSelectedClient } = useClientContext();
@@ -792,7 +795,7 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
       return false;
     }
     
-    // Filter by tab (expenses/revenue/fixed-assets/credit-card/payments/receipts) - this takes priority
+    // Filter by tab (expenses/revenue/fixed-assets/payments/receipts) - this takes priority
     if (selectedTab === "expenses" && transaction.type !== "bill") {
       return false;
     }
@@ -802,21 +805,11 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
     if (selectedTab === "fixed-assets" && transaction.type !== "fixed-asset") {
       return false;
     }
-    if (selectedTab === "credit-card" && transaction.type !== "credit-card") {
-      return false;
-    }
     if (selectedTab === "payments" && transaction.type !== "payment") {
       return false;
     }
     if (selectedTab === "receipts" && transaction.type !== "receipt") {
       return false;
-    }
-    
-    // Special filtering for credit card transactions - only show those with invoices
-    if (selectedTab === "credit-card") {
-      // Only show credit card transactions that have invoices (pdfFile exists)
-      // Credit card transactions WITHOUT invoices go to Exceptions tab
-      return transaction.type === "credit-card" && transaction.pdfFile;
     }
     
     // Filter by transaction type (only applies when not using tab filtering)
@@ -896,6 +889,10 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
     onTransactionSelect(selectedTransaction!);
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed);
+  };
+
   const handleSelectAllVisible = () => {
     const allVisibleSelected = filteredTransactions.length > 0 && selectedTransactions.length === filteredTransactions.length;
     
@@ -932,74 +929,82 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
           <Button 
             variant={selectedTab === "expenses" ? "default" : "ghost"}
             size="sm"
-            className={`px-4 py-2 rounded-none border-b-2 ${
+            className={`px-4 py-2 rounded-none border-b-2 flex items-center space-x-2 ${
               selectedTab === "expenses" 
                 ? "border-mobius-blue bg-transparent text-mobius-blue hover:bg-mobius-blue/5" 
                 : "border-transparent text-mobius-gray-600 hover:text-mobius-gray-900"
             }`}
             onClick={() => setSelectedTab("expenses")}
           >
-            Expenses
+            <span>Expenses</span>
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <span className="text-xs font-medium">12</span>
+            </div>
           </Button>
           <Button 
             variant={selectedTab === "revenue" ? "default" : "ghost"}
             size="sm"
-            className={`px-4 py-2 rounded-none border-b-2 ${
+            className={`px-4 py-2 rounded-none border-b-2 flex items-center space-x-2 ${
               selectedTab === "revenue" 
                 ? "border-mobius-blue bg-transparent text-mobius-blue hover:bg-mobius-blue/5" 
                 : "border-transparent text-mobius-gray-600 hover:text-mobius-gray-900"
             }`}
             onClick={() => setSelectedTab("revenue")}
           >
-            Revenue
+            <span>Revenue</span>
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+              <span className="text-xs font-medium">3</span>
+            </div>
           </Button>
           <Button 
             variant={selectedTab === "fixed-assets" ? "default" : "ghost"}
             size="sm"
-            className={`px-4 py-2 rounded-none border-b-2 ${
+            className={`px-4 py-2 rounded-none border-b-2 flex items-center space-x-2 ${
               selectedTab === "fixed-assets" 
                 ? "border-mobius-blue bg-transparent text-mobius-blue hover:bg-mobius-blue/5" 
                 : "border-transparent text-mobius-gray-600 hover:text-mobius-gray-900"
             }`}
             onClick={() => setSelectedTab("fixed-assets")}
           >
-            Fixed Assets
-          </Button>
-          <Button 
-            variant={selectedTab === "credit-card" ? "default" : "ghost"}
-            size="sm"
-            className={`px-4 py-2 rounded-none border-b-2 ${
-              selectedTab === "credit-card" 
-                ? "border-mobius-blue bg-transparent text-mobius-blue hover:bg-mobius-blue/5" 
-                : "border-transparent text-mobius-gray-600 hover:text-mobius-gray-900"
-            }`}
-            onClick={() => setSelectedTab("credit-card")}
-          >
-            Credit Card
+            <span>Fixed Assets</span>
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+              <span className="text-xs font-medium">1</span>
+            </div>
           </Button>
           <Button 
             variant={selectedTab === "payments" ? "default" : "ghost"}
             size="sm"
-            className={`px-4 py-2 rounded-none border-b-2 ${
+            className={`px-4 py-2 rounded-none border-b-2 flex items-center space-x-2 ${
               selectedTab === "payments" 
                 ? "border-mobius-blue bg-transparent text-mobius-blue hover:bg-mobius-blue/5" 
                 : "border-transparent text-mobius-gray-600 hover:text-mobius-gray-900"
             }`}
             onClick={() => setSelectedTab("payments")}
           >
-            Payments
+            <span>Payments</span>
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span className="text-xs font-medium">9</span>
+            </div>
           </Button>
           <Button 
             variant={selectedTab === "receipts" ? "default" : "ghost"}
             size="sm"
-            className={`px-4 py-2 rounded-none border-b-2 ${
+            className={`px-4 py-2 rounded-none border-b-2 flex items-center space-x-2 ${
               selectedTab === "receipts" 
                 ? "border-mobius-blue bg-transparent text-mobius-blue hover:bg-mobius-blue/5" 
                 : "border-transparent text-mobius-gray-600 hover:text-mobius-gray-900"
             }`}
             onClick={() => setSelectedTab("receipts")}
           >
-            Receipts
+            <span>Receipts</span>
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span className="text-xs font-medium">5</span>
+            </div>
           </Button>
         </div>
 
@@ -1015,6 +1020,29 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
             <Plus className="w-4 h-4 mr-2" />
             Add JE Manually
           </Button>
+
+          {/* Sidebar Toggle Button */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-3 text-sm text-mobius-gray-600 hover:text-mobius-gray-900 hover:bg-mobius-gray-100"
+                  onClick={toggleSidebar}
+                >
+                  {isSidebarCollapsed ? (
+                    <ChevronRight className="w-4 h-4" />
+                  ) : (
+                    <ChevronLeft className="w-4 h-4" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{isSidebarCollapsed ? "Show sidebar" : "Hide sidebar"}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           
           {/* Client Dropdown - Hidden */}
           {/* <DropdownMenu>
@@ -1080,80 +1108,116 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
         </div>
       </div>
 
-      {/* Inbox with Reading Pane */}
+      {/* Main Content Area */}
       <div className="flex-1 flex min-h-0 overflow-hidden">
-        <PanelGroup 
-          direction="horizontal" 
-          className="h-full"
-          onLayout={(panelSizes) => {
-            if (panelSizes.length >= 3) {
-              updateSizes({
-                ...sizes,
-                inbox: panelSizes[0],
-                document: panelSizes[1],
-                creditCard: panelSizes[2]
-              });
-            }
-          }}
-        >
-          {/* Inbox List - Resizable */}
-          <Panel defaultSize={sizes.inbox} minSize={15} maxSize={40} className="min-h-0">
-            <div className="h-full flex flex-col border-r border-mobius-gray-100">
-              <div className="flex-1 overflow-y-auto">
-                <InboxList
-                  transactions={filteredTransactions}
-                  selectedTransaction={selectedTransaction}
-                  selectedTransactions={selectedTransactions}
-                  onTransactionSelect={handleTransactionSelect}
-                  onTransactionToggle={handleTransactionToggle}
-                  onQuickApprove={handleQuickApprove}
-                  onQuickAssign={handleQuickAssign}
-                />
-              </div>
-            </div>
-          </Panel>
-
-          {selectedTransaction && (
-            <>
-              {/* Resize Handle */}
-              <PanelResizeHandle className="w-1 bg-mobius-gray-100 hover:bg-mobius-gray-200 transition-colors group">
-                <div className="flex items-center justify-center h-full">
-                  <GripVertical className="w-3 h-3 text-mobius-gray-400 group-hover:text-mobius-gray-600" />
-                </div>
-              </PanelResizeHandle>
-
-              {/* Document Pane - Resizable */}
-              <Panel defaultSize={sizes.document} minSize={25} maxSize={60} className="min-h-0">
+        {/* Render specific components for payments and receipts */}
+        {selectedTab === "payments" ? (
+          <PaymentsInbox onTransactionSelect={onTransactionSelect} />
+        ) : selectedTab === "receipts" ? (
+          <ReceiptsInbox onTransactionSelect={onTransactionSelect} />
+        ) : (
+          /* Default 3-panel layout for other tabs */
+          <PanelGroup 
+            direction="horizontal" 
+            className="h-full"
+            onLayout={(panelSizes) => {
+              if (!isSidebarCollapsed && panelSizes.length >= 3) {
+                updateSizes({
+                  ...sizes,
+                  inbox: panelSizes[0],
+                  document: panelSizes[1],
+                });
+              } else if (isSidebarCollapsed && panelSizes.length >= 2) {
+                updateSizes({
+                  ...sizes,
+                  document: panelSizes[0],
+                });
+              }
+            }}
+          >
+            {/* Inbox List - Conditionally rendered */}
+            {!isSidebarCollapsed && (
+              <Panel defaultSize={sizes.inbox} minSize={15} maxSize={40} className="min-h-0">
                 <div className="h-full flex flex-col border-r border-mobius-gray-100">
                   <div className="flex-1 overflow-y-auto">
-                    <DocumentPane transaction={selectedTransaction} />
-                  </div>
-                </div>
-              </Panel>
-
-              {/* Resize Handle */}
-              <PanelResizeHandle className="w-1 bg-mobius-gray-100 hover:bg-mobius-gray-200 transition-colors group">
-                <div className="flex items-center justify-center h-full">
-                  <GripVertical className="w-3 h-3 text-mobius-gray-400 group-hover:text-mobius-gray-600" />
-                </div>
-              </PanelResizeHandle>
-
-              {/* Analysis Pane - Resizable */}
-              <Panel defaultSize={sizes.creditCard} minSize={25} maxSize={60} className="min-h-0">
-                <div className="h-full flex flex-col">
-                  <div className="flex-1 overflow-y-auto">
-                    <AnalysisPane 
-                      transaction={selectedTransaction}
-                      onApprove={handleApprove}
-                      onEdit={handleEdit}
-                      onSeeHow={handleSeeHow}
+                    <InboxList
+                      transactions={filteredTransactions}
+                      selectedTransaction={selectedTransaction}
+                      selectedTransactions={selectedTransactions}
+                      onTransactionSelect={handleTransactionSelect}
+                      onTransactionToggle={handleTransactionToggle}
+                      onQuickApprove={handleQuickApprove}
+                      onQuickAssign={handleQuickAssign}
                     />
                   </div>
                 </div>
               </Panel>
-            </>
-          )}
-        </PanelGroup>
+            )}
+
+            {selectedTransaction && (
+              <>
+                {/* Resize Handle - Only show if sidebar is visible */}
+                {!isSidebarCollapsed && (
+                  <PanelResizeHandle className="w-1 bg-mobius-gray-100 hover:bg-mobius-gray-200 transition-colors group">
+                    <div className="flex items-center justify-center h-full">
+                      <GripVertical className="w-3 h-3 text-mobius-gray-400 group-hover:text-mobius-gray-600" />
+                    </div>
+                  </PanelResizeHandle>
+                )}
+
+                {/* Document Pane - Resizable */}
+                <Panel defaultSize={sizes.document} minSize={25} maxSize={60} className="min-h-0">
+                  <div className="h-full flex flex-col border-r border-mobius-gray-100">
+                    <div className="flex-1 overflow-y-auto">
+                      <DocumentPane transaction={selectedTransaction} />
+                    </div>
+                  </div>
+                </Panel>
+
+                {/* Resize Handle */}
+                <PanelResizeHandle className="w-1 bg-mobius-gray-100 hover:bg-mobius-gray-200 transition-colors group">
+                  <div className="flex items-center justify-center h-full">
+                    <GripVertical className="w-3 h-3 text-mobius-gray-400 group-hover:text-mobius-gray-600" />
+                  </div>
+                </PanelResizeHandle>
+
+                {/* Analysis Pane - Resizable */}
+                <Panel defaultSize={sizes.detail} minSize={25} maxSize={60} className="min-h-0">
+                  <div className="h-full flex flex-col">
+                    <div className="flex-1 overflow-y-auto">
+                      <AnalysisPane 
+                        transaction={selectedTransaction}
+                        onApprove={handleApprove}
+                        onEdit={handleEdit}
+                        onSeeHow={handleSeeHow}
+                      />
+                    </div>
+                  </div>
+                </Panel>
+              </>
+            )}
+
+            {/* Fallback view when sidebar is collapsed and no transaction selected */}
+            {isSidebarCollapsed && !selectedTransaction && (
+              <div className="flex-1 flex items-center justify-center bg-mobius-gray-50">
+                <div className="text-center text-mobius-gray-500">
+                  <FileText className="w-12 h-12 mx-auto mb-4 text-mobius-gray-400" />
+                  <h3 className="text-lg font-medium mb-2">No transaction selected</h3>
+                  <p className="text-sm">Select a transaction from the sidebar to view details</p>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="mt-4"
+                    onClick={toggleSidebar}
+                  >
+                    <ChevronRight className="w-4 h-4 mr-2" />
+                    Show Sidebar
+                  </Button>
+                </div>
+              </div>
+            )}
+          </PanelGroup>
+        )}
       </div>
 
       {/* Manual Entry Modal */}

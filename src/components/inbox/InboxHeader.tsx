@@ -128,34 +128,9 @@ export function InboxHeader({
           </TooltipProvider>
         </div>
 
-        <div className="flex items-center space-x-3">
-          {/* Policy Text */}
-          <div className="text-sm text-mobius-gray-600 italic">
-            Human review of all entries before posting
-          </div>
-          
-          {/* QuickBooks Logo */}
-          <div className="flex items-center">
-            <img
-              src="/logos/data-sources/quickbooks-2.svg"
-              alt="QuickBooks"
-              className="w-6 h-6 object-contain"
-            />
-          </div>
-          
-          {/* Progress indicator */}
-          <div className="flex items-center space-x-2 text-sm text-mobius-gray-600">
-            <span>{doneCount} of {totalCount} done</span>
-            <div className="w-16 h-2 bg-mobius-gray-200 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-status-done rounded-full transition-all duration-300"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-            <span>{progressPercent}%</span>
-          </div>
+        
         </div>
       </div>
-    </div>
+
   );
 }

@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 import { 
   Mail, 
   FolderOpen, 
-  CreditCard, 
   FileText, 
   CheckCircle2,
   AlertCircle,
@@ -85,32 +84,6 @@ export function InboxList({
       );
     }
 
-    // Use Brex logo for all credit card transactions
-    if (transactionType === "credit-card") {
-      return (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white border border-gray-200">
-                <img 
-                  src="/logos/brex.png" 
-                  alt="Brex"
-                  className="w-5 h-5 object-contain"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                  }}
-                />
-                <CreditCard className="w-4 h-4 text-purple-600 hidden" />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Brex</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      );
-    }
 
     switch (source) {
       case "email": 
@@ -177,7 +150,6 @@ export function InboxList({
                       e.currentTarget.nextElementSibling?.classList.remove('hidden');
                     }}
                   />
-                  <CreditCard className="w-4 h-4 text-purple-600 hidden" />
                 </div>
               </TooltipTrigger>
               <TooltipContent>
@@ -201,7 +173,6 @@ export function InboxList({
                       e.currentTarget.nextElementSibling?.classList.remove('hidden');
                     }}
                   />
-                  <CreditCard className="w-4 h-4 text-orange-600 hidden" />
                 </div>
               </TooltipTrigger>
               <TooltipContent>
@@ -384,7 +355,7 @@ export function InboxList({
                         Duplicate
                       </Badge>
                     )}
-                    {transaction.type === "credit-card" && !transaction.pdfFile && (
+                    {transaction.type === "bill" && !transaction.pdfFile && (
                       <Badge className="text-xs bg-orange-100 text-orange-800 border-orange-200">
                         No Invoice
                       </Badge>

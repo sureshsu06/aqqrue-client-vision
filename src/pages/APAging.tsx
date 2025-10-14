@@ -136,7 +136,7 @@ export default function APAging() {
                 <option value="Elire">Elire</option>
                 <option value="Mahat">Mahat</option>
                 <option value="TVS">TVS</option>
-                <option value="Rhythms">Rhythms</option>
+                <option value="Ripple">Ripple</option>
               </select>
             </div>
 

@@ -18,9 +18,9 @@ export const GL_ACCOUNTS: Record<string, GLAccount> = {
     type: "asset",
     category: "Current Assets"
   },
-  "Credit Card Suspense Account": {
+  "Card Suspense Account": {
     code: "1003",
-    name: "Credit Card Suspense Account",
+    name: "Card Suspense Account",
     type: "asset",
     category: "Current Assets"
   },

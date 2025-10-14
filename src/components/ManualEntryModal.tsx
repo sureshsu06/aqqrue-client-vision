@@ -43,7 +43,7 @@ export function ManualEntryModal({ isOpen, onClose, onSave }: ManualEntryModalPr
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-  const clients = ["Elire", "Mahat", "TVS", "Rhythms"];
+  const clients = ["Elire", "Mahat", "TVS", "Ripple"]; 
   const accountOptions = [
     "Cash/Accounts Receivable",
     "Accounts Receivable", 

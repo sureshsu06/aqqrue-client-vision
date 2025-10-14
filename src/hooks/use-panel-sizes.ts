@@ -3,14 +3,12 @@ import { useState, useEffect } from 'react';
 interface PanelSizes {
   inbox: number;
   document: number;
-  creditCard: number;
   detail: number;
 }
 
 const DEFAULT_SIZES: PanelSizes = {
   inbox: 20,
   document: 45,
-  creditCard: 35,
   detail: 40,
 };
 

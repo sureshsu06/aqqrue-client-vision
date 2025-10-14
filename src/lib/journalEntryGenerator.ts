@@ -25,36 +25,34 @@ export class JournalEntryGenerator {
     }
 
     // Fallback for any other transactions
-    return {
-      ...baseEntry,
-      entries: [
-        { account: "General Expense", debit: transaction.amount * 0.85, credit: 0, confidence: 95 },
-        { account: "Input CGST", debit: transaction.amount * 0.075, credit: 0, confidence: 100 },
-        { account: "Input SGST", debit: transaction.amount * 0.075, credit: 0, confidence: 100 },
-        { account: transaction.vendor, debit: 0, credit: transaction.amount, confidence: 100 }
-      ]
-    };
+    // Check if this is a US transaction (no GST) or Indian transaction (with GST)
+    if (transaction.currency === "USD") {
+      // US transactions - no GST, just expense and vendor payable
+      return {
+        ...baseEntry,
+        entries: [
+          { account: "US Operating Expenses", debit: transaction.amount, credit: 0, confidence: 95 },
+          { account: transaction.vendor, debit: 0, credit: transaction.amount, confidence: 100 }
+        ]
+      };
+    } else {
+      // Indian transactions - with GST
+      return {
+        ...baseEntry,
+        entries: [
+          { account: "General Expense", debit: transaction.amount * 0.85, credit: 0, confidence: 95 },
+          { account: "Input CGST", debit: transaction.amount * 0.075, credit: 0, confidence: 100 },
+          { account: "Input SGST", debit: transaction.amount * 0.075, credit: 0, confidence: 100 },
+          { account: transaction.vendor, debit: 0, credit: transaction.amount, confidence: 100 }
+        ]
+      };
+    }
   }
 
   /**
    * Gets transaction-specific journal entry data
    */
   private static getTransactionSpecificEntry(transaction: Transaction): Partial<JournalEntry> | null {
-    // Handle US credit card transactions (no GST)
-    if (transaction.currency === "USD" && transaction.type === "credit-card") {
-      return {
-        invoiceNumber: transaction.pdfFile ? `CC-${transaction.id}` : "PENDING",
-        totalAmount: transaction.amount,
-        entryType: "US Credit Card Expense",
-        narration: `Being the ${transaction.description} charged to Brex card`,
-        entries: [
-          { account: "US Operating Expenses", debit: transaction.amount, credit: 0, confidence: 95 },
-          { account: "Credit Card Suspense Account", debit: 0, credit: transaction.amount, confidence: 100 }
-        ],
-        costCenter: "US Operations",
-        location: "San Francisco HQ"
-      };
-    }
 
     switch (transaction.id) {
       case "1": // JCSS & Associates LLP - ASO-I/109/25-26
@@ -206,19 +204,19 @@ export class JournalEntryGenerator {
           invoiceNumber: "RHYTHMS-BISHOP-001",
           totalAmount: 7020,
           entryType: "SaaS Revenue",
-          narration: "Being the SaaS revenue from Bishop Wisecarver for RhythmsAI OKR Platform - 65 Owner Users",
+          narration: "Being the SaaS revenue from Bishop Wisecarver for RippleAI OKR Platform - 65 Owner Users",
           entries: [
             { account: "Cash/Accounts Receivable", debit: 7020, credit: 0, confidence: 100 },
             { account: "Deferred Revenue", debit: 0, credit: 7020, confidence: 100 }
           ]
         };
 
-      case "28": // MARKETview Technology - RhythmsAI OKR Platform
+      case "28": // MARKETview Technology - RippleAI OKR Platform
         return {
           invoiceNumber: "RHYTHMS-MV-001",
           totalAmount: 10000,
           entryType: "SaaS Revenue",
-          narration: "Being the SaaS revenue from MARKETview Technology for RhythmsAI OKR Platform subscription - 38 month contract (Year 1 of 3)",
+          narration: "Being the SaaS revenue from MARKETview Technology for RippleAI OKR Platform subscription - 38 month contract (Year 1 of 3)",
           entries: [
             { account: "Cash/Accounts Receivable", debit: 10000, credit: 0, confidence: 100 },
             { account: "Deferred Revenue", debit: 0, credit: 7894.74, confidence: 100 },
@@ -243,7 +241,7 @@ export class JournalEntryGenerator {
           invoiceNumber: "RHYTHMS-CLIPPER-001",
           totalAmount: 7999,
           entryType: "SaaS Revenue",
-          narration: "Being the SaaS revenue from Clipper Media Acquisition I, LLC for RhythmsAI OKR Platform subscription - 11 month contract",
+          narration: "Being the SaaS revenue from Clipper Media Acquisition I, LLC for RippleAI OKR Platform subscription - 11 month contract",
           entries: [
             { account: "Cash/Accounts Receivable", debit: 7999, credit: 0, confidence: 100 },
             { account: "Deferred Revenue", debit: 0, credit: 7999, confidence: 100 }
@@ -276,13 +274,15 @@ export class JournalEntryGenerator {
 
       // HubSpot Prepaid Expenses
       case "17": // HubSpot Inc - Marketing Hub Starter & Sales Hub Professional (Prepaid)
+      case "18": // HubSpot Inc - Marketing Hub Starter & Sales Hub Professional (Prepaid Duplicate)
         return {
           invoiceNumber: "HUBSPOT-614657704",
           totalAmount: 2324.11,
           entryType: "Prepaid Software Subscriptions",
           narration: "Being the quarterly prepaid subscription charges for HubSpot Marketing Hub Starter & Sales Hub Professional - to be amortized over 3 months",
           entries: [
-            { account: "Prepaid Software Subscriptions", debit: 2324.11, credit: 0, confidence: 95 },
+            { account: "Prepaid Software Subscriptions", debit: 2109.00, credit: 0, confidence: 95 },
+            { account: "Sales Tax", debit: 215.11, credit: 0, confidence: 100 },
             { account: "HubSpot Inc", debit: 0, credit: 2324.11, confidence: 100 }
           ],
           isPrepaid: true,
@@ -351,7 +351,7 @@ export class JournalEntryGenerator {
           ]
         };
 
-      // Credit Card transactions without invoices (pending)
+      // Transactions without invoices (pending)
       case "35": // Stripe Inc - Payment Processing
         return {
           invoiceNumber: "PENDING-INVOICE",
