@@ -21,6 +21,9 @@ interface JournalEntryTableProps {
   onEvaluateFormulaOnBlur: (index: number, field: string) => void;
   onAddRow: () => void;
   onDeleteRow: (index: number) => void;
+  showToolbar?: boolean;
+  showEditButton?: boolean;
+  compact?: boolean;
 }
 
 export function JournalEntryTable({
@@ -35,34 +38,66 @@ export function JournalEntryTable({
   onUpdateJournalEntry,
   onEvaluateFormulaOnBlur,
   onAddRow,
-  onDeleteRow
+  onDeleteRow,
+  showToolbar = true,
+  showEditButton = true,
+  compact = false
 }: JournalEntryTableProps) {
   const getCurrencySymbol = (transaction: any) => {
     return transaction.currency === 'USD' ? '$' : '₹';
   };
 
+  // Base account options used by the editor. The currently selected account
+  // will be added dynamically if it's not part of this list so the dropdown
+  // always displays a valid option.
+  const baseAccountOptions = [
+    "Cash/Accounts Receivable",
+    "Deferred Revenue",
+    "SaaS Revenue",
+    "Professional Fees",
+    "Rent",
+    "Computers",
+    "Freight and Postage",
+    "Rates & Taxes",
+    "Input CGST",
+    "Input SGST",
+    "Input IGST",
+    "TDS on Professional Charges",
+    "TDS on Rent",
+    "JCSS & Associates LLP",
+    "Sogo Computers Pvt Ltd",
+    "Clayworks Spaces Technologies Pvt Ltd",
+    "NSDL Database Management Ltd",
+    "Software Subscriptions",
+    "Brex Card",
+    "Suspense Account",
+    "Bank (1001)"
+  ];
+
   return (
     <div className="p-0">
-      <div className="flex justify-between mb-2">
-        <h4 className="text-xs font-medium text-mobius-gray-900"></h4>
-        <div className="flex gap-2">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className={cn("h-6 w-6 p-0", isFormulaMode ? "bg-blue-100 text-blue-600" : "")}
-            onClick={onFormulaModeToggle}
-            title={isFormulaMode ? "Disable Formula Mode" : "Enable Formula Mode"}
-          >
-            <span className="text-xs font-bold">fx</span>
-          </Button>
-          <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-            <RotateCcw className="w-3 h-3" />
-          </Button>
+      {showToolbar && (
+        <div className="flex justify-between mb-2">
+          <h4 className="text-xs font-medium text-mobius-gray-900"></h4>
+          <div className="flex gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={cn("h-6 w-6 p-0", isFormulaMode ? "bg-blue-100 text-blue-600" : "")}
+              onClick={onFormulaModeToggle}
+              title={isFormulaMode ? "Disable Formula Mode" : "Enable Formula Mode"}
+            >
+              <span className="text-xs font-bold">fx</span>
+            </Button>
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+              <RotateCcw className="w-3 h-3" />
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Formula Mode Instructions */}
-      {isFormulaMode && (
+      {showToolbar && isFormulaMode && (
         <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
           <p className="font-medium mb-1">Formula Mode Active</p>
           <p>Use Excel-like formulas: <code className="bg-blue-100 px-1 rounded">=B1*0.1</code>, <code className="bg-blue-100 px-1 rounded">=SUM(B1:B3)</code>, <code className="bg-blue-100 px-1 rounded">10%*C2</code></p>
@@ -70,13 +105,13 @@ export function JournalEntryTable({
         </div>
       )}
 
-      <Separator className="my-2" />
+      <Separator className={cn("my-2", compact ? "my-1" : "my-2")} />
 
       {/* Journal Entry Table */}
       <div className="mt-2">
         {/* Table Header */}
         <div className="bg-gray-50 border-b border-gray-200">
-          <div className="grid grid-cols-12 gap-2 text-xs font-semibold text-gray-600 uppercase tracking-wide py-3 px-4">
+          <div className={cn("grid grid-cols-12 gap-2 text-xs font-semibold text-gray-600 uppercase tracking-wide px-4", compact ? "py-2" : "py-3") }>
             <div className="col-span-5">ACCOUNT</div>
             <div className="col-span-3 text-right">DEBIT</div>
             <div className="col-span-3 text-right">CREDIT</div>
@@ -84,7 +119,7 @@ export function JournalEntryTable({
           </div>
           
           {/* Column Headers for Formula Reference */}
-          {isFormulaMode && (
+          {showToolbar && isFormulaMode && (
             <div className="grid grid-cols-12 gap-2 text-xs font-medium text-blue-600 py-2 px-4 border-t border-gray-200 bg-blue-50">
               <div className="col-span-5">A</div>
               <div className="col-span-3 text-right">B</div>
@@ -100,7 +135,8 @@ export function JournalEntryTable({
             <div 
               key={index} 
               className={cn(
-                "grid grid-cols-12 gap-2 text-xs items-center py-3 px-4 group transition-colors border-b border-gray-100 last:border-b-0",
+                "grid grid-cols-12 gap-2 text-xs items-center px-4 group transition-colors border-b border-gray-100 last:border-b-0",
+                compact ? "py-2" : "py-3",
                 index % 2 === 0 ? "bg-white" : "bg-gray-50/50"
               )}
             >
@@ -110,30 +146,17 @@ export function JournalEntryTable({
                     value={entry.account} 
                     onValueChange={(value) => onUpdateJournalEntry(index, 'account', value)}
                   >
-                    <SelectTrigger className="h-8 text-xs border-mobius-gray-200 text-left justify-start bg-white">
+                    <SelectTrigger className={cn("text-xs border-mobius-gray-200 text-left justify-start bg-white", compact ? "h-7" : "h-8") }>
                       <SelectValue className="text-xs text-left" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Cash/Accounts Receivable">Cash/Accounts Receivable</SelectItem>
-                      <SelectItem value="Deferred Revenue">Deferred Revenue</SelectItem>
-                      <SelectItem value="SaaS Revenue">SaaS Revenue</SelectItem>
-                      <SelectItem value="Professional Fees">Professional Fees</SelectItem>
-                      <SelectItem value="Rent">Rent</SelectItem>
-                      <SelectItem value="Computers">Computers</SelectItem>
-                      <SelectItem value="Freight and Postage">Freight and Postage</SelectItem>
-                      <SelectItem value="Rates & Taxes">Rates & Taxes</SelectItem>
-                      <SelectItem value="Input CGST">Input CGST</SelectItem>
-                      <SelectItem value="Input SGST">Input SGST</SelectItem>
-                      <SelectItem value="Input IGST">Input IGST</SelectItem>
-                      <SelectItem value="TDS on Professional Charges">TDS on Professional Charges</SelectItem>
-                      <SelectItem value="TDS on Rent">TDS on Rent</SelectItem>
-                      <SelectItem value="JCSS & Associates LLP">JCSS & Associates LLP</SelectItem>
-                      <SelectItem value="Sogo Computers Pvt Ltd">Sogo Computers Pvt Ltd</SelectItem>
-                      <SelectItem value="Clayworks Spaces Technologies Pvt Ltd">Clayworks Spaces Technologies Pvt Ltd</SelectItem>
-                      <SelectItem value="NSDL Database Management Ltd">NSDL Database Management Ltd</SelectItem>
-                      <SelectItem value="Software Subscriptions">Software Subscriptions</SelectItem>
-                      <SelectItem value="Brex Card">Brex Card</SelectItem>
-                      <SelectItem value="Suspense Account">Suspense Account</SelectItem>
+                      {/* Ensure current account is visible even if custom */}
+                      {!baseAccountOptions.includes(entry.account) && (
+                        <SelectItem value={entry.account}>{entry.account}</SelectItem>
+                      )}
+                      {baseAccountOptions.map((label) => (
+                        <SelectItem key={label} value={label}>{label}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 ) : (
@@ -156,7 +179,8 @@ export function JournalEntryTable({
                       }
                     }}
                     className={cn(
-                      "h-8 text-xs text-right border-mobius-gray-200 bg-white",
+                      "text-xs text-right border-mobius-gray-200 bg-white",
+                      compact ? "h-7" : "h-8",
                       isFormulaMode ? "bg-blue-50 border-blue-300 font-mono" : "font-variant-numeric tabular-nums"
                     )}
                     placeholder={isFormulaMode ? "=B1*0.1" : "0.00"}
@@ -188,7 +212,8 @@ export function JournalEntryTable({
                       }
                     }}
                     className={cn(
-                      "h-8 text-xs text-right border-mobius-gray-200 bg-white",
+                      "text-xs text-right border-mobius-gray-200 bg-white",
+                      compact ? "h-7" : "h-8",
                       isFormulaMode ? "bg-blue-50 border-blue-300 font-mono" : "font-variant-numeric tabular-nums"
                     )}
                     placeholder={isFormulaMode ? "=C1*0.1" : "0.00"}
@@ -227,13 +252,13 @@ export function JournalEntryTable({
         {/* Add Row */}
         {isEditMode && (
           <div 
-            className="group relative mt-2 p-1 border-2 border-dashed border-mobius-gray-200 rounded-lg hover:border-mobius-gray-300 transition-colors cursor-pointer"
+            className={cn("group relative border-2 border-dashed border-mobius-gray-200 rounded-lg hover:border-mobius-gray-300 transition-colors cursor-pointer", compact ? "mt-1 p-1" : "mt-2 p-1")}
             onClick={onAddRow}
           >
             <div className="flex items-center justify-center">
-              <Plus className="w-4 h-4 text-mobius-gray-400 group-hover:text-mobius-gray-600 transition-colors" />
+              <Plus className={cn("text-mobius-gray-400 group-hover:text-mobius-gray-600 transition-colors", compact ? "w-3 h-3" : "w-4 h-4")} />
             </div>
-            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-mobius-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+            <div className={cn("absolute bottom-full left-1/2 transform -translate-x-1/2 px-3 py-1 bg-mobius-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap", compact ? "mb-1" : "mb-2")}>
               Drag to add or remove rows
               <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-mobius-gray-800"></div>
             </div>
@@ -242,7 +267,7 @@ export function JournalEntryTable({
         
         {/* Totals Row */}
         <div className="bg-gray-100 border-t border-gray-200">
-          <div className="grid grid-cols-12 gap-2 text-xs font-bold py-3 px-4">
+          <div className={cn("grid grid-cols-12 gap-2 text-xs font-bold px-4", compact ? "py-2" : "py-3") }>
             <div className="col-span-5 text-gray-900">TOTALS</div>
             <div className="col-span-3 text-right text-green-700 font-variant-numeric tabular-nums">{getTotalDebit(journalEntry, transaction)}</div>
             <div className="col-span-3 text-right text-red-700 font-variant-numeric tabular-nums">{getTotalCredit(journalEntry, transaction)}</div>
@@ -252,25 +277,54 @@ export function JournalEntryTable({
         
         {/* Balance Status */}
         <div className={cn(
-          "text-center text-xs mt-2 p-2 rounded-lg font-medium",
+          "text-center text-xs p-2 rounded-lg font-medium",
+          compact ? "mt-2" : "mt-2",
           isBalanced(journalEntry) ? "text-green-700 bg-green-50 border border-green-200" : "text-red-700 bg-red-50 border border-red-200"
         )}>
           {isBalanced(journalEntry) ? "✓ Balanced" : "✗ Unbalanced"}
         </div>
         
         {/* Edit Button */}
-        <div className="flex justify-end mt-2">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-6 px-2"
-            onClick={onEditClick}
-            title="Edit"
-          >
-            <Edit3 className="w-3 h-3 mr-1" />
-            Edit
-          </Button>
-        </div>
+        {showEditButton && !isEditMode && (
+          <div className="flex justify-end mt-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-6 px-2"
+              onClick={onEditClick}
+              title="Edit"
+            >
+              <Edit3 className="w-3 h-3 mr-1" />
+              Edit
+            </Button>
+          </div>
+        )}
+        
+        {/* Save/Cancel Buttons */}
+        {isEditMode && (
+          <div className="flex justify-end gap-2 mt-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="h-6 px-2"
+              onClick={onCancelEdit}
+              title="Cancel"
+            >
+              <X className="w-3 h-3 mr-1" />
+              Cancel
+            </Button>
+            <Button 
+              variant="default" 
+              size="sm" 
+              className="h-6 px-2 bg-mobius-blue hover:bg-mobius-blue/90 text-white"
+              onClick={onSaveEdit}
+              title="Save"
+            >
+              <Save className="w-3 h-3 mr-1" />
+              Save
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -25,8 +25,6 @@ import {
   Clock,
   ArrowUpDown,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   Undo2,
   Filter,
   Upload,
@@ -784,7 +782,6 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [showManualEntryModal, setShowManualEntryModal] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const { toast } = useToast();
   const { sizes, updateSizes, resetSizes } = usePanelSizes();
   const { selectedClient, setSelectedClient } = useClientContext();
@@ -889,9 +886,6 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
     onTransactionSelect(selectedTransaction!);
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarCollapsed(!isSidebarCollapsed);
-  };
 
   const handleSelectAllVisible = () => {
     const allVisibleSelected = filteredTransactions.length > 0 && selectedTransactions.length === filteredTransactions.length;
@@ -1021,28 +1015,6 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
             Add JE Manually
           </Button>
 
-          {/* Sidebar Toggle Button */}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 px-3 text-sm text-mobius-gray-600 hover:text-mobius-gray-900 hover:bg-mobius-gray-100"
-                  onClick={toggleSidebar}
-                >
-                  {isSidebarCollapsed ? (
-                    <ChevronRight className="w-4 h-4" />
-                  ) : (
-                    <ChevronLeft className="w-4 h-4" />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{isSidebarCollapsed ? "Show sidebar" : "Hide sidebar"}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
           
           {/* Client Dropdown - Hidden */}
           {/* <DropdownMenu>
@@ -1121,49 +1093,40 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
             direction="horizontal" 
             className="h-full"
             onLayout={(panelSizes) => {
-              if (!isSidebarCollapsed && panelSizes.length >= 3) {
+              if (panelSizes.length >= 3) {
                 updateSizes({
                   ...sizes,
                   inbox: panelSizes[0],
                   document: panelSizes[1],
                 });
-              } else if (isSidebarCollapsed && panelSizes.length >= 2) {
-                updateSizes({
-                  ...sizes,
-                  document: panelSizes[0],
-                });
               }
             }}
           >
-            {/* Inbox List - Conditionally rendered */}
-            {!isSidebarCollapsed && (
-              <Panel defaultSize={sizes.inbox} minSize={15} maxSize={40} className="min-h-0">
-                <div className="h-full flex flex-col border-r border-mobius-gray-100">
-                  <div className="flex-1 overflow-y-auto">
-                    <InboxList
-                      transactions={filteredTransactions}
-                      selectedTransaction={selectedTransaction}
-                      selectedTransactions={selectedTransactions}
-                      onTransactionSelect={handleTransactionSelect}
-                      onTransactionToggle={handleTransactionToggle}
-                      onQuickApprove={handleQuickApprove}
-                      onQuickAssign={handleQuickAssign}
-                    />
-                  </div>
+            {/* Inbox List */}
+            <Panel defaultSize={sizes.inbox} minSize={15} maxSize={40} className="min-h-0">
+              <div className="h-full flex flex-col border-r border-mobius-gray-100">
+                <div className="flex-1 overflow-y-auto">
+                  <InboxList
+                    transactions={filteredTransactions}
+                    selectedTransaction={selectedTransaction}
+                    selectedTransactions={selectedTransactions}
+                    onTransactionSelect={handleTransactionSelect}
+                    onTransactionToggle={handleTransactionToggle}
+                    onQuickApprove={handleQuickApprove}
+                    onQuickAssign={handleQuickAssign}
+                  />
                 </div>
-              </Panel>
-            )}
+              </div>
+            </Panel>
 
             {selectedTransaction && (
               <>
-                {/* Resize Handle - Only show if sidebar is visible */}
-                {!isSidebarCollapsed && (
-                  <PanelResizeHandle className="w-1 bg-mobius-gray-100 hover:bg-mobius-gray-200 transition-colors group">
-                    <div className="flex items-center justify-center h-full">
-                      <GripVertical className="w-3 h-3 text-mobius-gray-400 group-hover:text-mobius-gray-600" />
-                    </div>
-                  </PanelResizeHandle>
-                )}
+                {/* Resize Handle */}
+                <PanelResizeHandle className="w-1 bg-mobius-gray-100 hover:bg-mobius-gray-200 transition-colors group">
+                  <div className="flex items-center justify-center h-full">
+                    <GripVertical className="w-3 h-3 text-mobius-gray-400 group-hover:text-mobius-gray-600" />
+                  </div>
+                </PanelResizeHandle>
 
                 {/* Document Pane - Resizable */}
                 <Panel defaultSize={sizes.document} minSize={25} maxSize={60} className="min-h-0">
@@ -1197,25 +1160,6 @@ export function TransactionInbox({ onTransactionSelect }: TransactionInboxProps)
               </>
             )}
 
-            {/* Fallback view when sidebar is collapsed and no transaction selected */}
-            {isSidebarCollapsed && !selectedTransaction && (
-              <div className="flex-1 flex items-center justify-center bg-mobius-gray-50">
-                <div className="text-center text-mobius-gray-500">
-                  <FileText className="w-12 h-12 mx-auto mb-4 text-mobius-gray-400" />
-                  <h3 className="text-lg font-medium mb-2">No transaction selected</h3>
-                  <p className="text-sm">Select a transaction from the sidebar to view details</p>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="mt-4"
-                    onClick={toggleSidebar}
-                  >
-                    <ChevronRight className="w-4 h-4 mr-2" />
-                    Show Sidebar
-                  </Button>
-                </div>
-              </div>
-            )}
           </PanelGroup>
         )}
       </div>
